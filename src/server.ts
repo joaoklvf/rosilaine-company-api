@@ -1,6 +1,7 @@
 import express, { Request, Response } from 'express';
 import { PostController } from './controller/post.controller'; // import the post controller
 import { createConnection } from "typeorm";
+import cors from 'cors';
 
 class Server {
   private postController: PostController;
@@ -19,6 +20,7 @@ class Server {
    */
   public configuration() {
     this.app.set('port', process.env.PORT || 3001);
+    this.app.use(cors());
     this.app.use(express.json());
   }
 
@@ -41,7 +43,7 @@ class Server {
     this.postController = new PostController();
 
     this.app.get("/", (req: Request, res: Response) => {
-      res.send("Hello world!");
+      res.send("<h1>Hello world!</h1>");
     });
 
     this.app.use(`/api/posts/`, this.postController.router); // Configure the new routes of the controller post
