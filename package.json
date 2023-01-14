@@ -1,11 +1,11 @@
 {
-  "name": "blog",
+  "name": "rosilaine-company",
   "version": "1.0.0",
-  "description": "Blog",
+  "description": "rosilaine-company",
   "main": "index.js",
   "scripts": {
     "tsc": "tsc ",
-    "start:dev": "nodemon ./build/server.js"
+    "start": "tsc & nodemon ./build/server.js"
   },
   "keywords": [],
   "author": "bautistaj",

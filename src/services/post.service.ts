@@ -6,7 +6,7 @@ export class PostService {
   private postRepository: PostRepository;
 
   constructor(){
-    this.postRepository = getConnection("blog").getCustomRepository(PostRepository);
+    this.postRepository = getConnection("rosilaine-company").getCustomRepository(PostRepository);
   }
 
   public index = async () => {

@@ -2,9 +2,11 @@ import express, { Request, Response } from 'express';
 import { PostController } from './controller/post.controller'; // import the post controller
 import { createConnection } from "typeorm";
 import cors from 'cors';
+import { CustomerController } from './controller/customer.controller';
 
 class Server {
   private postController: PostController;
+  private customerController: CustomerController;
   private app: express.Application;
 
   constructor() {
@@ -34,19 +36,21 @@ class Server {
       port: 5432,
       username: "postgres",
       password: "root",
-      database: "blog",
+      database: "rosilaine-company",
       entities: ["build/database/entities/**/*.js"],
       synchronize: true,
-      name: "blog"
-    }).catch(error => console.log('joão', error));
+      name: "rosilaine-company"
+    }).catch(error => console.log(error));
 
     this.postController = new PostController();
+    this.customerController = new CustomerController();
 
     this.app.get("/", (req: Request, res: Response) => {
       res.send("<h1>Hello world!</h1>");
     });
 
     this.app.use(`/api/posts/`, this.postController.router); // Configure the new routes of the controller post
+    this.app.use(`/api/customers/`, this.customerController.router); // Configure the new routes of the controller post
   }
 
   /**
