@@ -1,4 +1,4 @@
-import { getConnection, createConnection } from 'typeorm';
+import { getConnection } from 'typeorm';
 import { CustomerEntity } from '../database/entities/customer.entity';
 import { CustomerRepository } from '../repository/customer.repository';
 
@@ -21,7 +21,7 @@ export class CustomerService {
 
   public update = async (customer: CustomerEntity, id: number) => {
     const updatedCustomer = await this.customerRepository.update(id, customer);
-    return updatedCustomer;
+    return updatedCustomer.affected ? customer : null;
   }
 
   public delete = async (id: number) => {
