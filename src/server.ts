@@ -1,12 +1,16 @@
 import express, { Request, Response } from 'express';
-import { PostController } from './controller/post.controller'; // import the post controller
 import { createConnection } from "typeorm";
 import cors from 'cors';
 import { CustomerController } from './controller/customer.controller';
+import { ProductController } from './controller/product.controller';
+import * as dotenv from 'dotenv';
+import { OrderController } from './controller/order.controller';
 
 class Server {
-  private postController: PostController;
   private customerController: CustomerController;
+  private productController: ProductController;
+  private orderController: OrderController;
+
   private app: express.Application;
 
   constructor() {
@@ -24,6 +28,7 @@ class Server {
     this.app.set('port', process.env.PORT || 3001);
     this.app.use(cors());
     this.app.use(express.json());
+    dotenv.config();
   }
 
   /**
@@ -32,25 +37,27 @@ class Server {
   public async routes() {
     await createConnection({
       type: "postgres",
-      host: "localhost",
-      port: 5432,
-      username: "postgres",
-      password: "root",
+      host: process.env.DATABASE_HOST,
+      port: Number(process.env.DATABASE_PORT),
+      username: process.env.DATABASE_USERNAME,
+      password: process.env.DATABASE_PASSWORD,
       database: "rosilaine-company",
       entities: ["build/database/entities/**/*.js"],
       synchronize: true,
       name: "rosilaine-company"
     }).catch(error => console.log(error));
 
-    this.postController = new PostController();
     this.customerController = new CustomerController();
+    this.productController = new ProductController();
+    this.orderController = new OrderController();
 
     this.app.get("/", (req: Request, res: Response) => {
       res.send("<h1>Hello world!</h1>");
     });
 
-    this.app.use(`/api/posts/`, this.postController.router); // Configure the new routes of the controller post
-    this.app.use(`/api/customers/`, this.customerController.router); // Configure the new routes of the controller post
+    this.app.use(`/api/customers/`, this.customerController.router);
+    this.app.use('/api/products/', this.productController.router);
+    this.app.use('/api/orders/', this.orderController.router);
   }
 
   /**

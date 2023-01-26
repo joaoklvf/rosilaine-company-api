@@ -1,4 +1,5 @@
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { OrderEntity } from "./order.entity";
 
 @Entity('customers')
 export class CustomerEntity {
@@ -13,4 +14,7 @@ export class CustomerEntity {
 
   @Column()
   birthDate: Date;
+
+  @OneToMany(() => OrderEntity, (order) => order.customer) // note: we will create author property in the Photo class below
+  orders: OrderEntity[]
 }
