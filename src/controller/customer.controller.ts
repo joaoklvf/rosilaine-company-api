@@ -1,5 +1,5 @@
 import { Router, Response, Request } from "express";
-import { CustomerEntity } from "../database/entities/customer.entity";
+import { CustomerEntity } from "../database/entities/customer/customer.entity";
 import { CustomerService } from "../services/customer.service"; // import service
 
 export class CustomerController {

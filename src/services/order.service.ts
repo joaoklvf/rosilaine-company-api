@@ -1,5 +1,5 @@
 import { getConnection } from 'typeorm';
-import { OrderEntity } from '../database/entities/order.entity';
+import { OrderEntity } from '../database/entities/order/order.entity';
 import { OrderRepository } from '../repository/order.repository';
 import { ProductService } from './product.service';
 
@@ -18,11 +18,13 @@ export class OrderService {
   }
 
   public create = async (order: OrderEntity) => {
-    const productsIds = order.products.map(product => product.id);
+    const productsIds = order.orderItems.map(product => product.product.id);
     const response = await this.orderRepository.findByIds(productsIds);
 
     const productsToCreate =
-      order.products.filter(product => !response.find(productResponse => productResponse.id === product.id));
+      order.orderItems
+        .filter(product => !response.find(productResponse => productResponse.id === product.product.id))
+        .map(product => product.product);
 
     const productsCreated = await this.productService.createMany(productsToCreate);
 

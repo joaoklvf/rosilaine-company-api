@@ -1,5 +1,5 @@
 import { getConnection } from 'typeorm';
-import { CustomerEntity } from '../database/entities/customer.entity';
+import { CustomerEntity } from '../database/entities/customer/customer.entity';
 import { CustomerRepository } from '../repository/customer.repository';
 
 export class CustomerService {

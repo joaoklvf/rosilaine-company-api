@@ -3,13 +3,20 @@ import { createConnection } from "typeorm";
 import cors from 'cors';
 import { CustomerController } from './controller/customer.controller';
 import { ProductController } from './controller/product.controller';
-import * as dotenv from 'dotenv';
+import dotenv from 'dotenv'
 import { OrderController } from './controller/order.controller';
+import { databaseConfig } from './database/database-config';
+import { OrderStatusController } from './controller/order-status.controller';
+import { ProductCategoryController } from './controller/product-category.controller';
+import { StockController } from './controller/stock.controller';
 
 class Server {
   private customerController: CustomerController;
   private productController: ProductController;
   private orderController: OrderController;
+  private orderStatusController: OrderStatusController;
+  private productCategoryController: ProductCategoryController;
+  private stockController: StockController;
 
   private app: express.Application;
 
@@ -45,19 +52,25 @@ class Server {
       entities: ["build/database/entities/**/*.js"],
       synchronize: true,
       name: "rosilaine-company"
-    }).catch(error => console.log(error));
+    }).catch(error => console.log(`Create connection error:${error}`));
 
     this.customerController = new CustomerController();
     this.productController = new ProductController();
     this.orderController = new OrderController();
+    this.orderStatusController = new OrderStatusController();
+    this.productCategoryController = new ProductCategoryController();
+    this.stockController = new StockController();
 
-    this.app.get("/", (req: Request, res: Response) => {
+    this.app.get("/", (_: Request, res: Response) => {
       res.send("<h1>Hello world!</h1>");
     });
 
     this.app.use(`/api/customers/`, this.customerController.router);
     this.app.use('/api/products/', this.productController.router);
     this.app.use('/api/orders/', this.orderController.router);
+    this.app.use(`/api/order-status/`, this.orderStatusController.router);
+    this.app.use('/api/product-categories/', this.productCategoryController.router);
+    this.app.use('/api/stocks/', this.stockController.router);
   }
 
   /**

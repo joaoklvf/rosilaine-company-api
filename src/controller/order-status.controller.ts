@@ -1,19 +1,19 @@
 import { Router, Response, Request } from "express";
-import { OrderEntity } from "../database/entities/order/order.entity";
-import { OrderService } from "../services/order.service"; // import service
+import { OrderStatusEntity } from "../database/entities/order-status/order-status.entity";
+import { OrderStatusService } from "../services/order-status.service"; // import service
 
-export class OrderController {
+export class OrderStatusController {
   public router: Router;
-  private orderService: OrderService;
+  private orderStatusService: OrderStatusService;
 
   constructor() {
-    this.orderService = new OrderService(); // Create a new instance of PostController
+    this.orderStatusService = new OrderStatusService(); // Create a new instance of PostController
     this.router = Router();
     this.routes();
   }
 
   public index = async (req: Request, res: Response) => {
-    await this.orderService.index().then((data) => {
+    await this.orderStatusService.index().then((data) => {
       return res.status(200).json(data);
     }).catch((error) => {
       return res.status(500).json({ msg: error });
@@ -21,21 +21,21 @@ export class OrderController {
   }
 
   public create = async (req: Request, res: Response) => {
-    const order = req['body'] as OrderEntity;
-    const newCustomer = await this.orderService.create(order);
-    res.send(newCustomer);
+    const orderStatus = req['body'] as OrderStatusEntity;
+    const newOrderStatus = await this.orderStatusService.create(orderStatus);
+    res.send(newOrderStatus);
   }
 
   public update = async (req: Request, res: Response) => {
-    const order = req['body'] as OrderEntity;
+    const orderStatus = req['body'] as OrderStatusEntity;
     const id = req['params']['id'];
 
-    res.send(this.orderService.update(order, Number(id)));
+    res.send(this.orderStatusService.update(orderStatus, Number(id)));
   }
 
   public delete = async (req: Request, res: Response) => {
     const id = req['params']['id'];
-    res.send(this.orderService.delete(Number(id)));
+    res.send(this.orderStatusService.delete(Number(id)));
   }
 
   /**

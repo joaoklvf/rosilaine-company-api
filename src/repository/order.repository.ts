@@ -1,5 +1,5 @@
 import { EntityRepository, Repository } from "typeorm";
-import { OrderEntity } from "../database/entities/order.entity";
+import { OrderEntity } from "../database/entities/order/order.entity";
 
 @EntityRepository(OrderEntity)
 
