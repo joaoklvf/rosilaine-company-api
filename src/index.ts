@@ -10,7 +10,6 @@ import { ProductCategoryController } from './controller/product-category.control
 import { StockController } from './controller/stock.controller';
 
 const app = express();
-const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
@@ -44,9 +43,11 @@ const startApp = async () => {
   app.use(`/api/order-status/`, orderStatusController.router);
   app.use('/api/product-categories/', productCategoryController.router);
   app.use('/api/stocks/', stockController.router);
+  
+  const port = process.env.APP_PORT;
 
-  app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+  app.listen(port, () => {
+    console.log(`Server is running on port ${port}`);
   });
 }
 
