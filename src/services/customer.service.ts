@@ -1,12 +1,12 @@
-import { getConnection } from 'typeorm';
 import { CustomerEntity } from '../database/entities/customer/customer.entity';
 import { CustomerRepository } from '../repository/customer.repository';
+import { AppDataSource } from '..';
 
 export class CustomerService {
   private customerRepository: CustomerRepository;
 
   constructor() {
-    // this.customerRepository = getConnection("rosilaine-company").getCustomRepository(CustomerRepository);
+    this.customerRepository = AppDataSource.getRepository(CustomerEntity);
   }
 
   public index = async () => {

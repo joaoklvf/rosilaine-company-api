@@ -2,7 +2,7 @@ import { Column, Entity, ManyToOne, PrimaryGeneratedColumn, OneToMany, CreateDat
 import { CustomerEntity } from "../customer/customer.entity";
 import { OrderInstallmentEntity } from "./order-installment.entity";
 import { OrderItemEntity } from "./order-item.entity";
-import { OrderStatusEntity } from "../order-status/order-status.entity";
+import { OrderStatusEntity } from "./order-status.entity";
 
 @Entity('order')
 export class OrderEntity {
@@ -11,6 +11,9 @@ export class OrderEntity {
 
   @Column()
   deliveryDate: Date;
+
+  @Column()
+  orderDate: Date;
 
   @Column()
   total: number;

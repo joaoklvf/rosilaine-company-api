@@ -1,6 +1,6 @@
 import { Router, Response, Request } from "express";
-import { ProductCategoryEntity } from "../database/entities/product-category/product-category.entity";
 import { ProductCategoryService } from "../services/product-category.service"; // import service
+import { ProductCategoryEntity } from "../database/entities/product/product-category.entity";
 
 export class ProductCategoryController {
   public router: Router;

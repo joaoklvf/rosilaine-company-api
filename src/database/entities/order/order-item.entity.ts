@@ -8,16 +8,19 @@ export class OrderItemEntity {
   id: number;
 
   @Column()
-  quantity: number;
+  itemAmount: number;
 
-  @Column()
-  originalPrice: number;
+  @Column({ type: 'decimal', precision: 10, scale: 2 })
+  itemPrice: number;
+
+  @Column({ type: 'decimal', precision: 10, scale: 2 })
+  itemTotal: number;
 
   @Column({ nullable: true })
-  discount?: number;
+  itemDiscount?: number;
 
   @Column()
-  sellingPrice: number;
+  itemSellingPrice: number;
 
   @ManyToOne(() => ProductEntity, product => product.orderItems)
   product: ProductEntity;

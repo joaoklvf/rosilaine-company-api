@@ -1,12 +1,13 @@
-import { getConnection } from 'typeorm';
 import { ProductEntity } from '../database/entities/product/product.entity';
 import { ProductRepository } from '../repository/product.repository';
+import { AppDataSource } from '..';
+import { In } from 'typeorm';
 
 export class ProductService {
   private productRepository: ProductRepository;
 
   constructor() {
-    // this.productRepository = getConnection("rosilaine-company").getCustomRepository(ProductRepository);
+    this.productRepository = AppDataSource.getRepository(ProductEntity);
   }
 
   public index = async () => {
@@ -30,7 +31,7 @@ export class ProductService {
   }
 
   public find = async (ids: number[]) => {
-    const products = await this.productRepository.findByIds(ids)
+    const products = await this.productRepository.findBy({ id: In(ids) })
     return products;
   }
 

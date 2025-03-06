@@ -1,6 +1,6 @@
 import { Router, Response, Request } from "express";
-import { OrderStatusEntity } from "../database/entities/order-status/order-status.entity";
 import { OrderStatusService } from "../services/order-status.service"; // import service
+import { OrderStatusEntity } from "../database/entities/order/order-status.entity";
 
 export class OrderStatusController {
   public router: Router;

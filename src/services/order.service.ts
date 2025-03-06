@@ -1,14 +1,14 @@
+import { AppDataSource } from '..';
 import { OrderEntity } from '../database/entities/order/order.entity';
 import { OrderRepository } from '../repository/order.repository';
 import { ProductService } from './product.service';
-// import { appDataSource } from '@server';
 
 export class OrderService {
   private orderRepository: OrderRepository;
   private productService: ProductService;
 
   constructor() {
-    // this.orderRepository = appDataSource.getRepository(OrderRepository);
+    this.orderRepository = AppDataSource.getRepository(OrderEntity);
     this.productService = new ProductService();
   }
 
@@ -19,12 +19,12 @@ export class OrderService {
 
   public create = async (order: OrderEntity) => {
     const productsIds = order.orderItems.map(product => product.product.id);
-    const response = await this.orderRepository.findByIds(productsIds);
+    const response = await this.productService.find(productsIds);
 
     const productsToCreate =
       order.orderItems
-        .filter(product => !response.find(productResponse => productResponse.id === product.product.id))
-        .map(product => product.product);
+        .filter(orderItem => !response.find(orderItemResponse => orderItemResponse.id === orderItem.product.id))
+        .map(orderItem => orderItem.product);
 
     const productsCreated = await this.productService.createMany(productsToCreate);
 

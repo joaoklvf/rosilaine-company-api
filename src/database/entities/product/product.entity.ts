@@ -1,5 +1,5 @@
 import { ProductStockEntity } from "./product-stock.entity";
-import { ProductCategoryEntity } from "../product-category/product-category.entity";
+import { ProductCategoryEntity } from "./product-category.entity";
 import { OrderItemEntity } from "../order/order-item.entity";
 import { Column, CreateDateColumn, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 
@@ -10,9 +10,6 @@ export class ProductEntity {
 
   @Column({ length: 50 })
   description: string;
-
-  @Column({ type: 'decimal', precision: 10, scale: 2 })
-  price: number;
 
   @Column({ length: 10, unique: true, nullable: true })
   productCode?: string;

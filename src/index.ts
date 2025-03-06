@@ -15,14 +15,14 @@ app.use(cors());
 app.use(express.json());
 dotenv.config();
 
-const AppDataSource = new DataSource({
+export const AppDataSource = new DataSource({
   type: "postgres",
   host: process.env.DATABASE_HOST,
   port: Number(process.env.DATABASE_PORT),
   username: process.env.DATABASE_USERNAME,
   password: process.env.DATABASE_PASSWORD,
   database: process.env.DATABASE_NAME,
-  entities: ["build/database/entities/**/*.js"],
+  entities: [`${__dirname}/../**/*.entity.{js,ts}`],
   synchronize: true,
   name: process.env.DATABASE_NAME
 });
@@ -43,7 +43,7 @@ const startApp = async () => {
   app.use(`/api/order-status/`, orderStatusController.router);
   app.use('/api/product-categories/', productCategoryController.router);
   app.use('/api/stocks/', stockController.router);
-  
+
   const port = process.env.APP_PORT;
 
   app.listen(port, () => {

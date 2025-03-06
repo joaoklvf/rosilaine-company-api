@@ -1,17 +1,17 @@
-import { getConnection } from 'typeorm';
-import { ProductCategoryEntity } from '../database/entities/product-category/product-category.entity';
 import { ProductCategoryRepository } from '../repository/product-category.repository';
+import { AppDataSource } from '..';
+import { ProductCategoryEntity } from '../database/entities/product/product-category.entity';
 
 export class ProductCategoryService {
   private productCategoryRepository: ProductCategoryRepository;
 
   constructor() {
-    // this.productCategoryRepository = getConnection("rosilaine-company").getCustomRepository(ProductCategoryRepository);
+    this.productCategoryRepository = AppDataSource.getRepository(ProductCategoryEntity);
   }
 
   public index = async () => {
-    const productCategorys = await this.productCategoryRepository.find()
-    return productCategorys;
+    const productCategories = await this.productCategoryRepository.find()
+    return productCategories;
   }
 
   public create = async (productCategory: ProductCategoryEntity) => {

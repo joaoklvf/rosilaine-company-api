@@ -1,12 +1,12 @@
-import { getConnection } from 'typeorm';
 import { StockEntity } from '../database/entities/stock/stock.entity';
 import { StockRepository } from '../repository/stock.repository';
+import { AppDataSource } from '..';
 
 export class StockService {
   private stockRepository: StockRepository;
 
   constructor() {
-    // this.stockRepository = getConnection("rosilaine-company").getCustomRepository(StockRepository);
+    this.stockRepository = AppDataSource.getRepository(StockEntity);
   }
 
   public index = async () => {

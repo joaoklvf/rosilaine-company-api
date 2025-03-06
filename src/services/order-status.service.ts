@@ -1,12 +1,13 @@
-import { getConnection } from 'typeorm';
-import { OrderStatusEntity } from '../database/entities/order-status/order-status.entity';
+
 import { OrderStatusRepository } from '../repository/order-status.repository';
+import { AppDataSource } from '..';
+import { OrderStatusEntity } from '../database/entities/order/order-status.entity';
 
 export class OrderStatusService {
   private orderStatusRepository: OrderStatusRepository;
 
   constructor() {
-    // this.orderStatusRepository = getConnection("rosilaine-company").getCustomRepository(OrderStatusRepository);
+    this.orderStatusRepository = AppDataSource.getRepository(OrderStatusEntity);
   }
 
   public index = async () => {
