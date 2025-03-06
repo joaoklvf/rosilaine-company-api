@@ -1,9 +1,12 @@
-import { Column, Entity, ManyToOne } from "typeorm";
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 import { OrderEntity } from "./order.entity";
 import { ProductEntity } from "../product/product.entity";
 
 @Entity('order_item')
 export class OrderItemEntity {
+  @PrimaryGeneratedColumn()
+  id: number;
+
   @Column()
   quantity: number;
 
@@ -16,9 +19,9 @@ export class OrderItemEntity {
   @Column()
   sellingPrice: number;
 
-  @ManyToOne(() => ProductEntity, product => product.orderItems, { primary: true })
+  @ManyToOne(() => ProductEntity, product => product.orderItems)
   product: ProductEntity;
 
-  @ManyToOne(() => OrderEntity, order => order.orderItems, { primary: true })
+  @ManyToOne(() => OrderEntity, order => order.orderItems)
   order: OrderEntity;
 }

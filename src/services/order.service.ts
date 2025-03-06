@@ -1,14 +1,14 @@
-import { getConnection } from 'typeorm';
 import { OrderEntity } from '../database/entities/order/order.entity';
 import { OrderRepository } from '../repository/order.repository';
 import { ProductService } from './product.service';
+// import { appDataSource } from '@server';
 
 export class OrderService {
   private orderRepository: OrderRepository;
   private productService: ProductService;
 
   constructor() {
-    this.orderRepository = getConnection("rosilaine-company").getCustomRepository(OrderRepository);
+    // this.orderRepository = appDataSource.getRepository(OrderRepository);
     this.productService = new ProductService();
   }
 

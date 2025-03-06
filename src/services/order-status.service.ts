@@ -6,7 +6,7 @@ export class OrderStatusService {
   private orderStatusRepository: OrderStatusRepository;
 
   constructor() {
-    this.orderStatusRepository = getConnection("rosilaine-company").getCustomRepository(OrderStatusRepository);
+    // this.orderStatusRepository = getConnection("rosilaine-company").getCustomRepository(OrderStatusRepository);
   }
 
   public index = async () => {

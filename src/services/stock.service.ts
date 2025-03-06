@@ -6,7 +6,7 @@ export class StockService {
   private stockRepository: StockRepository;
 
   constructor() {
-    this.stockRepository = getConnection("rosilaine-company").getCustomRepository(StockRepository);
+    // this.stockRepository = getConnection("rosilaine-company").getCustomRepository(StockRepository);
   }
 
   public index = async () => {

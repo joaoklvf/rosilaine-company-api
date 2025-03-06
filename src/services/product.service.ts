@@ -6,7 +6,7 @@ export class ProductService {
   private productRepository: ProductRepository;
 
   constructor() {
-    this.productRepository = getConnection("rosilaine-company").getCustomRepository(ProductRepository);
+    // this.productRepository = getConnection("rosilaine-company").getCustomRepository(ProductRepository);
   }
 
   public index = async () => {
