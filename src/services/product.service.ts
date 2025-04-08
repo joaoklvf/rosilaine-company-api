@@ -2,12 +2,15 @@ import { ProductEntity } from '../database/entities/product/product.entity';
 import { ProductRepository } from '../repository/product.repository';
 import { AppDataSource } from '..';
 import { In } from 'typeorm';
+import { ProductCategoryService } from './product-category.service';
 
 export class ProductService {
   private productRepository: ProductRepository;
+  private productCategoryService: ProductCategoryService;
 
   constructor() {
     this.productRepository = AppDataSource.getRepository(ProductEntity);
+    this.productCategoryService = new ProductCategoryService();
   }
 
   public index = async () => {
@@ -16,12 +19,18 @@ export class ProductService {
   }
 
   public create = async (product: ProductEntity) => {
-    const newOrder = await this.productRepository.save(product);
+    const category = await this.createCategoryByProduct(product);
+    const finalProduct = { ...product, category };
+    
+    const newOrder = await this.productRepository.save(finalProduct);
     return newOrder;
   }
 
   public update = async (product: ProductEntity, id: number) => {
-    const updatedOrder = await this.productRepository.update(id, product);
+    const category = await this.createCategoryByProduct(product);
+    const finalProduct = { ...product, category };
+    
+    const updatedOrder = await this.productRepository.update(id, finalProduct);
     return updatedOrder.affected ? product : null;
   }
 
@@ -39,4 +48,18 @@ export class ProductService {
     const newOrder = await this.productRepository.save(products);
     return newOrder;
   }
+
+  private createCategoryByProduct = async (product: ProductEntity) => {
+    const { category } = product;
+  
+    if (category.id > 0)
+      return category;
+  
+    const created = await this.productCategoryService.create(category);
+  
+    if (!created?.id)
+      throw new Error('Error creating product category');
+  
+    return created;
+  };  
 }
