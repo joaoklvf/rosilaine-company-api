@@ -14,7 +14,7 @@ export class ProductService {
   }
 
   public index = async () => {
-    const products = await this.productRepository.find()
+    const products = await this.productRepository.createQueryBuilder('product').innerJoinAndSelect('product.category', 'categoryId').getMany()
     return products;
   }
 
