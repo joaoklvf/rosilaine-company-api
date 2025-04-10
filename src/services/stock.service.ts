@@ -2,7 +2,9 @@ import { StockEntity } from '../database/entities/stock/stock.entity';
 import { StockRepository } from '../repository/stock.repository';
 import { AppDataSource } from '..';
 import { IStockService } from '../interfaces/stock-service';
+import { injectable } from 'inversify';
 
+@injectable()
 export class StockService implements IStockService {
   private stockRepository: StockRepository;
 

@@ -1,19 +1,23 @@
+import 'reflect-metadata';
 import express from 'express';
-import { DataSource } from "typeorm";
 import cors from 'cors';
+import dotenv from 'dotenv';
+import { DataSource } from "typeorm";
+import container from './inversify.config';
+
+// Importações dos controllers
 import { CustomerController } from './controller/customer.controller';
 import { ProductController } from './controller/product.controller';
-import dotenv from 'dotenv'
 import { OrderController } from './controller/order.controller';
 import { OrderStatusController } from './controller/order-status.controller';
 import { ProductCategoryController } from './controller/product-category.controller';
 import { StockController } from './controller/stock.controller';
 
-const app = express();
+dotenv.config();
 
+const app = express();
 app.use(cors());
 app.use(express.json());
-dotenv.config();
 
 export const AppDataSource = new DataSource({
   type: "postgres",
@@ -30,12 +34,13 @@ export const AppDataSource = new DataSource({
 const startApp = async () => {
   await AppDataSource.initialize().catch(error => console.log(`Erro ao inicializar data source: ${JSON.stringify(error)}`));
 
-  const customerController = new CustomerController();
-  const productController = new ProductController();
-  const orderController = new OrderController();
-  const orderStatusController = new OrderStatusController();
-  const productCategoryController = new ProductCategoryController();
-  const stockController = new StockController();
+  // Obtendo controllers do container com dependências injetadas
+  const customerController = container.get(CustomerController);
+  const productController = container.get(ProductController);
+  const orderController = container.get(OrderController);
+  const orderStatusController = container.get(OrderStatusController);
+  const productCategoryController = container.get(ProductCategoryController);
+  const stockController = container.get(StockController);
 
   app.use(`/api/customers/`, customerController.router);
   app.use('/api/products/', productController.router);
@@ -49,6 +54,6 @@ const startApp = async () => {
   app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
   });
-}
+};
 
 startApp();

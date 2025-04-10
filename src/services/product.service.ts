@@ -2,16 +2,19 @@ import { ProductEntity } from '../database/entities/product/product.entity';
 import { ProductRepository } from '../repository/product.repository';
 import { AppDataSource } from '..';
 import { In } from 'typeorm';
-import { ProductCategoryService } from './product-category.service';
 import { IProductService } from '../interfaces/product-service';
+import { IProductCategoryService } from '../interfaces/product-category-service';
+import { productCategoryServiceId } from '../inversify.config';
+import { inject, injectable } from 'inversify';
 
+@injectable()
 export class ProductService implements IProductService {
   private productRepository: ProductRepository;
-  private productCategoryService: ProductCategoryService;
 
-  constructor() {
+  constructor(
+    @inject(productCategoryServiceId) private productCategoryService: IProductCategoryService
+  ) {
     this.productRepository = AppDataSource.getRepository(ProductEntity);
-    this.productCategoryService = new ProductCategoryService();
   }
 
   public index = async () => {

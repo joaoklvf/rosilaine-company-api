@@ -1,12 +1,15 @@
+import { inject, injectable } from 'inversify';
 import { OrderEntity } from '../database/entities/order/order.entity';
 import { IOrderItemService } from '../interfaces/order-item-service';
-import { ProductService } from './product.service';
+import { IProductService } from '../interfaces/product-service';
+import { productServiceId } from '../inversify.config';
 
+@injectable()
 export class OrderItemService implements IOrderItemService {
-  private productService: ProductService;
 
-  constructor() {
-    this.productService = new ProductService();
+  constructor(
+    @inject(productServiceId) private productService: IProductService
+  ) {
   }
 
   public createProductsByOrder = async (order: OrderEntity) => {

@@ -21,6 +21,7 @@
     "cors": "^2.8.5",
     "dotenv": "^16.0.3",
     "express": "^4.17.1",
+    "inversify": "^7.5.0",
     "nodemon": "^3.1.9",
     "pg": "^8.5.1",
     "rosilaine-company": "file:",

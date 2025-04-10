@@ -1,13 +1,16 @@
 import { Router, Response, Request } from "express";
-import { OrderStatusService } from "../services/order-status.service"; // import service
 import { OrderStatusEntity } from "../database/entities/order/order-status.entity";
+import { IOrderStatusService } from "../interfaces/order-status-service";
+import { orderStatusServiceId } from "../inversify.config";
+import { inject, injectable } from "inversify";
 
+@injectable()
 export class OrderStatusController {
   public router: Router;
-  private orderStatusService: OrderStatusService;
 
-  constructor() {
-    this.orderStatusService = new OrderStatusService(); // Create a new instance of PostController
+  constructor(
+    @inject(orderStatusServiceId) private orderStatusService: IOrderStatusService
+  ) {
     this.router = Router();
     this.routes();
   }

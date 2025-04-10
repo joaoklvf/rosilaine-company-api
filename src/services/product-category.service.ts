@@ -2,7 +2,9 @@ import { ProductCategoryRepository } from '../repository/product-category.reposi
 import { AppDataSource } from '..';
 import { ProductCategoryEntity } from '../database/entities/product/product-category.entity';
 import { IProductCategoryService } from '../interfaces/product-category-service';
+import { injectable } from 'inversify';
 
+@injectable()
 export class ProductCategoryService implements IProductCategoryService {
   private productCategoryRepository: ProductCategoryRepository;
 

@@ -1,13 +1,16 @@
 import { Router, Response, Request } from "express";
-import { ProductCategoryService } from "../services/product-category.service"; // import service
 import { ProductCategoryEntity } from "../database/entities/product/product-category.entity";
+import { IProductCategoryService } from "../interfaces/product-category-service";
+import { inject, injectable } from "inversify";
+import { productCategoryServiceId } from "../inversify.config";
 
+@injectable()
 export class ProductCategoryController {
   public router: Router;
-  private productCategoryService: ProductCategoryService;
 
-  constructor() {
-    this.productCategoryService = new ProductCategoryService(); // Create a new instance of PostController
+  constructor(
+    @inject(productCategoryServiceId) private productCategoryService: IProductCategoryService
+  ) {
     this.router = Router();
     this.routes();
   }

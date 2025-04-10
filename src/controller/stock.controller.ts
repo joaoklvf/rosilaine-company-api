@@ -1,13 +1,16 @@
 import { Router, Response, Request } from "express";
 import { StockEntity } from "../database/entities/stock/stock.entity";
-import { StockService } from "../services/stock.service"; // import service
+import { IStockService } from "../interfaces/stock-service";
+import { inject, injectable } from "inversify";
+import { stockServiceId } from "../inversify.config";
 
+@injectable()
 export class StockController {
   public router: Router;
-  private stockService: StockService;
 
-  constructor() {
-    this.stockService = new StockService(); // Create a new instance of PostController
+  constructor(
+    @inject(stockServiceId) private stockService: IStockService
+  ) {
     this.router = Router();
     this.routes();
   }

@@ -2,7 +2,9 @@ import { CustomerEntity } from '../database/entities/customer/customer.entity';
 import { CustomerRepository } from '../repository/customer.repository';
 import { AppDataSource } from '..';
 import { ICustomerService } from '../interfaces/customer-service';
+import { injectable } from 'inversify';
 
+@injectable()
 export class CustomerService implements ICustomerService {
   private customerRepository: CustomerRepository;
 
