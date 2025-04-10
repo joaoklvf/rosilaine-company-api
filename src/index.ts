@@ -28,7 +28,7 @@ export const AppDataSource = new DataSource({
 });
 
 const startApp = async () => {
-  await AppDataSource.initialize().catch(error => console.log(`Erro bolado: ${JSON.stringify(error)}`));
+  await AppDataSource.initialize().catch(error => console.log(`Erro ao inicializar data source: ${JSON.stringify(error)}`));
 
   const customerController = new CustomerController();
   const productController = new ProductController();
