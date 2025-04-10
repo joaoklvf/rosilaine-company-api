@@ -1,8 +1,9 @@
 import { StockEntity } from '../database/entities/stock/stock.entity';
 import { StockRepository } from '../repository/stock.repository';
 import { AppDataSource } from '..';
+import { IStockService } from '../interfaces/stock-service';
 
-export class StockService {
+export class StockService implements IStockService {
   private stockRepository: StockRepository;
 
   constructor() {

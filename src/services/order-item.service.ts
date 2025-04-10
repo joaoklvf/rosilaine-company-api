@@ -1,7 +1,8 @@
 import { OrderEntity } from '../database/entities/order/order.entity';
+import { IOrderItemService } from '../interfaces/order-item-service';
 import { ProductService } from './product.service';
 
-export class OrderItemService {
+export class OrderItemService implements IOrderItemService {
   private productService: ProductService;
 
   constructor() {

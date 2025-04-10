@@ -1,8 +1,9 @@
 import { ProductCategoryRepository } from '../repository/product-category.repository';
 import { AppDataSource } from '..';
 import { ProductCategoryEntity } from '../database/entities/product/product-category.entity';
+import { IProductCategoryService } from '../interfaces/product-category-service';
 
-export class ProductCategoryService {
+export class ProductCategoryService implements IProductCategoryService {
   private productCategoryRepository: ProductCategoryRepository;
 
   constructor() {

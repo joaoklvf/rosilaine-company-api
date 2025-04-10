@@ -1,10 +1,10 @@
 import { AppDataSource } from '..';
 import { OrderEntity } from '../database/entities/order/order.entity';
+import { IOrderService } from '../interfaces/order-service';
 import { OrderRepository } from '../repository/order.repository';
 import { OrderItemService } from './order-item.service';
-import { ProductService } from './product.service';
 
-export class OrderService {
+export class OrderService implements IOrderService {
   private orderRepository: OrderRepository;
   private orderItemService: OrderItemService;
 
