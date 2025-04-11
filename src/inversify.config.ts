@@ -25,7 +25,7 @@ export const productCategoryServiceId: symbol = Symbol.for('ProductCategoryServi
 export const productServiceId: symbol = Symbol.for('ProductServiceId');
 export const stockServiceId: symbol = Symbol.for('StockServiceId');
 
-const container = new Container();
+export const container = new Container();
 
 container.bind(CustomerController).toSelf();
 container.bind(ProductController).toSelf();
@@ -41,5 +41,3 @@ container.bind(orderServiceId).to(OrderService);
 container.bind(productCategoryServiceId).to(ProductCategoryService);
 container.bind(productServiceId).to(ProductService);
 container.bind(stockServiceId).to(StockService);
-
-export default container;

@@ -3,7 +3,7 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import { DataSource } from "typeorm";
-import container from './inversify.config';
+import { container } from './inversify.config';
 
 // Importações dos controllers
 import { CustomerController } from './controller/customer.controller';
