@@ -2,14 +2,14 @@ import { Router, Response, Request } from "express";
 import { StockEntity } from "../database/entities/stock/stock.entity";
 import { IStockService } from "../interfaces/stock-service";
 import { inject, injectable } from "inversify";
-import { stockServiceId } from "../inversify.config";
+import { INJECTABLE_TYPES } from "../types/inversify-types";
 
 @injectable()
 export class StockController {
   public router: Router;
 
   constructor(
-    @inject(stockServiceId) private stockService: IStockService
+    @inject(INJECTABLE_TYPES.StockService) private stockService: IStockService
   ) {
     this.router = Router();
     this.routes();

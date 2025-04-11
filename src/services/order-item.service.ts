@@ -2,13 +2,13 @@ import { inject, injectable } from 'inversify';
 import { OrderEntity } from '../database/entities/order/order.entity';
 import { IOrderItemService } from '../interfaces/order-item-service';
 import { IProductService } from '../interfaces/product-service';
-import { productServiceId } from '../inversify.config';
+import { INJECTABLE_TYPES } from '../types/inversify-types';
 
 @injectable()
 export class OrderItemService implements IOrderItemService {
 
   constructor(
-    @inject(productServiceId) private productService: IProductService
+    @inject(INJECTABLE_TYPES.ProductService) private productService: IProductService
   ) {
   }
 

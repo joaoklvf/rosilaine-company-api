@@ -15,15 +15,7 @@ import { OrderService } from './services/order.service';
 import { ProductCategoryService } from './services/product-category.service';
 import { ProductService } from './services/product.service';
 import { StockService } from './services/stock.service';
-
-// Adicione também seus services se quiser que o container os instancie
-export const customerServiceId: symbol = Symbol.for('CustomerServiceId');
-export const orderItemServiceId: symbol = Symbol.for('OrderItemServiceId');
-export const orderStatusServiceId: symbol = Symbol.for('OrderStatusServiceId');
-export const orderServiceId: symbol = Symbol.for('OrderServiceId');
-export const productCategoryServiceId: symbol = Symbol.for('ProductCategoryServiceId');
-export const productServiceId: symbol = Symbol.for('ProductServiceId');
-export const stockServiceId: symbol = Symbol.for('StockServiceId');
+import { INJECTABLE_TYPES } from './types/inversify-types';
 
 export const container = new Container();
 
@@ -34,10 +26,10 @@ container.bind(OrderStatusController).toSelf();
 container.bind(ProductCategoryController).toSelf();
 container.bind(StockController).toSelf();
 
-container.bind(customerServiceId).to(CustomerService);
-container.bind(orderItemServiceId).to(OrderItemService);
-container.bind(orderStatusServiceId).to(OrderStatusService);
-container.bind(orderServiceId).to(OrderService);
-container.bind(productCategoryServiceId).to(ProductCategoryService);
-container.bind(productServiceId).to(ProductService);
-container.bind(stockServiceId).to(StockService);
+container.bind(INJECTABLE_TYPES.CustomerService).to(CustomerService);
+container.bind(INJECTABLE_TYPES.OrderItemService).to(OrderItemService);
+container.bind(INJECTABLE_TYPES.OrderStatusService).to(OrderStatusService);
+container.bind(INJECTABLE_TYPES.OrderService).to(OrderService);
+container.bind(INJECTABLE_TYPES.ProductCategoryService).to(ProductCategoryService);
+container.bind(INJECTABLE_TYPES.ProductService).to(ProductService);
+container.bind(INJECTABLE_TYPES.StockService).to(StockService);

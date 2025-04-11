@@ -4,15 +4,15 @@ import { AppDataSource } from '..';
 import { In } from 'typeorm';
 import { IProductService } from '../interfaces/product-service';
 import { IProductCategoryService } from '../interfaces/product-category-service';
-import { productCategoryServiceId } from '../inversify.config';
 import { inject, injectable } from 'inversify';
+import { INJECTABLE_TYPES } from '../types/inversify-types';
 
 @injectable()
 export class ProductService implements IProductService {
   private productRepository: ProductRepository;
 
   constructor(
-    @inject(productCategoryServiceId) private productCategoryService: IProductCategoryService
+    @inject(INJECTABLE_TYPES.ProductCategoryService) private productCategoryService: IProductCategoryService
   ) {
     this.productRepository = AppDataSource.getRepository(ProductEntity);
   }

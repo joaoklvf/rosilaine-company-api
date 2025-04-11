@@ -2,14 +2,14 @@ import { Router, Response, Request } from "express";
 import { CustomerEntity } from "../database/entities/customer/customer.entity";
 import { ICustomerService } from "../interfaces/customer-service";
 import { inject, injectable } from "inversify";
-import { customerServiceId } from "../inversify.config";
+import { INJECTABLE_TYPES } from "../types/inversify-types";
 
 @injectable()
 export class CustomerController {
   public router: Router;
 
   constructor(
-    @inject(customerServiceId) private customerService: ICustomerService
+    @inject(INJECTABLE_TYPES.CustomerService) private customerService: ICustomerService
   ) {
     this.router = Router();
     this.routes();

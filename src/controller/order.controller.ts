@@ -2,14 +2,14 @@ import { Router, Response, Request } from "express";
 import { OrderEntity } from "../database/entities/order/order.entity";
 import { IOrderService } from "../interfaces/order-service";
 import { inject, injectable } from "inversify";
-import { orderServiceId } from "../inversify.config";
+import { INJECTABLE_TYPES } from "../types/inversify-types";
 
 @injectable()
 export class OrderController {
   public router: Router;
 
   constructor(
-    @inject(orderServiceId) private orderService: IOrderService
+    @inject(INJECTABLE_TYPES.OrderService) private orderService: IOrderService
   ) {
     this.router = Router();
     this.routes();

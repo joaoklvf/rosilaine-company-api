@@ -3,15 +3,15 @@ import { AppDataSource } from '..';
 import { OrderEntity } from '../database/entities/order/order.entity';
 import { IOrderItemService } from '../interfaces/order-item-service';
 import { IOrderService } from '../interfaces/order-service';
-import { orderItemServiceId } from '../inversify.config';
 import { OrderRepository } from '../repository/order.repository';
+import { INJECTABLE_TYPES } from '../types/inversify-types';
 
 @injectable()
 export class OrderService implements IOrderService {
   private orderRepository: OrderRepository;
 
   constructor(
-    @inject(orderItemServiceId) private orderItemService: IOrderItemService
+    @inject(INJECTABLE_TYPES.OrderItemService) private orderItemService: IOrderItemService
   ) {
     this.orderRepository = AppDataSource.getRepository(OrderEntity);
   }
