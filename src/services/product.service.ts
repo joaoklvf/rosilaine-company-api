@@ -18,7 +18,12 @@ export class ProductService implements IProductService {
   }
 
   public index = async () => {
-    const products = await this.productRepository.createQueryBuilder('product').innerJoinAndSelect('product.category', 'categoryId').getMany()
+    const products = await this.productRepository.find({
+      relations: {
+        category: true
+      }
+    });
+
     return products;
   }
 

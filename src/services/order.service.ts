@@ -19,7 +19,22 @@ export class OrderService implements IOrderService {
   }
 
   public index = async () => {
-    const orders = await this.orderRepository.find()
+    const orders = await this.orderRepository.find({
+      relations: {
+        customer: true,
+        status: true
+      },
+      select: {
+        createdDate: true,
+        status: {
+          description: true
+        },
+        customer: {
+          name: true
+        },
+      }
+    });
+
     return orders;
   }
 
