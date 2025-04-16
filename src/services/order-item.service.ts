@@ -3,13 +3,18 @@ import { OrderEntity } from '../database/entities/order/order.entity';
 import { IOrderItemService } from '../interfaces/order-item-service';
 import { IProductService } from '../interfaces/product-service';
 import { INJECTABLE_TYPES } from '../types/inversify-types';
+import { OrderItemRepository } from '../repository/order-item.repository';
+import { OrderItemEntity } from '../database/entities/order/order-item.entity';
+import { AppDataSource } from '..';
 
 @injectable()
 export class OrderItemService implements IOrderItemService {
+  private orderItemRepository: OrderItemRepository;
 
   constructor(
     @inject(INJECTABLE_TYPES.ProductService) private productService: IProductService
   ) {
+    this.orderItemRepository = AppDataSource.getRepository(OrderItemEntity);
   }
 
   public createProductsByOrder = async (order: OrderEntity) => {
@@ -51,4 +56,17 @@ export class OrderItemService implements IOrderItemService {
 
     return finalOrderItems;
   };
+
+  public createMany = async (items: OrderItemEntity[]) => {
+    const newOrder = await this.orderItemRepository.save(items);
+    return newOrder;
+  }
+
+  public deleteFromOrderId = async (orderId: number) => {
+    await this.orderItemRepository
+      .createQueryBuilder()
+      .delete()
+      .where("orderId = :orderId", { orderId })
+      .execute()
+  }
 }

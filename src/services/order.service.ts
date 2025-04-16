@@ -5,13 +5,15 @@ import { IOrderItemService } from '../interfaces/order-item-service';
 import { IOrderService } from '../interfaces/order-service';
 import { OrderRepository } from '../repository/order.repository';
 import { INJECTABLE_TYPES } from '../types/inversify-types';
+import { IOrderStatusService } from '../interfaces/order-status-service';
 
 @injectable()
 export class OrderService implements IOrderService {
   private orderRepository: OrderRepository;
 
   constructor(
-    @inject(INJECTABLE_TYPES.OrderItemService) private orderItemService: IOrderItemService
+    @inject(INJECTABLE_TYPES.OrderItemService) private orderItemService: IOrderItemService,
+    @inject(INJECTABLE_TYPES.OrderStatusService) private orderStatusService: IOrderStatusService
   ) {
     this.orderRepository = AppDataSource.getRepository(OrderEntity);
   }
@@ -23,20 +25,43 @@ export class OrderService implements IOrderService {
 
   public create = async (order: OrderEntity) => {
     const orderItems = await this.orderItemService.createProductsByOrder(order);
-    const total = orderItems.reduce((prev, acc) => prev + (acc.itemAmount * acc.itemSellingPrice), 0);
+
+    if (!order.status.id) {
+      const newStatus = await this.orderStatusService.create(order.status);
+      order.status = { ...newStatus };
+    }
+
+    const total = orderItems.reduce((prev, acc) => prev + acc.itemTotal, 0);
     const finalOrder: OrderEntity = { ...order, orderItems, total };
 
     const newOrder = await this.orderRepository.save(finalOrder);
+
+    if (newOrder.id) {
+      await this.orderItemService.createMany(orderItems);
+    }
+
     return newOrder;
   }
 
   public update = async (order: OrderEntity, id: number) => {
     const orderItems = await this.orderItemService.createProductsByOrder(order);
-    const total = orderItems.reduce((prev, acc) => prev + (acc.itemAmount * acc.itemSellingPrice), 0);
+
+    if (!order.status.id) {
+      const newStatus = await this.orderStatusService.create(order.status);
+      order.status = { ...newStatus };
+    }
+
+    const total = orderItems.reduce((prev, acc) => prev + acc.itemTotal, 0);
     const finalOrder: OrderEntity = { ...order, orderItems, total };
 
     const updatedOrder = await this.orderRepository.update(id, finalOrder);
-    return updatedOrder.affected ? order : null;
+    if (!updatedOrder.affected)
+      return null;
+
+    await this.orderItemService.deleteFromOrderId(order.id);
+    await this.orderItemService.createMany(orderItems);
+
+    return order;
   }
 
   public delete = async (id: number) => {
