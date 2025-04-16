@@ -16,10 +16,10 @@ export class OrderItemEntity {
   @Column({ type: 'decimal', precision: 10, scale: 2 })
   itemTotal: number;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: 'decimal', precision: 10, scale: 2 })
   itemDiscount?: number;
 
-  @Column()
+  @Column({ type: 'decimal', precision: 10, scale: 2 })
   itemSellingPrice: number;
 
   @ManyToOne(() => ProductEntity, product => product.orderItems)

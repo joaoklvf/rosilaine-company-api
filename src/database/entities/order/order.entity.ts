@@ -15,7 +15,7 @@ export class OrderEntity {
   @Column()
   orderDate: Date;
 
-  @Column()
+  @Column({ type: 'decimal', precision: 10, scale: 2 })
   total: number;
 
   @CreateDateColumn()
@@ -26,7 +26,7 @@ export class OrderEntity {
 
   @ManyToOne(() => CustomerEntity, customer => customer.orders)
   customer: CustomerEntity;
-  
+
   @ManyToOne(() => OrderStatusEntity, orderStatus => orderStatus.orders)
   status: OrderStatusEntity;
 
