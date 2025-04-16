@@ -24,7 +24,7 @@ export class OrderEntity {
   @UpdateDateColumn()
   updatedDate: Date;
 
-  @ManyToOne(() => OrderEntity, order => order.customer)
+  @ManyToOne(() => CustomerEntity, customer => customer.orders)
   customer: CustomerEntity;
   
   @ManyToOne(() => OrderStatusEntity, orderStatus => orderStatus.orders)
