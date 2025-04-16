@@ -9,4 +9,5 @@ export interface IRepoService<T> {          // Exportado
   index(): Promise<T[]>;
   create(customer: T): Promise<T>;
   update(customer: T, id: number): Promise<T | null>;
+  get(id: number): Promise<T | null>
 }

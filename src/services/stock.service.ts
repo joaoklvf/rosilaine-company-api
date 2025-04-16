@@ -31,4 +31,14 @@ export class StockService implements IStockService {
     const deletedStock = await this.stockRepository.delete(id);
     return deletedStock;
   }
+
+  public get = async (id: number) => {
+    const stock = await this.stockRepository.findOne({
+      where: {
+        id
+      }
+    });
+
+    return stock;
+  }
 }

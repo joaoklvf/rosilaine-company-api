@@ -33,7 +33,7 @@ export class OrderService implements IOrderService {
         customer: {
           name: true
         },
-      }
+      },
     });
 
     return orders;
@@ -53,7 +53,8 @@ export class OrderService implements IOrderService {
     const newOrder = await this.orderRepository.save(finalOrder);
 
     if (newOrder.id) {
-      await this.orderItemService.createMany(orderItems);
+      const itemsWithOrderId = orderItems.map(x => ({ ...x, order: newOrder }));
+      await this.orderItemService.createMany(itemsWithOrderId);
     }
 
     return newOrder;
@@ -83,5 +84,22 @@ export class OrderService implements IOrderService {
   public delete = async (id: number) => {
     const deletedOrder = await this.orderRepository.delete(id);
     return deletedOrder;
+  }
+
+  public get = async (id: number) => {
+    const order = await this.orderRepository.findOne({
+      relations: {
+        customer: true,
+        status: true,
+        orderItems: {
+          product: true
+        },
+      },
+      where: {
+        id
+      }
+    });
+
+    return order;
   }
 }

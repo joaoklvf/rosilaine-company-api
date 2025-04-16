@@ -32,4 +32,14 @@ export class OrderStatusService implements IOrderStatusService {
     const deletedOrderStatus = await this.orderStatusRepository.delete(id);
     return deletedOrderStatus;
   }
+
+  public get = async (id: number) => {
+    const product = await this.orderStatusRepository.findOne({
+      where: {
+        id
+      }
+    });
+
+    return product;
+  }
 }

@@ -31,4 +31,14 @@ export class CustomerService implements ICustomerService {
     const deletedCustomer = await this.customerRepository.delete(id);
     return deletedCustomer;
   }
+
+  public get = async (id: number) => {
+    const customer = await this.customerRepository.findOne({
+      where: {
+        id
+      }
+    });
+
+    return customer;
+  }
 }

@@ -41,11 +41,21 @@ export class OrderController {
     res.send(this.orderService.delete(Number(id)));
   }
 
+  public get = async (req: Request, res: Response) => {
+    const id = req['params']['id'];
+    await this.orderService.get(Number(id)).then((data) => {
+      return res.status(200).json(data);
+    }).catch((error) => {
+      return res.status(500).json({ msg: error });
+    });
+  }
+
   /**
    * Configure the routes of controller
    */
   public routes() {
     this.router.get('/', this.index);
+    this.router.get('/:id', this.get);
     this.router.post('/', this.create);
     this.router.put('/:id', this.update);
     this.router.delete('/:id', this.delete);

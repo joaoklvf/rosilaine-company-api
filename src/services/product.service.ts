@@ -71,4 +71,17 @@ export class ProductService implements IProductService {
 
     return created;
   };
+
+  public get = async (id: number) => {
+    const product = await this.productRepository.findOne({
+      relations: {
+        category: true
+      },
+      where: {
+        id
+      }
+    });
+
+    return product;
+  }
 }

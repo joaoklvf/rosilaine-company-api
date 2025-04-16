@@ -31,4 +31,14 @@ export class ProductCategoryService implements IProductCategoryService {
     const deletedProductCategory = await this.productCategoryRepository.delete(id);
     return deletedProductCategory;
   }
+
+  public get = async (id: number) => {
+    const category = await this.productCategoryRepository.findOne({
+      where: {
+        id
+      }
+    });
+
+    return category;
+  }
 }
