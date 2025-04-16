@@ -26,7 +26,7 @@ export class OrderService implements IOrderService {
       },
       select: {
         id: true,
-        createdDate: true,
+        orderDate: true,
         status: {
           description: true
         },
