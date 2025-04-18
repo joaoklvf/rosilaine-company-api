@@ -14,6 +14,12 @@ export class ProductEntity {
   @Column({ length: 10, unique: true, nullable: true })
   productCode?: string;
 
+  @Column({ type: 'decimal', precision: 10, scale: 2 })
+  productPrice: number;
+
+  @Column({ default: false })
+  isDeleted: boolean;
+
   @CreateDateColumn()
   createdDate: Date;
 

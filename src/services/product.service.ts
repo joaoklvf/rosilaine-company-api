@@ -21,6 +21,9 @@ export class ProductService implements IProductService {
     const products = await this.productRepository.find({
       relations: {
         category: true
+      },
+      where: {
+        isDeleted: false
       }
     });
 
