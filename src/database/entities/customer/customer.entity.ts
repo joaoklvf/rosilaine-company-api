@@ -25,10 +25,16 @@ export class CustomerEntity {
   neighborhood?: string;
 
   @Column({ length: 10, nullable: true })
-  streetNumber?: string;
+  houseNumber?: string;
 
   @Column({ length: 30, nullable: true })
   city?: string;
+
+  @Column({ length: 30, nullable: true })
+  complemento?: string;
+
+  @Column({ length: 30, nullable: true })
+  addressObservation?: string;
 
   @Column({ length: 2, nullable: true })
   state?: string;
