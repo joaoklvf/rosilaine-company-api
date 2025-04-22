@@ -18,12 +18,12 @@ export class CustomerService implements ICustomerService {
   }
 
   public create = async (customer: CustomerEntity) => {
-    const newCustomer = await this.customerRepository.save(customer);
+    const newCustomer = await this.customerRepository.save({ ...customer, state: customer.state?.toUpperCase() });
     return newCustomer;
   }
 
   public update = async (customer: CustomerEntity, id: number) => {
-    const updatedCustomer = await this.customerRepository.update(id, customer);
+    const updatedCustomer = await this.customerRepository.update(id, { ...customer, state: customer.state?.toUpperCase() });
     return updatedCustomer.affected ? customer : null;
   }
 
