@@ -1,7 +1,7 @@
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn, OneToMany, CreateDateColumn, UpdateDateColumn } from "typeorm";
 import { CustomerEntity } from "../customer/customer.entity";
 import { OrderInstallmentEntity } from "./order-installment.entity";
-import { OrderItemEntity } from "./order-item.entity";
+import { OrderItemEntity } from "./order-item/order-item.entity";
 import { OrderStatusEntity } from "./order-status.entity";
 
 @Entity('order')

@@ -1,6 +1,6 @@
 import { ProductStockEntity } from "./product-stock.entity";
 import { ProductCategoryEntity } from "./product-category.entity";
-import { OrderItemEntity } from "../order/order-item.entity";
+import { OrderItemEntity } from "../order/order-item/order-item.entity";
 import { Column, CreateDateColumn, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 
 @Entity('product')

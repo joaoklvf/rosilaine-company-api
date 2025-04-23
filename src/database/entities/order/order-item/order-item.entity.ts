@@ -1,6 +1,7 @@
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
-import { OrderEntity } from "./order.entity";
-import { ProductEntity } from "../product/product.entity";
+import { OrderEntity } from "../order.entity";
+import { ProductEntity } from "../../product/product.entity";
+import { OrderItemStatusEntity } from "./order-item-status.entity";
 
 @Entity('order_item')
 export class OrderItemEntity {
@@ -27,4 +28,7 @@ export class OrderItemEntity {
 
   @ManyToOne(() => OrderEntity, order => order.orderItems)
   order: OrderEntity;
+
+  @ManyToOne(() => OrderItemStatusEntity, status => status)
+  itemStatus: OrderItemStatusEntity;
 }

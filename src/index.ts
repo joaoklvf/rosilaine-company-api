@@ -13,6 +13,7 @@ import { OrderStatusController } from './controller/order-status.controller';
 import { ProductCategoryController } from './controller/product-category.controller';
 import { StockController } from './controller/stock.controller';
 import { CustomerTagController } from './controller/customer-tag.controller';
+import { OrderItemStatusController } from './controller/order-item-status.controller';
 
 dotenv.config();
 
@@ -41,6 +42,7 @@ const startApp = async () => {
   const productController = container.get(ProductController);
   const orderController = container.get(OrderController);
   const orderStatusController = container.get(OrderStatusController);
+  const orderItemStatusController = container.get(OrderItemStatusController);
   const productCategoryController = container.get(ProductCategoryController);
   const stockController = container.get(StockController);
 
@@ -49,6 +51,7 @@ const startApp = async () => {
   app.use('/api/products/', productController.router);
   app.use('/api/orders/', orderController.router);
   app.use(`/api/order-status/`, orderStatusController.router);
+  app.use(`/api/order-item-status/`, orderItemStatusController.router);
   app.use('/api/product-categories/', productCategoryController.router);
   app.use('/api/stocks/', stockController.router);
 

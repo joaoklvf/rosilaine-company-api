@@ -4,62 +4,37 @@ import { IOrderItemService } from '../interfaces/order-item-service';
 import { IProductService } from '../interfaces/product-service';
 import { INJECTABLE_TYPES } from '../types/inversify-types';
 import { OrderItemRepository } from '../repository/order-item.repository';
-import { OrderItemEntity } from '../database/entities/order/order-item.entity';
+import { OrderItemEntity } from '../database/entities/order/order-item/order-item.entity';
 import { AppDataSource } from '..';
+import { IOrderItemStatusService } from '../interfaces/order-item-status-service';
 
 @injectable()
 export class OrderItemService implements IOrderItemService {
   private orderItemRepository: OrderItemRepository;
 
   constructor(
-    @inject(INJECTABLE_TYPES.ProductService) private productService: IProductService
+    @inject(INJECTABLE_TYPES.OrderItemStatusService) private orderItemStatusService: IOrderItemStatusService
   ) {
     this.orderItemRepository = AppDataSource.getRepository(OrderItemEntity);
   }
 
-  public createProductsByOrder = async (order: OrderEntity) => {
-    const productsToCreate = order.orderItems
-      .filter(item => item.product.id === 0)
-      .map(item => item.product);
+  public createMany = async (orderItems: OrderItemEntity[]) => {
+    const items = [...orderItems];
 
-    if (productsToCreate.length === 0)
-      return order.orderItems;
+    const statusWithoutId = items.filter(x => !x.itemStatus.id)?.map(x => x.itemStatus);
+    if (statusWithoutId.length) {
+      const newStatus = await this.orderItemStatusService.createMany(statusWithoutId);
+      items.forEach(x => {
+        x.itemStatus = { ...newStatus.find(status => status.description === x.itemStatus.description)! };
+      });
+    }
 
-    const productsCreated = await this.productService.createMany(productsToCreate);
-    if (productsCreated.length !== productsToCreate.length)
-      throw new Error('Error creating products');
-
-    const productMap = new Map(
-      productsToCreate.map((originalProduct, index) => [
-        originalProduct,
-        productsCreated[index]
-      ])
-    );
-
-    const finalOrderItems = order.orderItems.map(item => {
-      if (item.product.id === 0) {
-        const createdProduct = productMap.get(item.product);
-
-        if (!createdProduct)
-          throw new Error(`Product not found after creation: ${item.product.description}`);
-
-        return {
-          ...item,
-          product: {
-            ...item.product,
-            id: createdProduct.id,
-          },
-        };
-      }
-      return item;
+    await this.orderItemRepository.manager.transaction(async (transactionalEntityManager) => {
+      const promises = items.map(x => transactionalEntityManager.save(OrderItemEntity, x));
+      Promise.all(promises);
     });
 
-    return finalOrderItems;
-  };
-
-  public createMany = async (items: OrderItemEntity[]) => {
-    const newOrder = await this.orderItemRepository.save(items);
-    return newOrder;
+    return items;
   }
 
   public deleteFromOrderId = async (orderId: number) => {
