@@ -2,13 +2,15 @@ import { CustomerEntity } from '../database/entities/customer/customer.entity';
 import { CustomerRepository } from '../repository/customer.repository';
 import { AppDataSource } from '..';
 import { ICustomerService } from '../interfaces/customer-service';
-import { injectable } from 'inversify';
+import { inject, injectable } from 'inversify';
+import { INJECTABLE_TYPES } from '../types/inversify-types';
+import { ICustomerTagService } from '../interfaces/customer-tag-service';
 
 @injectable()
 export class CustomerService implements ICustomerService {
   private customerRepository: CustomerRepository;
 
-  constructor() {
+  constructor(@inject(INJECTABLE_TYPES.CustomerTagService) private customerTagService: ICustomerTagService) {
     this.customerRepository = AppDataSource.getRepository(CustomerEntity);
   }
 
@@ -18,13 +20,23 @@ export class CustomerService implements ICustomerService {
   }
 
   public create = async (customer: CustomerEntity) => {
+    if (customer.tags.some(x => !x.id)) {
+      const newTags = await this.customerTagService.createMany(customer.tags);
+      customer.tags = [...newTags];
+    }
+
     const newCustomer = await this.customerRepository.save({ ...customer, state: customer.state?.toUpperCase() });
     return newCustomer;
   }
 
   public update = async (customer: CustomerEntity, id: number) => {
-    const updatedCustomer = await this.customerRepository.update(id, { ...customer, state: customer.state?.toUpperCase() });
-    return updatedCustomer.affected ? customer : null;
+    if (customer.tags.some(x => !x.id)) {
+      const newTags = await this.customerTagService.createMany(customer.tags);
+      customer.tags = [...newTags];
+    }
+
+    const updatedCustomer = await this.customerRepository.save({ ...customer, state: customer.state?.toUpperCase() });
+    return updatedCustomer ?? null;
   }
 
   public delete = async (id: number) => {
@@ -34,6 +46,9 @@ export class CustomerService implements ICustomerService {
 
   public get = async (id: number) => {
     const customer = await this.customerRepository.findOne({
+      relations: {
+        tags: true
+      },
       where: {
         id
       }

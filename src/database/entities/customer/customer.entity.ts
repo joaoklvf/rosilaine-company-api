@@ -1,5 +1,6 @@
-import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 import { OrderEntity } from "../order/order.entity";
+import { CustomerTagEntity } from "./customer-tag.entity";
 
 @Entity('customer')
 export class CustomerEntity {
@@ -47,4 +48,8 @@ export class CustomerEntity {
 
   @OneToMany(() => OrderEntity, (order) => order.customer)
   orders: OrderEntity[];
+
+  @ManyToMany(() => CustomerTagEntity, (tags) => tags)
+  @JoinTable()
+  tags: CustomerTagEntity[];
 }

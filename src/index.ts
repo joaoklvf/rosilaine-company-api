@@ -12,6 +12,7 @@ import { OrderController } from './controller/order.controller';
 import { OrderStatusController } from './controller/order-status.controller';
 import { ProductCategoryController } from './controller/product-category.controller';
 import { StockController } from './controller/stock.controller';
+import { CustomerTagController } from './controller/customer-tag.controller';
 
 dotenv.config();
 
@@ -36,6 +37,7 @@ const startApp = async () => {
 
   // Obtendo controllers do container com dependências injetadas
   const customerController = container.get(CustomerController);
+  const customerTagController = container.get(CustomerTagController);
   const productController = container.get(ProductController);
   const orderController = container.get(OrderController);
   const orderStatusController = container.get(OrderStatusController);
@@ -43,6 +45,7 @@ const startApp = async () => {
   const stockController = container.get(StockController);
 
   app.use(`/api/customers/`, customerController.router);
+  app.use(`/api/customer-tags/`, customerTagController.router);
   app.use('/api/products/', productController.router);
   app.use('/api/orders/', orderController.router);
   app.use(`/api/order-status/`, orderStatusController.router);
