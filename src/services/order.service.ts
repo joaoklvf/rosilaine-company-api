@@ -41,18 +41,24 @@ export class OrderService implements IOrderService {
 
   public create = async (order: OrderEntity) => {
     const finalOrder = await this.handleEntity(order);
+    if (!finalOrder)
+      return null;
+
     const newOrder = await this.orderRepository.save(finalOrder);
+    if (!newOrder.id)
+      return null;
 
-    if (newOrder.id) {
-      const itemsWithOrderId = order.orderItems.map(x => ({ ...x, order: newOrder }));
-      await this.orderItemService.createMany(itemsWithOrderId);
-    }
+    const itemsWithOrderId = order.orderItems.map(x => ({ ...x, order: newOrder }));
+    await this.orderItemService.createMany(itemsWithOrderId);
 
-    return newOrder;
+    return { ...newOrder, orderItems: itemsWithOrderId.map(x => ({ ...x, order: {} as OrderEntity })) };
   }
 
   public update = async (order: OrderEntity, id: string) => {
     const finalOrder = await this.handleEntity(order);
+    if (!finalOrder)
+      return null;
+    
     const orderItems = await this.orderItemService.createMany(finalOrder.orderItems);
     const updatedOrder = await this.orderRepository.update(id, { updatedDate: new Date(), total: finalOrder.total });
     if (!updatedOrder.affected)
@@ -87,6 +93,9 @@ export class OrderService implements IOrderService {
   private handleEntity = async (order: OrderEntity) => {
     if (!order.status.id) {
       const newStatus = await this.orderStatusService.create(order.status);
+      if (!newStatus)
+        return null;
+
       order.status = { ...newStatus };
     }
 
