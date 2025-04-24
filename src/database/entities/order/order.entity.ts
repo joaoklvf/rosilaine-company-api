@@ -9,7 +9,7 @@ export class OrderEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @Column({ nullable: true })
   deliveryDate: Date;
 
   @Column()

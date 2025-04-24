@@ -20,6 +20,9 @@ export class OrderItemEntity {
   @Column({ type: 'decimal', precision: 10, scale: 2 })
   itemOriginalPrice: number;
 
+  @Column({ nullable: true })
+  deliveryDate: Date;
+
   @ManyToOne(() => ProductEntity, product => product.orderItems)
   product: ProductEntity;
 

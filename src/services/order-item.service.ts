@@ -1,7 +1,5 @@
 import { inject, injectable } from 'inversify';
-import { OrderEntity } from '../database/entities/order/order.entity';
 import { IOrderItemService } from '../interfaces/order-item-service';
-import { IProductService } from '../interfaces/product-service';
 import { INJECTABLE_TYPES } from '../types/inversify-types';
 import { OrderItemRepository } from '../repository/order-item.repository';
 import { OrderItemEntity } from '../database/entities/order/order-item/order-item.entity';
@@ -44,4 +42,34 @@ export class OrderItemService implements IOrderItemService {
       .where("orderId = :orderId", { orderId })
       .execute()
   }
+
+    public index = async () => {
+      const productCategories = await this.orderItemRepository.find()
+      return productCategories;
+    }
+  
+    public create = async (orderItem: OrderItemEntity) => {
+      const newOrderItem = await this.orderItemRepository.save(orderItem);
+      return newOrderItem;
+    }
+  
+    public update = async (orderItem: OrderItemEntity, id: number) => {
+      const updatedOrderItem = await this.orderItemRepository.update(id, orderItem);
+      return updatedOrderItem.affected ? orderItem : null;
+    }
+  
+    public delete = async (id: number) => {
+      const deletedOrderItem = await this.orderItemRepository.delete(id);
+      return deletedOrderItem;
+    }
+  
+    public get = async (id: number) => {
+      const category = await this.orderItemRepository.findOne({
+        where: {
+          id
+        }
+      });
+  
+      return category;
+    }
 }

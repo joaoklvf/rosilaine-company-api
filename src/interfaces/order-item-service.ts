@@ -1,6 +1,7 @@
 import { OrderItemEntity } from "../database/entities/order/order-item/order-item.entity";
+import { IRepoService } from "./repo-service";
 
-export interface IOrderItemService {
+export interface IOrderItemService extends IRepoService<OrderItemEntity> {
   createMany(items: OrderItemEntity[]): Promise<OrderItemEntity[]>;
   deleteFromOrderId(orderId: number): Promise<void>;
 }

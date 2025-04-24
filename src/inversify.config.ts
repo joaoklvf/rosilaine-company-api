@@ -20,6 +20,7 @@ import { CustomerTagService } from './services/customer-tag.service';
 import { CustomerTagController } from './controller/customer-tag.controller';
 import { OrderItemStatusService } from './services/order-item-status.service';
 import { OrderItemStatusController } from './controller/order-item-status.controller';
+import { OrderItemController } from './controller/order-item.controller';
 
 export const container = new Container();
 
@@ -31,6 +32,7 @@ container.bind(OrderItemStatusController).toSelf();
 container.bind(ProductCategoryController).toSelf();
 container.bind(StockController).toSelf();
 container.bind(CustomerTagController).toSelf();
+container.bind(OrderItemController).toSelf();
 
 container.bind(INJECTABLE_TYPES.CustomerService).to(CustomerService);
 container.bind(INJECTABLE_TYPES.CustomerTagService).to(CustomerTagService);
