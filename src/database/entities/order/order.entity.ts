@@ -1,14 +1,12 @@
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn, OneToMany, CreateDateColumn, UpdateDateColumn } from "typeorm";
+import { Column, Entity, ManyToOne, OneToMany } from "typeorm";
 import { CustomerEntity } from "../customer/customer.entity";
 import { OrderInstallmentEntity } from "./order-installment.entity";
 import { OrderItemEntity } from "./order-item/order-item.entity";
 import { OrderStatusEntity } from "./order-status.entity";
+import { BaseProjectEntity } from "../base-entity";
 
 @Entity('order')
-export class OrderEntity {
-  @PrimaryGeneratedColumn()
-  id: number;
-
+export class OrderEntity extends BaseProjectEntity {
   @Column({ nullable: true })
   deliveryDate: Date;
 
@@ -17,12 +15,6 @@ export class OrderEntity {
 
   @Column({ type: 'decimal', precision: 10, scale: 2 })
   total: number;
-
-  @CreateDateColumn()
-  createdDate: Date;
-
-  @UpdateDateColumn()
-  updatedDate: Date;
 
   @ManyToOne(() => CustomerEntity, customer => customer.orders)
   customer: CustomerEntity;

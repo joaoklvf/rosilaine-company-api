@@ -1,10 +1,10 @@
 import { inject, injectable } from 'inversify';
 import { IOrderItemService } from '../interfaces/order-item-service';
 import { INJECTABLE_TYPES } from '../types/inversify-types';
-import { OrderItemRepository } from '../repository/order-item.repository';
-import { OrderItemEntity } from '../database/entities/order/order-item/order-item.entity';
+import { OrderItemRepository } from '../database/repository/order-item.repository';
 import { AppDataSource } from '..';
 import { IOrderItemStatusService } from '../interfaces/order-item-status-service';
+import { OrderItemEntity } from '../database/entities/order/order-item/order-item.entity';
 
 @injectable()
 export class OrderItemService implements IOrderItemService {
@@ -53,17 +53,17 @@ export class OrderItemService implements IOrderItemService {
       return newOrderItem;
     }
   
-    public update = async (orderItem: OrderItemEntity, id: number) => {
+    public update = async (orderItem: OrderItemEntity, id: string) => {
       const updatedOrderItem = await this.orderItemRepository.update(id, orderItem);
       return updatedOrderItem.affected ? orderItem : null;
     }
   
-    public delete = async (id: number) => {
+    public delete = async (id: string) => {
       const deletedOrderItem = await this.orderItemRepository.delete(id);
       return deletedOrderItem;
     }
   
-    public get = async (id: number) => {
+    public get = async (id: string) => {
       const category = await this.orderItemRepository.findOne({
         where: {
           id

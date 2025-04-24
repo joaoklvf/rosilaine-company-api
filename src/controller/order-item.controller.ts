@@ -33,7 +33,7 @@ export class OrderItemController {
     const orderItemItem = req['body'] as OrderItemEntity;
     const id = req['params']['id'];
 
-    this.orderItemService.update(orderItemItem, Number(id)).then(orderItemItem => {
+    this.orderItemService.update(orderItemItem, id).then(orderItemItem => {
       return res.send(orderItemItem);
     }).catch(error => {
       return res.send(error);
@@ -42,12 +42,12 @@ export class OrderItemController {
 
   public delete = async (req: Request, res: Response) => {
     const id = req['params']['id'];
-    res.send(this.orderItemService.delete(Number(id)));
+    res.send(this.orderItemService.delete(id));
   }
 
   public get = async (req: Request, res: Response) => {
     const id = req['params']['id'];
-    await this.orderItemService.get(Number(id)).then((data) => {
+    await this.orderItemService.get(id).then((data) => {
       return res.status(200).json(data);
     }).catch((error) => {
       return res.status(500).json({ msg: error });

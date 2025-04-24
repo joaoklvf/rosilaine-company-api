@@ -1,19 +1,11 @@
-import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { Column, Entity, OneToMany } from "typeorm";
 import { OrderEntity } from "../order/order.entity";
+import { BaseProjectEntity } from "../base-entity";
 
 @Entity('order_status')
-export class OrderStatusEntity {
-  @PrimaryGeneratedColumn()
-  id: number;
-
+export class OrderStatusEntity extends BaseProjectEntity {
   @Column({ length: 30 })
   description: string;
-
-  @CreateDateColumn()
-  createdDate: Date;
-
-  @UpdateDateColumn()
-  updatedDate: Date;
 
   @OneToMany(() => OrderEntity, (order) => order.status)
   orders: OrderEntity[];

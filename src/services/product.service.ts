@@ -1,5 +1,5 @@
 import { ProductEntity } from '../database/entities/product/product.entity';
-import { ProductRepository } from '../repository/product.repository';
+import { ProductRepository } from '../database/repository/product.repository';
 import { AppDataSource } from '..';
 import { In } from 'typeorm';
 import { IProductService } from '../interfaces/product-service';
@@ -38,7 +38,7 @@ export class ProductService implements IProductService {
     return newOrder;
   }
 
-  public update = async (product: ProductEntity, id: number) => {
+  public update = async (product: ProductEntity, id: string) => {
     const category = await this.createCategoryByProduct(product);
     const finalProduct = { ...product, category };
 
@@ -46,7 +46,7 @@ export class ProductService implements IProductService {
     return updatedOrder.affected ? product : null;
   }
 
-  public delete = async (id: number) => {
+  public delete = async (id: string) => {
     const deletedOrder = await this.productRepository.delete(id);
     return deletedOrder;
   }
@@ -63,8 +63,7 @@ export class ProductService implements IProductService {
 
   private createCategoryByProduct = async (product: ProductEntity) => {
     const { category } = product;
-
-    if (category.id > 0)
+    if (category.id && category.id.length > 0)
       return category;
 
     const created = await this.productCategoryService.create(category);
@@ -75,7 +74,7 @@ export class ProductService implements IProductService {
     return created;
   };
 
-  public get = async (id: number) => {
+  public get = async (id: string) => {
     const product = await this.productRepository.findOne({
       relations: {
         category: true

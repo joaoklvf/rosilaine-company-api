@@ -1,13 +1,11 @@
 import { ProductStockEntity } from "./product-stock.entity";
 import { ProductCategoryEntity } from "./product-category.entity";
 import { OrderItemEntity } from "../order/order-item/order-item.entity";
-import { Column, CreateDateColumn, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { Column, Entity, ManyToOne, OneToMany } from "typeorm";
+import { BaseProjectEntity } from "../base-entity";
 
 @Entity('product')
-export class ProductEntity {
-  @PrimaryGeneratedColumn()
-  id: number;
-
+export class ProductEntity extends BaseProjectEntity {
   @Column({ length: 50 })
   description: string;
 
@@ -19,12 +17,6 @@ export class ProductEntity {
 
   @Column({ default: false })
   isDeleted: boolean;
-
-  @CreateDateColumn()
-  createdDate: Date;
-
-  @UpdateDateColumn()
-  updatedDate: Date;
 
   @OneToMany(() => OrderItemEntity, orderProduct => orderProduct.product)
   orderItems: OrderItemEntity[];

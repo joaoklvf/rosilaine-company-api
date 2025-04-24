@@ -1,4 +1,4 @@
-import { ProductCategoryRepository } from '../repository/product-category.repository';
+import { ProductCategoryRepository } from '../database/repository/product-category.repository';
 import { AppDataSource } from '..';
 import { ProductCategoryEntity } from '../database/entities/product/product-category.entity';
 import { IProductCategoryService } from '../interfaces/product-category-service';
@@ -22,17 +22,17 @@ export class ProductCategoryService implements IProductCategoryService {
     return newProductCategory;
   }
 
-  public update = async (productCategory: ProductCategoryEntity, id: number) => {
+  public update = async (productCategory: ProductCategoryEntity, id: string) => {
     const updatedProductCategory = await this.productCategoryRepository.update(id, productCategory);
     return updatedProductCategory.affected ? productCategory : null;
   }
 
-  public delete = async (id: number) => {
+  public delete = async (id: string) => {
     const deletedProductCategory = await this.productCategoryRepository.delete(id);
     return deletedProductCategory;
   }
 
-  public get = async (id: number) => {
+  public get = async (id: string) => {
     const category = await this.productCategoryRepository.findOne({
       where: {
         id

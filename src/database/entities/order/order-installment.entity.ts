@@ -1,11 +1,9 @@
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, ManyToOne } from "typeorm";
 import { OrderEntity } from "./order.entity";
+import { BaseProjectEntity } from "../base-entity";
 
 @Entity('order_installment')
-export class OrderInstallmentEntity {
-  @PrimaryGeneratedColumn()
-  id: number;
-
+export class OrderInstallmentEntity extends BaseProjectEntity {
   @Column()
   amount: number;
 

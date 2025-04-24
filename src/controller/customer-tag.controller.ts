@@ -33,12 +33,12 @@ export class CustomerTagController {
     const customerTag = req['body'] as CustomerTagEntity;
     const id = req['params']['id'];
 
-    res.send(this.customerTagService.update(customerTag, Number(id)));
+    res.send(this.customerTagService.update(customerTag, id));
   }
 
   public delete = async (req: Request, res: Response) => {
     const id = req['params']['id'];
-    res.send(this.customerTagService.delete(Number(id)));
+    res.send(this.customerTagService.delete(id));
   }
 
   /**

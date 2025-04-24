@@ -1,7 +1,7 @@
 import { AppDataSource } from '..';
 import { CustomerTagEntity } from '../database/entities/customer/customer-tag.entity';
 import { injectable } from 'inversify';
-import { CustomerTagRepository } from '../repository/customer-tag.repository';
+import { CustomerTagRepository } from '../database/repository/customer-tag.repository';
 import { ICustomerTagService } from '../interfaces/customer-tag-service';
 
 @injectable()
@@ -27,17 +27,17 @@ export class CustomerTagService implements ICustomerTagService {
     return newOrder;
   }
 
-  public update = async (customerTag: CustomerTagEntity, id: number) => {
+  public update = async (customerTag: CustomerTagEntity, id: string) => {
     const updatedCustomerTag = await this.customerTagRepository.update(id, customerTag);
     return updatedCustomerTag.affected ? customerTag : null;
   }
 
-  public delete = async (id: number) => {
+  public delete = async (id: string) => {
     const deletedCustomerTag = await this.customerTagRepository.delete(id);
     return deletedCustomerTag;
   }
 
-  public get = async (id: number) => {
+  public get = async (id: string) => {
     const product = await this.customerTagRepository.findOne({
       where: {
         id

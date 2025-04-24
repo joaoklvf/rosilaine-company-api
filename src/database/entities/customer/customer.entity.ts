@@ -1,12 +1,10 @@
-import { Column, CreateDateColumn, Entity, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { Column, Entity, JoinTable, ManyToMany, OneToMany } from "typeorm";
 import { OrderEntity } from "../order/order.entity";
 import { CustomerTagEntity } from "./customer-tag.entity";
+import { BaseProjectEntity } from "../base-entity";
 
 @Entity('customer')
-export class CustomerEntity {
-  @PrimaryGeneratedColumn()
-  id: number;
-
+export class CustomerEntity extends BaseProjectEntity {
   @Column()
   name: string;
 
@@ -39,12 +37,6 @@ export class CustomerEntity {
 
   @Column({ length: 2, nullable: true })
   state?: string;
-
-  @CreateDateColumn()
-  createdDate: Date;
-
-  @UpdateDateColumn()
-  updatedDate: Date;
 
   @OneToMany(() => OrderEntity, (order) => order.customer)
   orders: OrderEntity[];

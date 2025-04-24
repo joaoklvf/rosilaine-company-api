@@ -1,5 +1,5 @@
 import { StockEntity } from '../database/entities/stock/stock.entity';
-import { StockRepository } from '../repository/stock.repository';
+import { StockRepository } from '../database/repository/stock.repository';
 import { AppDataSource } from '..';
 import { IStockService } from '../interfaces/stock-service';
 import { injectable } from 'inversify';
@@ -22,17 +22,17 @@ export class StockService implements IStockService {
     return newStock;
   }
 
-  public update = async (stock: StockEntity, id: number) => {
+  public update = async (stock: StockEntity, id: string) => {
     const updatedStock = await this.stockRepository.update(id, stock);
     return updatedStock.affected ? stock : null;
   }
 
-  public delete = async (id: number) => {
+  public delete = async (id: string) => {
     const deletedStock = await this.stockRepository.delete(id);
     return deletedStock;
   }
 
-  public get = async (id: number) => {
+  public get = async (id: string) => {
     const stock = await this.stockRepository.findOne({
       where: {
         id

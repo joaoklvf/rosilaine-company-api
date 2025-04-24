@@ -33,7 +33,7 @@ export class OrderController {
     const order = req['body'] as OrderEntity;
     const id = req['params']['id'];
 
-    this.orderService.update(order, Number(id)).then(order => {
+    this.orderService.update(order, id).then(order => {
       return res.send(order);
     }).catch(error => {
       return res.send(error);
@@ -42,12 +42,12 @@ export class OrderController {
 
   public delete = async (req: Request, res: Response) => {
     const id = req['params']['id'];
-    res.send(this.orderService.delete(Number(id)));
+    res.send(this.orderService.delete(id));
   }
 
   public get = async (req: Request, res: Response) => {
     const id = req['params']['id'];
-    await this.orderService.get(Number(id)).then((data) => {
+    await this.orderService.get(id).then((data) => {
       return res.status(200).json(data);
     }).catch((error) => {
       return res.status(500).json({ msg: error });

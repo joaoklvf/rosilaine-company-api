@@ -33,12 +33,12 @@ export class ProductCategoryController {
     const productCategory = req['body'] as ProductCategoryEntity;
     const id = req['params']['id'];
 
-    res.send(this.productCategoryService.update(productCategory, Number(id)));
+    res.send(this.productCategoryService.update(productCategory, id));
   }
 
   public delete = async (req: Request, res: Response) => {
     const id = req['params']['id'];
-    res.send(this.productCategoryService.delete(Number(id)));
+    res.send(this.productCategoryService.delete(id));
   }
 
   /**

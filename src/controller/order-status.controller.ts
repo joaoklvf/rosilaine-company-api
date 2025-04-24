@@ -33,12 +33,12 @@ export class OrderStatusController {
     const orderStatus = req['body'] as OrderStatusEntity;
     const id = req['params']['id'];
 
-    res.send(this.orderStatusService.update(orderStatus, Number(id)));
+    res.send(this.orderStatusService.update(orderStatus, id));
   }
 
   public delete = async (req: Request, res: Response) => {
     const id = req['params']['id'];
-    res.send(this.orderStatusService.delete(Number(id)));
+    res.send(this.orderStatusService.delete(id));
   }
 
   /**

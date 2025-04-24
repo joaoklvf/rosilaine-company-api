@@ -2,12 +2,10 @@ import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 import { OrderEntity } from "../order.entity";
 import { ProductEntity } from "../../product/product.entity";
 import { OrderItemStatusEntity } from "./order-item-status.entity";
+import { BaseProjectEntity } from "../../base-entity";
 
 @Entity('order_item')
-export class OrderItemEntity {
-  @PrimaryGeneratedColumn()
-  id: number;
-
+export class OrderItemEntity extends BaseProjectEntity {
   @Column()
   itemAmount: number;
 

@@ -33,17 +33,17 @@ export class CustomerController {
     const customer = req['body'] as CustomerEntity;
     const id = req['params']['id'];
 
-    res.send(this.customerService.update(customer, Number(id)));
+    res.send(this.customerService.update(customer, id));
   }
 
   public delete = async (req: Request, res: Response) => {
     const id = req['params']['id'];
-    res.send(this.customerService.delete(Number(id)));
+    res.send(this.customerService.delete(id));
   }
 
   public get = async (req: Request, res: Response) => {
     const id = req['params']['id'];
-    await this.customerService.get(Number(id)).then((data) => {
+    await this.customerService.get(id).then((data) => {
       return res.status(200).json(data);
     }).catch((error) => {
       return res.status(500).json({ msg: error });

@@ -1,5 +1,5 @@
 
-import { OrderStatusRepository } from '../repository/order-status.repository';
+import { OrderStatusRepository } from '../database/repository/order-status.repository';
 import { AppDataSource } from '..';
 import { OrderStatusEntity } from '../database/entities/order/order-status.entity';
 import { IOrderStatusService } from '../interfaces/order-status-service';
@@ -23,17 +23,17 @@ export class OrderStatusService implements IOrderStatusService {
     return newOrderStatus;
   }
 
-  public update = async (orderStatus: OrderStatusEntity, id: number) => {
+  public update = async (orderStatus: OrderStatusEntity, id: string) => {
     const updatedOrderStatus = await this.orderStatusRepository.update(id, orderStatus);
     return updatedOrderStatus.affected ? orderStatus : null;
   }
 
-  public delete = async (id: number) => {
+  public delete = async (id: string) => {
     const deletedOrderStatus = await this.orderStatusRepository.delete(id);
     return deletedOrderStatus;
   }
 
-  public get = async (id: number) => {
+  public get = async (id: string) => {
     const product = await this.orderStatusRepository.findOne({
       where: {
         id

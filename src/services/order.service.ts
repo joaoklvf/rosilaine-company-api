@@ -3,7 +3,7 @@ import { AppDataSource } from '..';
 import { OrderEntity } from '../database/entities/order/order.entity';
 import { IOrderItemService } from '../interfaces/order-item-service';
 import { IOrderService } from '../interfaces/order-service';
-import { OrderRepository } from '../repository/order.repository';
+import { OrderRepository } from '../database/repository/order.repository';
 import { INJECTABLE_TYPES } from '../types/inversify-types';
 import { IOrderStatusService } from '../interfaces/order-status-service';
 
@@ -51,7 +51,7 @@ export class OrderService implements IOrderService {
     return newOrder;
   }
 
-  public update = async (order: OrderEntity, id: number) => {
+  public update = async (order: OrderEntity, id: string) => {
     const finalOrder = await this.handleEntity(order);
     const orderItems = await this.orderItemService.createMany(finalOrder.orderItems);
     const updatedOrder = await this.orderRepository.update(id, { updatedDate: new Date(), total: finalOrder.total });
@@ -61,12 +61,12 @@ export class OrderService implements IOrderService {
     return { ...finalOrder, orderItems: orderItems.map(x => ({ ...x, order: {} as OrderEntity })) };
   }
 
-  public delete = async (id: number) => {
+  public delete = async (id: string) => {
     const deletedOrder = await this.orderRepository.delete(id);
     return deletedOrder;
   }
 
-  public get = async (id: number) => {
+  public get = async (id: string) => {
     const order = await this.orderRepository.findOne({
       relations: {
         customer: true,

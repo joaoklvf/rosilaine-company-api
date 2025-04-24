@@ -1,5 +1,5 @@
 import { Repository } from "typeorm";
-import { StockEntity } from "../database/entities/stock/stock.entity";
+import { StockEntity } from "../entities/stock/stock.entity";
 
 export class StockRepository extends Repository<StockEntity> {
 

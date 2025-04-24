@@ -1,5 +1,5 @@
 import { CustomerEntity } from '../database/entities/customer/customer.entity';
-import { CustomerRepository } from '../repository/customer.repository';
+import { CustomerRepository } from '../database/repository/customer.repository';
 import { AppDataSource } from '..';
 import { ICustomerService } from '../interfaces/customer-service';
 import { inject, injectable } from 'inversify';
@@ -29,7 +29,7 @@ export class CustomerService implements ICustomerService {
     return newCustomer;
   }
 
-  public update = async (customer: CustomerEntity, id: number) => {
+  public update = async (customer: CustomerEntity, id: string) => {
     if (customer.tags.some(x => !x.id)) {
       const newTags = await this.customerTagService.createMany(customer.tags);
       customer.tags = [...newTags];
@@ -39,12 +39,12 @@ export class CustomerService implements ICustomerService {
     return updatedCustomer ?? null;
   }
 
-  public delete = async (id: number) => {
+  public delete = async (id: string) => {
     const deletedCustomer = await this.customerRepository.delete(id);
     return deletedCustomer;
   }
 
-  public get = async (id: number) => {
+  public get = async (id: string) => {
     const customer = await this.customerRepository.findOne({
       relations: {
         tags: true

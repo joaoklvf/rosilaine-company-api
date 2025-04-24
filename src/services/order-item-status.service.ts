@@ -2,7 +2,7 @@ import { AppDataSource } from '..';
 import { injectable } from 'inversify';
 import { IOrderItemStatusService } from '../interfaces/order-item-status-service';
 import { OrderItemStatusEntity } from '../database/entities/order/order-item/order-item-status.entity';
-import { OrderItemStatusRepository } from '../repository/order-item-status.repository';
+import { OrderItemStatusRepository } from '../database/repository/order-item-status.repository';
 
 @injectable()
 export class OrderItemStatusService implements IOrderItemStatusService {
@@ -22,17 +22,17 @@ export class OrderItemStatusService implements IOrderItemStatusService {
     return newOrderItemStatus;
   }
 
-  public update = async (orderItemStatus: OrderItemStatusEntity, id: number) => {
+  public update = async (orderItemStatus: OrderItemStatusEntity, id: string) => {
     const updatedOrderItemStatus = await this.orderItemStatusRepository.update(id, orderItemStatus);
     return updatedOrderItemStatus.affected ? orderItemStatus : null;
   }
 
-  public delete = async (id: number) => {
+  public delete = async (id: string) => {
     const deletedOrderItemStatus = await this.orderItemStatusRepository.delete(id);
     return deletedOrderItemStatus;
   }
 
-  public get = async (id: number) => {
+  public get = async (id: string) => {
     const product = await this.orderItemStatusRepository.findOne({
       where: {
         id

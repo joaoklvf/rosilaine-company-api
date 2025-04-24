@@ -1,12 +1,10 @@
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, ManyToOne } from "typeorm";
 import { ProductEntity } from "./product.entity";
 import { StockEntity } from "../stock/stock.entity";
+import { BaseProjectEntity } from "../base-entity";
 
 @Entity('product_stock')
-export class ProductStockEntity {
-  @PrimaryGeneratedColumn()
-  id: number;
-
+export class ProductStockEntity extends BaseProjectEntity {
   @Column()
   quantity: number;
 
