@@ -2,7 +2,7 @@ import { PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn } from "type
 
 export class BaseProjectEntity {
   @PrimaryGeneratedColumn("uuid")
-  id: string;
+  id?: string;
 
   @CreateDateColumn()
   createdDate: Date;
