@@ -25,15 +25,19 @@ export class OrderController {
 
   public create = async (req: Request, res: Response) => {
     const order = req['body'] as OrderEntity;
-    const newCustomer = await this.orderService.create(order);
-    res.send(newCustomer);
+    const newOrder = await this.orderService.create(order);
+    res.send(newOrder);
   }
 
   public update = async (req: Request, res: Response) => {
     const order = req['body'] as OrderEntity;
     const id = req['params']['id'];
 
-    res.send(this.orderService.update(order, Number(id)));
+    this.orderService.update(order, Number(id)).then(order => {
+      return res.send(order);
+    }).catch(error => {
+      return res.send(error);
+    })
   }
 
   public delete = async (req: Request, res: Response) => {

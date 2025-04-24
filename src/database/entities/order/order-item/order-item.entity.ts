@@ -12,16 +12,13 @@ export class OrderItemEntity {
   itemAmount: number;
 
   @Column({ type: 'decimal', precision: 10, scale: 2 })
-  itemPrice: number;
-
-  @Column({ type: 'decimal', precision: 10, scale: 2 })
-  itemTotal: number;
-
-  @Column({ nullable: true, type: 'decimal', precision: 10, scale: 2 })
-  itemDiscount?: number;
-
-  @Column({ type: 'decimal', precision: 10, scale: 2 })
   itemSellingPrice: number;
+
+  @Column({ type: 'decimal', precision: 10, scale: 2 })
+  itemSellingTotal: number;
+
+  @Column({ type: 'decimal', precision: 10, scale: 2 })
+  itemOriginalPrice: number;
 
   @ManyToOne(() => ProductEntity, product => product.orderItems)
   product: ProductEntity;

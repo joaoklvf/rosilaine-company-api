@@ -40,13 +40,7 @@ export class OrderService implements IOrderService {
   }
 
   public create = async (order: OrderEntity) => {
-    if (!order.status.id) {
-      const newStatus = await this.orderStatusService.create(order.status);
-      order.status = { ...newStatus };
-    }
-
-    const total = order.orderItems.reduce((prev, acc) => prev + Number(acc.itemTotal), 0);
-    const finalOrder: OrderEntity = { ...order, total };
+    const finalOrder = await this.handleEntity(order);
     const newOrder = await this.orderRepository.save(finalOrder);
 
     if (newOrder.id) {
@@ -58,20 +52,13 @@ export class OrderService implements IOrderService {
   }
 
   public update = async (order: OrderEntity, id: number) => {
-    if (!order.status.id) {
-      const newStatus = await this.orderStatusService.create(order.status);
-      order.status = { ...newStatus };
-    }
-
-    const orderItems = await this.orderItemService.createMany(order.orderItems);
-    const total = orderItems.reduce((prev, acc) => prev + Number(acc.itemTotal), 0);
-
-    const updatedOrder = await this.orderRepository.update(id, { updatedDate: new Date(), total });
+    const finalOrder = await this.handleEntity(order);
+    const orderItems = await this.orderItemService.createMany(finalOrder.orderItems);
+    const updatedOrder = await this.orderRepository.update(id, { updatedDate: new Date(), total: finalOrder.total });
     if (!updatedOrder.affected)
       return null;
 
-    const finalOrder = { ...order, total, orderItems };
-    return order;
+    return { ...finalOrder, orderItems: orderItems.map(x => ({ ...x, order: {} as OrderEntity })) };
   }
 
   public delete = async (id: number) => {
@@ -94,6 +81,22 @@ export class OrderService implements IOrderService {
       }
     });
 
+    return order;
+  }
+
+  private handleEntity = async (order: OrderEntity) => {
+    if (!order.status.id) {
+      const newStatus = await this.orderStatusService.create(order.status);
+      order.status = { ...newStatus };
+    }
+
+    order.orderItems.forEach(x => {
+      x.itemSellingTotal = Number(x.itemAmount) * Number(x.itemSellingPrice);
+      x.itemOriginalPrice = Number(x.product.productPrice),
+        x.order = order;
+    });
+
+    order.total = order.orderItems.reduce((prev, acc) => prev + Number(acc.itemSellingTotal), 0);
     return order;
   }
 }
