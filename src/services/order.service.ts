@@ -6,6 +6,9 @@ import { IOrderService } from '../interfaces/order-service';
 import { OrderRepository } from '../database/repository/order.repository';
 import { INJECTABLE_TYPES } from '../types/inversify-types';
 import { IOrderStatusService } from '../interfaces/order-status-service';
+import { DeleteResult } from 'typeorm';
+import { OrderItemEntity } from '../database/entities/order/order-item/order-item.entity';
+import { OrderInstallmentEntity } from '../database/entities/order/order-installment.entity';
 
 @injectable()
 export class OrderService implements IOrderService {
@@ -58,7 +61,7 @@ export class OrderService implements IOrderService {
     const finalOrder = await this.handleEntity(order);
     if (!finalOrder)
       return null;
-    
+
     const orderItems = await this.orderItemService.createMany(finalOrder.orderItems);
     const updatedOrder = await this.orderRepository.update(id, { updatedDate: new Date(), total: finalOrder.total });
     if (!updatedOrder.affected)
@@ -68,8 +71,14 @@ export class OrderService implements IOrderService {
   }
 
   public delete = async (id: string) => {
-    const deletedOrder = await this.orderRepository.delete(id);
-    return deletedOrder;
+    let deleteResult = new DeleteResult();
+    await this.orderRepository.manager.transaction(async (transactionalEntityManager) => {
+      await transactionalEntityManager.delete(OrderItemEntity, { order: { id } });
+      await transactionalEntityManager.delete(OrderInstallmentEntity, { order: { id } });
+      deleteResult = await transactionalEntityManager.delete(OrderEntity, { id });
+    });
+    console.log('deleteResult', deleteResult)
+    return deleteResult;
   }
 
   public get = async (id: string) => {

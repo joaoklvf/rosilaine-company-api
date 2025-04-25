@@ -33,12 +33,12 @@ export class StockController {
     const stock = req['body'] as StockEntity;
     const id = req['params']['id'];
 
-    res.send(this.stockService.update(stock, id));
+    res.send(await this.stockService.update(stock, id));
   }
 
   public delete = async (req: Request, res: Response) => {
     const id = req['params']['id'];
-    res.send(this.stockService.delete(id));
+    res.send(await this.stockService.delete(id));
   }
 
   /**

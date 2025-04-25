@@ -42,7 +42,7 @@ export class OrderController {
 
   public delete = async (req: Request, res: Response) => {
     const id = req['params']['id'];
-    res.send(this.orderService.delete(id));
+    res.send(await this.orderService.delete(id));
   }
 
   public get = async (req: Request, res: Response) => {

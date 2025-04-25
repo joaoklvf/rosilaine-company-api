@@ -33,12 +33,12 @@ export class ProductController {
     const product = req['body'] as ProductEntity;
     const id = req['params']['id'];
 
-    res.send(this.productService.update(product, id));
+    res.send(await this.productService.update(product, id));
   }
 
   public delete = async (req: Request, res: Response) => {
     const id = req['params']['id'];
-    res.send(this.productService.delete(id));
+    res.send(await this.productService.delete(id));
   }
 
   /**
