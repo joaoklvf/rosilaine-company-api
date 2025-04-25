@@ -16,6 +16,9 @@ export class OrderInstallmentEntity extends BaseProjectEntity {
   @Column()
   paymentDate: Date;
 
+  @ManyToOne(() => OrderEntity, order => order.orderItems)
+  order: OrderEntity;
+
   @ManyToOne(() => OrderEntity, (order) => order.installments)
   orders: OrderEntity[];
 }
