@@ -77,7 +77,7 @@ export class OrderService implements IOrderService {
       await transactionalEntityManager.delete(OrderInstallmentEntity, { order: { id } });
       deleteResult = await transactionalEntityManager.delete(OrderEntity, { id });
     });
-    console.log('deleteResult', deleteResult)
+
     return deleteResult;
   }
 
