@@ -13,6 +13,9 @@ export class OrderEntity extends BaseProjectEntity {
   @Column()
   orderDate: Date;
 
+  @Column({ nullable: true })
+  firstInstallmentDate: Date;
+
   @Column({ type: 'decimal', precision: 10, scale: 2 })
   total: number;
 
