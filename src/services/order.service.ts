@@ -6,9 +6,11 @@ import { IOrderService } from '../interfaces/order-service';
 import { OrderRepository } from '../database/repository/order.repository';
 import { INJECTABLE_TYPES } from '../types/inversify-types';
 import { IOrderStatusService } from '../interfaces/order-status-service';
-import { DeleteResult } from 'typeorm';
+import { DeleteResult, EntityManager } from 'typeorm';
 import { OrderItemEntity } from '../database/entities/order/order-item/order-item.entity';
 import { OrderInstallmentEntity } from '../database/entities/order/order-installment.entity';
+import { IOrderInstallmentService } from '../interfaces/order-installment-service';
+import { OrderStatusEntity } from '../database/entities/order/order-status.entity';
 
 @injectable()
 export class OrderService implements IOrderService {
@@ -16,7 +18,8 @@ export class OrderService implements IOrderService {
 
   constructor(
     @inject(INJECTABLE_TYPES.OrderItemService) private orderItemService: IOrderItemService,
-    @inject(INJECTABLE_TYPES.OrderStatusService) private orderStatusService: IOrderStatusService
+    @inject(INJECTABLE_TYPES.OrderStatusService) private orderStatusService: IOrderStatusService,
+    @inject(INJECTABLE_TYPES.OrderInstallmentService) private orderInstallmentService: IOrderInstallmentService
   ) {
     this.orderRepository = AppDataSource.getRepository(OrderEntity);
   }
@@ -43,31 +46,48 @@ export class OrderService implements IOrderService {
   }
 
   public create = async (order: OrderEntity) => {
-    const finalOrder = await this.handleEntity(order);
-    if (!finalOrder)
-      return null;
+    return await this.orderRepository.manager.transaction(async (transactionalEntityManager) => {
+      order.status = await this.checkToCreateOrderStatus(order, transactionalEntityManager);
 
-    const newOrder = await this.orderRepository.save(finalOrder);
-    if (!newOrder.id)
-      return null;
+      order.total = order.orderItems.reduce((prev, orderItem) => prev + (Number(orderItem.itemAmount) * Number(orderItem.itemSellingPrice)), 0);
+      order = await transactionalEntityManager.save(OrderEntity, order);
 
-    const itemsWithOrderId = order.orderItems.map(x => ({ ...x, order: newOrder }));
-    await this.orderItemService.createMany(itemsWithOrderId);
+      order.orderItems.forEach(async (orderItem) => {
+        await transactionalEntityManager.save(OrderItemEntity, this.updateOrderItems(order, orderItem));
+      });
 
-    return { ...newOrder, orderItems: itemsWithOrderId.map(x => ({ ...x, order: {} as OrderEntity })) };
+      this.createOrderInstallments(order, transactionalEntityManager);
+      return this.mapOrderResponse(order);
+    });
   }
 
   public update = async (order: OrderEntity, id: string) => {
-    const finalOrder = await this.handleEntity(order);
-    if (!finalOrder)
-      return null;
+    return await this.orderRepository.manager.transaction(async (transactionalEntityManager) => {
+      order.status = await this.checkToCreateOrderStatus(order, transactionalEntityManager);
 
-    const orderItems = await this.orderItemService.createMany(finalOrder.orderItems);
-    const updatedOrder = await this.orderRepository.update(id, { updatedDate: new Date(), total: finalOrder.total });
-    if (!updatedOrder.affected)
-      return null;
+      order.orderItems.forEach(async (orderItem) => {
+        await transactionalEntityManager.save(OrderItemEntity, this.updateOrderItems(order, orderItem));
+      });
 
-    return { ...finalOrder, orderItems: orderItems.map(x => ({ ...x, order: {} as OrderEntity })) };
+      if (order.installments?.some(x => !x.id)) {
+        transactionalEntityManager
+          .createQueryBuilder()
+          .delete()
+          .from(OrderInstallmentEntity)
+          .where("orderId = :orderId", { orderId: order.id })
+          .execute()
+
+        this.createOrderInstallments(order, transactionalEntityManager);
+      }
+
+      order.total = order.orderItems.reduce((prev, acc) => prev + Number(acc.itemSellingTotal), 0);
+
+      const orderUpdateResult = await transactionalEntityManager.update(OrderEntity, id, { updatedDate: new Date(), total: order.total });
+      if (!orderUpdateResult.affected)
+        throw new Error("Error updating order\n");
+
+      return this.mapOrderResponse(order);
+    });
   }
 
   public delete = async (id: string) => {
@@ -90,6 +110,7 @@ export class OrderService implements IOrderService {
           product: true,
           itemStatus: true
         },
+        installments: true
       },
       where: {
         id
@@ -99,22 +120,40 @@ export class OrderService implements IOrderService {
     return order;
   }
 
-  private handleEntity = async (order: OrderEntity) => {
-    if (!order.status.id) {
-      const newStatus = await this.orderStatusService.create(order.status);
-      if (!newStatus)
-        return null;
-
-      order.status = { ...newStatus };
-    }
-
-    order.orderItems.forEach(x => {
-      x.itemSellingTotal = Number(x.itemAmount) * Number(x.itemSellingPrice);
-      x.itemOriginalPrice = Number(x.product.productPrice),
-        x.order = order;
+  private updateOrderItems(order: OrderEntity, orderItem: OrderItemEntity) {
+    return ({
+      ...orderItem,
+      itemSellingTotal: Number(orderItem.itemAmount) * Number(orderItem.itemSellingPrice),
+      itemOriginalPrice: Number(orderItem.product.productPrice),
+      order
     });
+  }
 
-    order.total = order.orderItems.reduce((prev, acc) => prev + Number(acc.itemSellingTotal), 0);
-    return order;
+  private mapOrderResponse(order: OrderEntity) {
+    return ({
+      ...order,
+      orderItems: order.orderItems.map(x => ({ ...x, order: {} as OrderEntity })),
+      installments: order.installments?.map(x => ({ ...x, order: {} as OrderEntity }))
+    });
+  }
+
+  private async checkToCreateOrderStatus(order: OrderEntity, transactionalEntityManager: EntityManager) {
+    if (order.status.id)
+      return order.status;
+
+    const newStatus = await transactionalEntityManager.save(OrderStatusEntity, order.status);
+    if (!newStatus)
+      throw new Error("Error creating order status\n");
+
+    return { ...newStatus };
+  }
+
+  private async createOrderInstallments(order: OrderEntity, transactionalEntityManager: EntityManager) {
+    order.installments?.forEach(async (installment) => {
+      await transactionalEntityManager.save(OrderInstallmentEntity, {
+        ...installment,
+        order
+      });
+    });
   }
 }

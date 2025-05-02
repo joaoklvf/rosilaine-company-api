@@ -16,7 +16,7 @@ export class OrderItemService implements IOrderItemService {
     this.orderItemRepository = AppDataSource.getRepository(OrderItemEntity);
   }
 
-  public createMany = async (orderItems: OrderItemEntity[]) => {
+  public createUpdateMany = async (orderItems: OrderItemEntity[]) => {
     const items = [...orderItems];
 
     const statusWithoutId = items.filter(x => !x.itemStatus.id)?.map(x => x.itemStatus);

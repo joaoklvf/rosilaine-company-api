@@ -4,21 +4,18 @@ import { BaseProjectEntity } from "../base-entity";
 
 @Entity('order_installment')
 export class OrderInstallmentEntity extends BaseProjectEntity {
-  @Column()
+  @Column({ type: 'decimal', precision: 10, scale: 2 })
   amount: number;
 
-  @Column()
+  @Column({ nullable: true, type: 'decimal', precision: 10, scale: 2 })
   amountPaid: number;
 
   @Column()
   debitDate: Date;
 
-  @Column()
+  @Column({ nullable: true })
   paymentDate: Date;
 
-  @ManyToOne(() => OrderEntity, order => order.orderItems)
+  @ManyToOne(() => OrderEntity, order => order.installments)
   order: OrderEntity;
-
-  @ManyToOne(() => OrderEntity, (order) => order.installments)
-  orders: OrderEntity[];
 }

@@ -28,6 +28,6 @@ export class OrderEntity extends BaseProjectEntity {
   @OneToMany(() => OrderItemEntity, (product) => product.order)
   orderItems: OrderItemEntity[];
 
-  @OneToMany(() => OrderInstallmentEntity, orderInstallments => orderInstallments.orders)
+  @OneToMany(() => OrderInstallmentEntity, orderInstallments => orderInstallments.order)
   installments: OrderInstallmentEntity[];
 }
