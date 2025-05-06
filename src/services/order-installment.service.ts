@@ -1,6 +1,5 @@
-import { inject, injectable } from 'inversify';
+import { injectable } from 'inversify';
 import { IOrderInstallmentService } from '../interfaces/order-installment-service';
-import { INJECTABLE_TYPES } from '../types/inversify-types';
 import { OrderInstallmentRepository } from '../database/repository/order-installment.repository';
 import { AppDataSource } from '..';
 import { OrderInstallmentEntity } from '../database/entities/order/order-installment.entity';
