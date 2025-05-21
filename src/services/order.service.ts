@@ -52,9 +52,7 @@ export class OrderService implements IOrderService {
       order.total = order.orderItems.reduce((prev, orderItem) => prev + (Number(orderItem.itemAmount) * Number(orderItem.itemSellingPrice)), 0);
       order = await transactionalEntityManager.save(OrderEntity, order);
 
-      order.orderItems.forEach(async (orderItem) => {
-        await transactionalEntityManager.save(OrderItemEntity, this.updateOrderItems(order, orderItem));
-      });
+      order.orderItems = await this.updateOrderItems(order, transactionalEntityManager);
 
       this.createOrderInstallments(order, transactionalEntityManager);
       return this.mapOrderResponse(order);
@@ -64,10 +62,7 @@ export class OrderService implements IOrderService {
   public update = async (order: OrderEntity, id: string) => {
     return await this.orderRepository.manager.transaction(async (transactionalEntityManager) => {
       order.status = await this.checkToCreateOrderStatus(order, transactionalEntityManager);
-
-      order.orderItems.forEach(async (orderItem) => {
-        await transactionalEntityManager.save(OrderItemEntity, this.updateOrderItems(order, orderItem));
-      });
+      order.orderItems = await this.updateOrderItems(order, transactionalEntityManager);
 
       if (order.installments?.some(x => !x.id)) {
         transactionalEntityManager
@@ -120,7 +115,15 @@ export class OrderService implements IOrderService {
     return order;
   }
 
-  private updateOrderItems(order: OrderEntity, orderItem: OrderItemEntity) {
+  private async updateOrderItems(order: OrderEntity, transactionalEntityManager: EntityManager) {
+    return Promise.all(
+      order.orderItems.map(orderItem =>
+        transactionalEntityManager.save(OrderItemEntity, this.getRecalculatedOrderItem(order, orderItem))
+      )
+    );
+  }
+
+  private getRecalculatedOrderItem(order: OrderEntity, orderItem: OrderItemEntity) {
     return ({
       ...orderItem,
       itemSellingTotal: Number(orderItem.itemAmount) * Number(orderItem.itemSellingPrice),
