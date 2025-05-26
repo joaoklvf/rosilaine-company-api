@@ -54,12 +54,15 @@ export class OrderService implements IOrderService {
 
       order.orderItems = await this.orderItemService.createUpdateManyByOrder(order, transactionalEntityManager);
 
-     this.orderInstallmentService.recreateInstallmentsByOrder(order, transactionalEntityManager);
+      this.orderInstallmentService.recreateInstallmentsByOrder(order, transactionalEntityManager);
       return this.mapOrderResponse(order);
     });
   }
 
   public update = async (order: OrderEntity, id: string) => {
+    if (order.id !== id)
+      throw new Error("The order request id does not match with the url id param")
+
     return await this.orderRepository.manager.transaction(async (transactionalEntityManager) => {
       order.status = await this.checkToCreateOrderStatus(order, transactionalEntityManager);
       order.orderItems = await this.orderItemService.createUpdateManyByOrder(order, transactionalEntityManager);
@@ -72,16 +75,16 @@ export class OrderService implements IOrderService {
           .where("orderId = :orderId", { orderId: order.id })
           .execute()
 
-       this.orderInstallmentService.recreateInstallmentsByOrder(order, transactionalEntityManager);
+        this.orderInstallmentService.recreateInstallmentsByOrder(order, transactionalEntityManager);
       }
 
       order.total = order.orderItems.reduce((prev, acc) => prev + Number(acc.itemSellingTotal), 0);
 
-      const orderUpdateResult = await transactionalEntityManager.update(OrderEntity, id, { updatedDate: new Date(), total: order.total });
-      if (!orderUpdateResult.affected)
+      const orderUpdateResult = await transactionalEntityManager.save(OrderEntity, order);
+      if (!orderUpdateResult)
         throw new Error("Error updating order\n");
 
-      return this.mapOrderResponse(order);
+      return this.mapOrderResponse(orderUpdateResult);
     });
   }
 
