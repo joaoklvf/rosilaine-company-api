@@ -11,6 +11,7 @@ import { OrderItemEntity } from '../database/entities/order/order-item/order-ite
 import { OrderInstallmentEntity } from '../database/entities/order/order-installment.entity';
 import { IOrderInstallmentService } from '../interfaces/order-installment-service';
 import { OrderStatusEntity } from '../database/entities/order/order-status.entity';
+import { OrderSearchFilter } from '../interfaces/order-filter';
 
 @injectable()
 export class OrderService implements IOrderService {
@@ -24,7 +25,7 @@ export class OrderService implements IOrderService {
     this.orderRepository = AppDataSource.getRepository(OrderEntity);
   }
 
-  public index = async () => {
+  public index = async (filters: OrderSearchFilter) => {
     const orders = await this.orderRepository.find({
       relations: {
         customer: true,
@@ -40,6 +41,14 @@ export class OrderService implements IOrderService {
           name: true
         },
       },
+      where: {
+        customer: {
+          id: filters.customerId
+        },
+        status: {
+          id: filters.statusId
+        }
+      }
     });
 
     return orders;

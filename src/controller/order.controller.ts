@@ -3,6 +3,7 @@ import { OrderEntity } from "../database/entities/order/order.entity";
 import { IOrderService } from "../interfaces/order-service";
 import { inject, injectable } from "inversify";
 import { INJECTABLE_TYPES } from "../types/inversify-types";
+import { OrderSearchFilter } from "../interfaces/order-filter";
 
 @injectable()
 export class OrderController {
@@ -16,7 +17,7 @@ export class OrderController {
   }
 
   public index = async (req: Request, res: Response) => {
-    await this.orderService.index().then((data) => {
+    await this.orderService.index(req.query).then((data) => {
       return res.status(200).json(data);
     }).catch((error) => {
       return res.status(500).json({ msg: error });
