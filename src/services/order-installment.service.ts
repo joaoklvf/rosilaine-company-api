@@ -4,6 +4,7 @@ import { OrderInstallmentRepository } from '../database/repository/order-install
 import { AppDataSource } from '..';
 import { OrderInstallmentEntity } from '../database/entities/order/order-installment.entity';
 import { OrderEntity } from '../database/entities/order/order.entity';
+import { EntityManager } from 'typeorm';
 
 @injectable()
 export class OrderInstallmentService implements IOrderInstallmentService {
@@ -14,20 +15,17 @@ export class OrderInstallmentService implements IOrderInstallmentService {
     this.orderInstallmentRepository = AppDataSource.getRepository(OrderInstallmentEntity);
   }
 
-  public recreateInstallmentsByOrder = async (order: OrderEntity) => {
-    const installments = [...order.installments];
-    await this.orderInstallmentRepository.manager.transaction(async (transactionalEntityManager) => {
-      await transactionalEntityManager.createQueryBuilder()
-        .delete()
-        .from(OrderInstallmentEntity)
-        .where("orderId = :orderId", { orderId: order.id })
-        .execute().catch(error => console.log(error));
+  public recreateInstallmentsByOrder = async (order: OrderEntity, transactionalEntityManager: EntityManager) => {
+    await transactionalEntityManager.createQueryBuilder()
+      .delete()
+      .from(OrderInstallmentEntity)
+      .where("orderId = :orderId", { orderId: order.id })
+      .execute().catch(error => console.log(error));
 
-      const promises = installments.map(x => transactionalEntityManager.save(OrderInstallmentEntity, { ...x, order }));
-      Promise.all(promises);
-    });
+    const promises = order.installments.map(x => transactionalEntityManager.save(OrderInstallmentEntity, { ...x, order }));
+    const newInstallments = await Promise.all(promises);
 
-    return installments;
+    return newInstallments;
   }
 
   public index = async () => {

@@ -52,9 +52,9 @@ export class OrderService implements IOrderService {
       order.total = order.orderItems.reduce((prev, orderItem) => prev + (Number(orderItem.itemAmount) * Number(orderItem.itemSellingPrice)), 0);
       order = await transactionalEntityManager.save(OrderEntity, order);
 
-      order.orderItems = await this.updateOrderItems(order, transactionalEntityManager);
+      order.orderItems = await this.orderItemService.createUpdateManyByOrder(order, transactionalEntityManager);
 
-      this.createOrderInstallments(order, transactionalEntityManager);
+     this.orderInstallmentService.recreateInstallmentsByOrder(order, transactionalEntityManager);
       return this.mapOrderResponse(order);
     });
   }
@@ -62,7 +62,7 @@ export class OrderService implements IOrderService {
   public update = async (order: OrderEntity, id: string) => {
     return await this.orderRepository.manager.transaction(async (transactionalEntityManager) => {
       order.status = await this.checkToCreateOrderStatus(order, transactionalEntityManager);
-      order.orderItems = await this.updateOrderItems(order, transactionalEntityManager);
+      order.orderItems = await this.orderItemService.createUpdateManyByOrder(order, transactionalEntityManager);
 
       if (order.installments?.some(x => !x.id)) {
         transactionalEntityManager
@@ -72,7 +72,7 @@ export class OrderService implements IOrderService {
           .where("orderId = :orderId", { orderId: order.id })
           .execute()
 
-        this.createOrderInstallments(order, transactionalEntityManager);
+       this.orderInstallmentService.recreateInstallmentsByOrder(order, transactionalEntityManager);
       }
 
       order.total = order.orderItems.reduce((prev, acc) => prev + Number(acc.itemSellingTotal), 0);
@@ -115,23 +115,6 @@ export class OrderService implements IOrderService {
     return order;
   }
 
-  private async updateOrderItems(order: OrderEntity, transactionalEntityManager: EntityManager) {
-    return Promise.all(
-      order.orderItems.map(orderItem =>
-        transactionalEntityManager.save(OrderItemEntity, this.getRecalculatedOrderItem(order, orderItem))
-      )
-    );
-  }
-
-  private getRecalculatedOrderItem(order: OrderEntity, orderItem: OrderItemEntity) {
-    return ({
-      ...orderItem,
-      itemSellingTotal: Number(orderItem.itemAmount) * Number(orderItem.itemSellingPrice),
-      itemOriginalPrice: Number(orderItem.product.productPrice),
-      order
-    });
-  }
-
   private mapOrderResponse(order: OrderEntity) {
     return ({
       ...order,
@@ -149,14 +132,5 @@ export class OrderService implements IOrderService {
       throw new Error("Error creating order status\n");
 
     return { ...newStatus };
-  }
-
-  private async createOrderInstallments(order: OrderEntity, transactionalEntityManager: EntityManager) {
-    order.installments?.forEach(async (installment) => {
-      await transactionalEntityManager.save(OrderInstallmentEntity, {
-        ...installment,
-        order
-      });
-    });
   }
 }
