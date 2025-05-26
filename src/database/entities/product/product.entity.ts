@@ -15,9 +15,6 @@ export class ProductEntity extends BaseProjectEntity {
   @Column({ type: 'decimal', precision: 10, scale: 2 })
   productPrice: number;
 
-  @Column({ default: false })
-  isDeleted: boolean;
-
   @OneToMany(() => OrderItemEntity, orderProduct => orderProduct.product)
   orderItems: OrderItemEntity[];
 

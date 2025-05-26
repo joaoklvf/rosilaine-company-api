@@ -1,4 +1,4 @@
-import { PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn } from "typeorm";
+import { PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, Column } from "typeorm";
 
 export class BaseProjectEntity {
   @PrimaryGeneratedColumn("uuid")
@@ -9,4 +9,7 @@ export class BaseProjectEntity {
 
   @UpdateDateColumn()
   updatedDate: Date;
+
+  @Column({ default: false })
+  isDeleted: boolean;
 }
