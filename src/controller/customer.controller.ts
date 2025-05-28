@@ -16,7 +16,7 @@ export class CustomerController {
   }
 
   public index = async (req: Request, res: Response) => {
-    await this.customerService.index().then((data) => {
+    await this.customerService.index(req.query).then((data) => {
       return res.status(200).json(data);
     }).catch((error) => {
       return res.status(500).json({ msg: error });

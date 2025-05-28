@@ -5,13 +5,12 @@ import { IOrderItemService } from '../interfaces/order-item-service';
 import { IOrderService } from '../interfaces/order-service';
 import { OrderRepository } from '../database/repository/order.repository';
 import { INJECTABLE_TYPES } from '../types/inversify-types';
-import { IOrderStatusService } from '../interfaces/order-status-service';
 import { DeleteResult, EntityManager } from 'typeorm';
 import { OrderItemEntity } from '../database/entities/order/order-item/order-item.entity';
 import { OrderInstallmentEntity } from '../database/entities/order/order-installment.entity';
 import { IOrderInstallmentService } from '../interfaces/order-installment-service';
 import { OrderStatusEntity } from '../database/entities/order/order-status.entity';
-import { OrderSearchFilter } from '../interfaces/order-filter';
+import { OrderSearchFilter } from '../interfaces/filters/order-filter';
 
 @injectable()
 export class OrderService implements IOrderService {
@@ -19,7 +18,6 @@ export class OrderService implements IOrderService {
 
   constructor(
     @inject(INJECTABLE_TYPES.OrderItemService) private orderItemService: IOrderItemService,
-    @inject(INJECTABLE_TYPES.OrderStatusService) private orderStatusService: IOrderStatusService,
     @inject(INJECTABLE_TYPES.OrderInstallmentService) private orderInstallmentService: IOrderInstallmentService
   ) {
     this.orderRepository = AppDataSource.getRepository(OrderEntity);

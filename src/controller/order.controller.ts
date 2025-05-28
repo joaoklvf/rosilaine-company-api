@@ -3,7 +3,7 @@ import { OrderEntity } from "../database/entities/order/order.entity";
 import { IOrderService } from "../interfaces/order-service";
 import { inject, injectable } from "inversify";
 import { INJECTABLE_TYPES } from "../types/inversify-types";
-import { OrderSearchFilter } from "../interfaces/order-filter";
+import { OrderSearchFilter } from "../interfaces/filters/order-filter";
 
 @injectable()
 export class OrderController {
