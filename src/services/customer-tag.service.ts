@@ -17,7 +17,7 @@ export class CustomerTagService implements ICustomerTagService {
   public index = async (filters: DescriptionFilter) => {
     const tags = await this.customerTagRepository.find({
       where: {
-        description: ILike(`%${filters.description}%`),
+        description: ILike(`%${filters.description ?? ''}%`),
         isDeleted: false
       }
     });

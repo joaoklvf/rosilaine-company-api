@@ -24,7 +24,7 @@ export class ProductService implements IProductService {
         category: true
       },
       where: {
-        description: ILike(`%${filters.description}%`),
+        description: ILike(`%${filters.description ?? ''}%`),
         isDeleted: false
       }
     });

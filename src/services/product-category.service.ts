@@ -17,7 +17,7 @@ export class ProductCategoryService implements IProductCategoryService {
   public index = async (filters: DescriptionFilter) => {
     const productCategories = await this.productCategoryRepository.find({
       where: {
-        description: ILike(`%${filters.description}%`),
+        description: ILike(`%${filters.description ?? ''}%`),
         isDeleted: false
       }
     });

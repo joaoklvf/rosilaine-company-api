@@ -17,7 +17,7 @@ export class OrderStatusService implements IOrderStatusService {
   public index = async (filters: DescriptionFilter) => {
     const orderStatus = await this.orderStatusRepository.find({
       where: {
-        description: ILike(`%${filters.description}%`),
+        description: ILike(`%${filters.description ?? ''}%`),
         isDeleted: false
       }
     });

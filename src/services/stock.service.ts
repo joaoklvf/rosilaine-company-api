@@ -17,7 +17,7 @@ export class StockService implements IStockService {
   public index = async (filters: DescriptionFilter) => {
     const stocks = await this.stockRepository.find({
       where: {
-        description: ILike(`%${filters.description}%`),
+        description: ILike(`%${filters.description ?? ''}%`),
         isDeleted: false
       }
     });
