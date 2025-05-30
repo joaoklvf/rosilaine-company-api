@@ -3,6 +3,8 @@ import { StockRepository } from '../database/repository/stock.repository';
 import { AppDataSource } from '..';
 import { IStockService } from '../interfaces/stock-service';
 import { injectable } from 'inversify';
+import { ILike } from 'typeorm';
+import { DescriptionFilter } from '../interfaces/filters/product-filter';
 
 @injectable()
 export class StockService implements IStockService {
@@ -12,11 +14,17 @@ export class StockService implements IStockService {
     this.stockRepository = AppDataSource.getRepository(StockEntity);
   }
 
-  public index = async () => {
-    const stocks = await this.stockRepository.find()
+  public index = async (filters: DescriptionFilter) => {
+    const stocks = await this.stockRepository.find({
+      where: {
+        description: ILike(`%${filters.description}%`),
+        isDeleted: false
+      }
+    });
+
     return stocks;
   }
-
+  
   public create = async (stock: StockEntity) => {
     const newStock = await this.stockRepository.save(stock);
     return newStock;

@@ -3,6 +3,8 @@ import { AppDataSource } from '..';
 import { OrderStatusEntity } from '../database/entities/order/order-status.entity';
 import { IOrderStatusService } from '../interfaces/order-status-service';
 import { injectable } from 'inversify';
+import { ILike } from 'typeorm';
+import { DescriptionFilter } from '../interfaces/filters/product-filter';
 
 @injectable()
 export class OrderStatusService implements IOrderStatusService {
@@ -12,11 +14,17 @@ export class OrderStatusService implements IOrderStatusService {
     this.orderStatusRepository = AppDataSource.getRepository(OrderStatusEntity);
   }
 
-  public index = async () => {
-    const orderStatus = await this.orderStatusRepository.find()
+  public index = async (filters: DescriptionFilter) => {
+    const orderStatus = await this.orderStatusRepository.find({
+      where: {
+        description: ILike(`%${filters.description}%`),
+        isDeleted: false
+      }
+    });
+
     return orderStatus;
   }
-
+  
   public create = async (orderStatus: OrderStatusEntity) => {
     const newOrderStatus = await this.orderStatusRepository.save(orderStatus);
     return newOrderStatus;

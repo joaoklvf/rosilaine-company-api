@@ -16,7 +16,7 @@ export class OrderInstallmentController {
   }
 
   public index = async (req: Request, res: Response) => {
-    await this.orderInstallmentService.index().then((data) => {
+    await this.orderInstallmentService.index(req.query).then((data) => {
       return res.status(200).json(data);
     }).catch((error) => {
       return res.status(500).json({ msg: error });

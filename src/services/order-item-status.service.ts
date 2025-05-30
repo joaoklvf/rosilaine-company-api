@@ -3,6 +3,8 @@ import { injectable } from 'inversify';
 import { IOrderItemStatusService } from '../interfaces/order-item-status-service';
 import { OrderItemStatusEntity } from '../database/entities/order/order-item/order-item-status.entity';
 import { OrderItemStatusRepository } from '../database/repository/order-item-status.repository';
+import { ILike } from 'typeorm';
+import { DescriptionFilter } from '../interfaces/filters/product-filter';
 
 @injectable()
 export class OrderItemStatusService implements IOrderItemStatusService {
@@ -12,8 +14,14 @@ export class OrderItemStatusService implements IOrderItemStatusService {
     this.orderItemStatusRepository = AppDataSource.getRepository(OrderItemStatusEntity);
   }
 
-  public index = async () => {
-    const orderItemStatus = await this.orderItemStatusRepository.find()
+  public index = async (filters: DescriptionFilter) => {
+    const orderItemStatus = await this.orderItemStatusRepository.find({
+      where: {
+        description: ILike(`%${filters.description}%`),
+        isDeleted: false
+      }
+    });
+
     return orderItemStatus;
   }
 

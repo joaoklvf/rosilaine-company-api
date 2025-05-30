@@ -6,7 +6,7 @@ import { inject, injectable } from 'inversify';
 import { INJECTABLE_TYPES } from '../types/inversify-types';
 import { ICustomerTagService } from '../interfaces/customer-tag-service';
 import { CustomerSearchFilter } from '../interfaces/filters/customer-filter';
-import { Like } from 'typeorm';
+import { ILike } from 'typeorm';
 
 @injectable()
 export class CustomerService implements ICustomerService {
@@ -17,13 +17,14 @@ export class CustomerService implements ICustomerService {
   }
 
   public index = async (filters: CustomerSearchFilter) => {
-    const orders = await this.customerRepository.find({
+    const customers = await this.customerRepository.find({
       where: {
-        name: filters.name ? Like(`%${filters.name}%`) : undefined
+        name: ILike(`%${filters.name}%`),
+        isDeleted: false
       }
     });
 
-    return orders;
+    return customers;
   }
 
   public create = async (customer: CustomerEntity) => {

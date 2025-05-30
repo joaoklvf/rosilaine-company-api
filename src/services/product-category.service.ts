@@ -3,6 +3,8 @@ import { AppDataSource } from '..';
 import { ProductCategoryEntity } from '../database/entities/product/product-category.entity';
 import { IProductCategoryService } from '../interfaces/product-category-service';
 import { injectable } from 'inversify';
+import { ILike } from 'typeorm';
+import { DescriptionFilter } from '../interfaces/filters/product-filter';
 
 @injectable()
 export class ProductCategoryService implements IProductCategoryService {
@@ -11,12 +13,18 @@ export class ProductCategoryService implements IProductCategoryService {
   constructor() {
     this.productCategoryRepository = AppDataSource.getRepository(ProductCategoryEntity);
   }
+  
+  public index = async (filters: DescriptionFilter) => {
+    const productCategories = await this.productCategoryRepository.find({
+      where: {
+        description: ILike(`%${filters.description}%`),
+        isDeleted: false
+      }
+    });
 
-  public index = async () => {
-    const productCategories = await this.productCategoryRepository.find()
     return productCategories;
   }
-
+  
   public create = async (productCategory: ProductCategoryEntity) => {
     const newProductCategory = await this.productCategoryRepository.save(productCategory);
     return newProductCategory;

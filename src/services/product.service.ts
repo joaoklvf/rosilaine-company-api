@@ -1,11 +1,12 @@
 import { ProductEntity } from '../database/entities/product/product.entity';
 import { ProductRepository } from '../database/repository/product.repository';
 import { AppDataSource } from '..';
-import { In } from 'typeorm';
+import { ILike, In } from 'typeorm';
 import { IProductService } from '../interfaces/product-service';
 import { IProductCategoryService } from '../interfaces/product-category-service';
 import { inject, injectable } from 'inversify';
 import { INJECTABLE_TYPES } from '../types/inversify-types';
+import { DescriptionFilter } from '../interfaces/filters/product-filter';
 
 @injectable()
 export class ProductService implements IProductService {
@@ -17,12 +18,13 @@ export class ProductService implements IProductService {
     this.productRepository = AppDataSource.getRepository(ProductEntity);
   }
 
-  public index = async () => {
+  public index = async (filters: DescriptionFilter) => {
     const products = await this.productRepository.find({
       relations: {
         category: true
       },
       where: {
+        description: ILike(`%${filters.description}%`),
         isDeleted: false
       }
     });

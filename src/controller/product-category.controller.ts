@@ -16,7 +16,7 @@ export class ProductCategoryController {
   }
 
   public index = async (req: Request, res: Response) => {
-    await this.productCategoryService.index().then((data) => {
+    await this.productCategoryService.index(req.query).then((data) => {
       return res.status(200).json(data);
     }).catch((error) => {
       return res.status(500).json({ msg: error });

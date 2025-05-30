@@ -3,6 +3,8 @@ import { CustomerTagEntity } from '../database/entities/customer/customer-tag.en
 import { injectable } from 'inversify';
 import { CustomerTagRepository } from '../database/repository/customer-tag.repository';
 import { ICustomerTagService } from '../interfaces/customer-tag-service';
+import { ILike } from 'typeorm';
+import { DescriptionFilter } from '../interfaces/filters/product-filter';
 
 @injectable()
 export class CustomerTagService implements ICustomerTagService {
@@ -12,9 +14,15 @@ export class CustomerTagService implements ICustomerTagService {
     this.customerTagRepository = AppDataSource.getRepository(CustomerTagEntity);
   }
 
-  public index = async () => {
-    const customerTag = await this.customerTagRepository.find()
-    return customerTag;
+  public index = async (filters: DescriptionFilter) => {
+    const tags = await this.customerTagRepository.find({
+      where: {
+        description: ILike(`%${filters.description}%`),
+        isDeleted: false
+      }
+    });
+
+    return tags;
   }
 
   public create = async (customerTag: CustomerTagEntity) => {
