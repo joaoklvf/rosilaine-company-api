@@ -19,7 +19,7 @@ export class CustomerService implements ICustomerService {
   public index = async (filters: CustomerSearchFilter) => {
     const customers = await this.customerRepository.find({
       where: {
-        name: ILike(`%${filters.name}%`),
+        name: ILike(`%${filters.name ?? ''}%`),
         isDeleted: false
       }
     });
