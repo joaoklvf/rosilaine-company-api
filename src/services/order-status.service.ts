@@ -1,5 +1,5 @@
 import { OrderStatusRepository } from '../database/repository/order-status.repository';
-import { AppDataSource } from '..';
+import { AppDataSource } from '../api';
 import { OrderStatusEntity } from '../database/entities/order/order-status.entity';
 import { IOrderStatusService } from '../interfaces/order-status-service';
 import { injectable } from 'inversify';

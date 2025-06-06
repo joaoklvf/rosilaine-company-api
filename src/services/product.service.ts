@@ -1,6 +1,6 @@
 import { ProductEntity } from '../database/entities/product/product.entity';
 import { ProductRepository } from '../database/repository/product.repository';
-import { AppDataSource } from '..';
+import { AppDataSource } from '../api';
 import { ILike, In } from 'typeorm';
 import { IProductService } from '../interfaces/product-service';
 import { IProductCategoryService } from '../interfaces/product-category-service';
