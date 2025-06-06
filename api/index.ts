@@ -1,6 +1,9 @@
 import dotenv from 'dotenv';
 import express from "express";
 import { DataSource } from 'typeorm';
+import { CustomerController } from '../src/controller/customer.controller';
+import cors from 'cors';
+import { container } from '../src/inversify.config';
 
 dotenv.config();
 
@@ -17,8 +20,12 @@ export const AppDataSource = new DataSource({
   synchronize: true,
   name: process.env.DATABASE_NAME
 });
-
+app.use(cors());
+app.use(express.json());
 app.get("/", (req: any, res: any) => res.send("Express on Vercel"));
+
+const customerController = container.get(CustomerController);
+app.use(`/api/customers/`, customerController.router);
 
 const port = process.env.APP_PORT;
 app.listen(port, () => {
