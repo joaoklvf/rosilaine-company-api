@@ -37,7 +37,7 @@ export const AppDataSource = new DataSource({
 
 const startApp = async () => {
   try {
-    // await AppDataSource.initialize().catch(error => console.log(`Erro ao inicializar data source: ${JSON.stringify(error)}`));
+    await AppDataSource.initialize().catch(error => console.error(`Erro ao inicializar data source: ${JSON.stringify(error)}`));
 
     // Obtendo controllers do container com dependências injetadas
     const customerController = container.get(CustomerController);
@@ -71,7 +71,7 @@ const startApp = async () => {
     module.exports = app;
   }
   catch (error) {
-    console.log(error)
+    console.error(error)
   }
 };
 
