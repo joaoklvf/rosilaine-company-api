@@ -4,6 +4,7 @@ import { DataSource } from 'typeorm';
 import { CustomerController } from '../src/controller/customer.controller';
 import cors from 'cors';
 import { container } from '../src/inversify.config';
+import { CustomerEntity } from '../src/database/entities/customer/customer.entity';
 
 dotenv.config();
 
@@ -16,7 +17,7 @@ export const AppDataSource = new DataSource({
   username: process.env.DATABASE_USERNAME,
   password: process.env.DATABASE_PASSWORD,
   database: process.env.DATABASE_NAME,
-  entities: [`${__dirname}/src/database/entities/**/*.entity.{js,ts}`],
+  entities: [CustomerEntity],
   synchronize: true,
   name: process.env.DATABASE_NAME
 });
