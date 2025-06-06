@@ -61,10 +61,10 @@ const startApp = async () => {
   app.use('/api/order-items/', orderItemController.router);
   app.use('/api/order-installments/', orderInstallmentController.router);
 
-  const port = process.env.APP_PORT;
+  // const port = process.env.APP_PORT;
 
-  app.listen(port, () => {
-    console.log(`Server is running on port ${port}`);
+  app.listen(3000, () => {
+    console.log(`Server is running on port ${3000}`);
   });
 };
 
