@@ -36,35 +36,35 @@ export const AppDataSource = new DataSource({
 });
 
 const startApp = async () => {
-  await AppDataSource.initialize().catch(error => console.log(`Erro ao inicializar data source: ${JSON.stringify(error)}`));
+  // await AppDataSource.initialize().catch(error => console.log(`Erro ao inicializar data source: ${JSON.stringify(error)}`));
 
-  // Obtendo controllers do container com dependências injetadas
-  const customerController = container.get(CustomerController);
-  const customerTagController = container.get(CustomerTagController);
-  const productController = container.get(ProductController);
-  const orderController = container.get(OrderController);
-  const orderStatusController = container.get(OrderStatusController);
-  const orderItemStatusController = container.get(OrderItemStatusController);
-  const productCategoryController = container.get(ProductCategoryController);
-  const stockController = container.get(StockController);
-  const orderItemController = container.get(OrderItemController);
-  const orderInstallmentController = container.get(OrderInstallmentController);
+  // // Obtendo controllers do container com dependências injetadas
+  // const customerController = container.get(CustomerController);
+  // const customerTagController = container.get(CustomerTagController);
+  // const productController = container.get(ProductController);
+  // const orderController = container.get(OrderController);
+  // const orderStatusController = container.get(OrderStatusController);
+  // const orderItemStatusController = container.get(OrderItemStatusController);
+  // const productCategoryController = container.get(ProductCategoryController);
+  // const stockController = container.get(StockController);
+  // const orderItemController = container.get(OrderItemController);
+  // const orderInstallmentController = container.get(OrderInstallmentController);
 
-  app.use(`/api/customers/`, customerController.router);
-  app.use(`/api/customer-tags/`, customerTagController.router);
-  app.use('/api/products/', productController.router);
-  app.use('/api/orders/', orderController.router);
-  app.use(`/api/order-status/`, orderStatusController.router);
-  app.use(`/api/order-item-status/`, orderItemStatusController.router);
-  app.use('/api/product-categories/', productCategoryController.router);
-  app.use('/api/stocks/', stockController.router);
-  app.use('/api/order-items/', orderItemController.router);
-  app.use('/api/order-installments/', orderInstallmentController.router);
+  // app.use(`/api/customers/`, customerController.router);
+  // app.use(`/api/customer-tags/`, customerTagController.router);
+  // app.use('/api/products/', productController.router);
+  // app.use('/api/orders/', orderController.router);
+  // app.use(`/api/order-status/`, orderStatusController.router);
+  // app.use(`/api/order-item-status/`, orderItemStatusController.router);
+  // app.use('/api/product-categories/', productCategoryController.router);
+  // app.use('/api/stocks/', stockController.router);
+  // app.use('/api/order-items/', orderItemController.router);
+  // app.use('/api/order-installments/', orderInstallmentController.router);
 
-  // const port = process.env.APP_PORT;
+  const port = process.env.APP_PORT;
 
-  app.listen(3000, () => {
-    console.log(`Server is running on port ${3000}`);
+  app.listen(port, () => {
+    console.log(`Server is running on port ${port}`);
   });
 };
 
