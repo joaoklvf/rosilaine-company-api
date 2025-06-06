@@ -1,5 +1,5 @@
 import { inject, injectable } from 'inversify';
-import { AppDataSource } from '../../api';
+import { AppDataSource } from '../../api/index-old';
 import { OrderEntity } from '../database/entities/order/order.entity';
 import { IOrderItemService } from '../interfaces/order-item-service';
 import { IOrderService } from '../interfaces/order-service';

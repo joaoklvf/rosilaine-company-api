@@ -1,7 +1,7 @@
 import { injectable } from 'inversify';
 import { IOrderInstallmentService } from '../interfaces/order-installment-service';
 import { OrderInstallmentRepository } from '../database/repository/order-installment.repository';
-import { AppDataSource } from '../../api';
+import { AppDataSource } from '../../api/index-old';
 import { OrderInstallmentEntity } from '../database/entities/order/order-installment.entity';
 import { OrderEntity } from '../database/entities/order/order.entity';
 import { EntityManager } from 'typeorm';

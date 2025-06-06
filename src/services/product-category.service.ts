@@ -1,5 +1,5 @@
 import { ProductCategoryRepository } from '../database/repository/product-category.repository';
-import { AppDataSource } from '../../api';
+import { AppDataSource } from '../../api/index-old';
 import { ProductCategoryEntity } from '../database/entities/product/product-category.entity';
 import { IProductCategoryService } from '../interfaces/product-category-service';
 import { injectable } from 'inversify';

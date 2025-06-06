@@ -1,4 +1,4 @@
-import { AppDataSource } from '../../api';
+import { AppDataSource } from '../../api/index-old';
 import { injectable } from 'inversify';
 import { IOrderItemStatusService } from '../interfaces/order-item-status-service';
 import { OrderItemStatusEntity } from '../database/entities/order/order-item/order-item-status.entity';
