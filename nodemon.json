@@ -6,7 +6,7 @@
   "ignore": [
     "./test/*.ts"
   ],
-  "exec": "node -r ts-node/register -r dotenv/config src/api/index.ts dotenv_config_path=$(pwd)/.env",
+  "exec": "node -r ts-node/register -r dotenv/config api/index.ts dotenv_config_path=$(pwd)/.env",
   "env": {
     "NODE_ENV": "development"
   }

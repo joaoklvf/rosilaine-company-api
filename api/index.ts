@@ -3,19 +3,19 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import { DataSource } from "typeorm";
-import { container } from '../inversify.config';
+import { container } from '../src/inversify.config';
 
 // Importações dos controllers
-import { CustomerController } from '../controller/customer.controller';
-import { ProductController } from '../controller/product.controller';
-import { OrderController } from '../controller/order.controller';
-import { OrderStatusController } from '../controller/order-status.controller';
-import { ProductCategoryController } from '../controller/product-category.controller';
-import { StockController } from '../controller/stock.controller';
-import { CustomerTagController } from '../controller/customer-tag.controller';
-import { OrderItemStatusController } from '../controller/order-item-status.controller';
-import { OrderItemController } from '../controller/order-item.controller';
-import { OrderInstallmentController } from '../controller/order-installment.controller';
+import { CustomerController } from '../src/controller/customer.controller';
+import { ProductController } from '../src/controller/product.controller';
+import { OrderController } from '../src/controller/order.controller';
+import { OrderStatusController } from '../src/controller/order-status.controller';
+import { ProductCategoryController } from '../src/controller/product-category.controller';
+import { StockController } from '../src/controller/stock.controller';
+import { CustomerTagController } from '../src/controller/customer-tag.controller';
+import { OrderItemStatusController } from '../src/controller/order-item-status.controller';
+import { OrderItemController } from '../src/controller/order-item.controller';
+import { OrderInstallmentController } from '../src/controller/order-installment.controller';
 
 dotenv.config();
 

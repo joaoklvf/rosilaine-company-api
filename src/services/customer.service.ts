@@ -1,6 +1,6 @@
 import { CustomerEntity } from '../database/entities/customer/customer.entity';
 import { CustomerRepository } from '../database/repository/customer.repository';
-import { AppDataSource } from '../api';
+import { AppDataSource } from '../../api';
 import { ICustomerService } from '../interfaces/customer-service';
 import { inject, injectable } from 'inversify';
 import { INJECTABLE_TYPES } from '../types/inversify-types';
