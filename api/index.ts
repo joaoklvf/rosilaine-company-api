@@ -67,6 +67,8 @@ const startApp = async () => {
     app.listen(port, () => {
       console.log(`Server is running on port ${port}`);
     });
+
+    module.exports = app;
   }
   catch (error) {
     console.log(error)
