@@ -24,6 +24,7 @@ export const AppDataSource = new DataSource({
 app.use(cors());
 app.use(express.json());
 app.get("/", (req: any, res: any) => res.send("Express on Vercel"));
+AppDataSource.initialize().catch(error => console.error(`Erro ao inicializar data source: ${JSON.stringify(error)}`));
 
 const customerController = container.get(CustomerController);
 app.use(`/api/customers/`, customerController.router);
