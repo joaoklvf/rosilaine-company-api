@@ -119,6 +119,13 @@ export class OrderService implements IOrderService {
       },
       where: {
         id
+      },
+      order: {
+        installments: {
+          debitDate: {
+            direction: 'ASC'
+          }
+        }
       }
     });
 

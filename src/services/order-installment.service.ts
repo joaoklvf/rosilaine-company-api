@@ -57,4 +57,10 @@ export class OrderInstallmentService implements IOrderInstallmentService {
 
     return category;
   }
+
+  public updateMany = async (installments: OrderInstallmentEntity[]) => {
+    return await this.orderInstallmentRepository.manager.transaction(async (transactionalEntityManager) => { 
+      return await transactionalEntityManager.save(OrderInstallmentEntity, installments);
+    });
+  }
 }

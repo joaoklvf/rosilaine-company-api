@@ -5,4 +5,5 @@ import { IRepoService } from "./repo-service";
 
 export interface IOrderInstallmentService extends IRepoService<OrderInstallmentEntity> {
   recreateInstallmentsByOrder(order: OrderEntity, transactionalEntityManager: EntityManager): Promise<OrderInstallmentEntity[]>;
+  updateMany(installments: OrderInstallmentEntity[]): Promise<OrderInstallmentEntity[]>;
 }

@@ -24,17 +24,27 @@ export class OrderInstallmentController {
   }
 
   public create = async (req: Request, res: Response) => {
-    const orderInstallmentInstallment = req['body'] as OrderInstallmentEntity;
-    const newOrderInstallment = await this.orderInstallmentService.create(orderInstallmentInstallment);
+    const orderInstallment = req['body'] as OrderInstallmentEntity;
+    const newOrderInstallment = await this.orderInstallmentService.create(orderInstallment);
     res.send(newOrderInstallment);
   }
 
   public update = async (req: Request, res: Response) => {
-    const orderInstallmentInstallment = req['body'] as OrderInstallmentEntity;
+    const orderInstallment = req['body'] as OrderInstallmentEntity;
     const id = req['params']['id'];
 
-    this.orderInstallmentService.update(orderInstallmentInstallment, id).then(orderInstallmentInstallment => {
-      return res.send(orderInstallmentInstallment);
+    this.orderInstallmentService.update(orderInstallment, id).then(orderInstallment => {
+      return res.send(orderInstallment);
+    }).catch(error => {
+      return res.send(error);
+    })
+  }
+
+  public updateMany = async (req: Request, res: Response) => {
+    const orderInstallments = req['body'] as OrderInstallmentEntity[];
+
+    this.orderInstallmentService.updateMany(orderInstallments).then(orderInstallments => {
+      return res.send(orderInstallments);
     }).catch(error => {
       return res.send(error);
     })
@@ -62,6 +72,7 @@ export class OrderInstallmentController {
     this.router.get('/:id', this.get);
     this.router.post('/', this.create);
     this.router.put('/:id', this.update);
+    this.router.put('/', this.updateMany);
     this.router.delete('/:id', this.delete);
   }
 }
