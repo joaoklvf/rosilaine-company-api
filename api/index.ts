@@ -1,27 +1,10 @@
-import 'reflect-metadata';
-import express from 'express';
-import cors from 'cors';
 import dotenv from 'dotenv';
-import { DataSource } from "typeorm";
-import { container } from '../src/inversify.config';
-
-// Importações dos controllers
-import { CustomerController } from '../src/controller/customer.controller';
-import { ProductController } from '../src/controller/product.controller';
-import { OrderController } from '../src/controller/order.controller';
-import { OrderStatusController } from '../src/controller/order-status.controller';
-import { ProductCategoryController } from '../src/controller/product-category.controller';
-import { StockController } from '../src/controller/stock.controller';
-import { CustomerTagController } from '../src/controller/customer-tag.controller';
-import { OrderItemStatusController } from '../src/controller/order-item-status.controller';
-import { OrderItemController } from '../src/controller/order-item.controller';
-import { OrderInstallmentController } from '../src/controller/order-installment.controller';
+import express from "express";
+import { DataSource } from 'typeorm';
 
 dotenv.config();
 
 const app = express();
-app.use(cors());
-app.use(express.json());
 
 export const AppDataSource = new DataSource({
   type: "postgres",
@@ -30,49 +13,16 @@ export const AppDataSource = new DataSource({
   username: process.env.DATABASE_USERNAME,
   password: process.env.DATABASE_PASSWORD,
   database: process.env.DATABASE_NAME,
-  entities: [`${__dirname}/../**/*.entity.{js,ts}`],
+  entities: [`${__dirname}/src/database/entities/**/*.entity.{js,ts}`],
   synchronize: true,
   name: process.env.DATABASE_NAME
 });
 
-const startApp = async () => {
-  try {
-    await AppDataSource.initialize().catch(error => console.error(`Erro ao inicializar data source: ${JSON.stringify(error)}`));
+app.get("/", (req: any, res: any) => res.send("Express on Vercel"));
 
-    // Obtendo controllers do container com dependências injetadas
-    const customerController = container.get(CustomerController);
-    const customerTagController = container.get(CustomerTagController);
-    const productController = container.get(ProductController);
-    const orderController = container.get(OrderController);
-    const orderStatusController = container.get(OrderStatusController);
-    const orderItemStatusController = container.get(OrderItemStatusController);
-    const productCategoryController = container.get(ProductCategoryController);
-    const stockController = container.get(StockController);
-    const orderItemController = container.get(OrderItemController);
-    const orderInstallmentController = container.get(OrderInstallmentController);
+const port = process.env.APP_PORT;
+app.listen(port, () => {
+  console.log(`Server is running on port ${port}`);
+});
 
-    app.use(`/api/customers/`, customerController.router);
-    app.use(`/api/customer-tags/`, customerTagController.router);
-    app.use('/api/products/', productController.router);
-    app.use('/api/orders/', orderController.router);
-    app.use(`/api/order-status/`, orderStatusController.router);
-    app.use(`/api/order-item-status/`, orderItemStatusController.router);
-    app.use('/api/product-categories/', productCategoryController.router);
-    app.use('/api/stocks/', stockController.router);
-    app.use('/api/order-items/', orderItemController.router);
-    app.use('/api/order-installments/', orderInstallmentController.router);
-
-    const port = process.env.APP_PORT;
-
-    app.listen(port, () => {
-      console.log(`Server is running on port ${port}`);
-    });
-
-    module.exports = app;
-  }
-  catch (error) {
-    console.error(error)
-  }
-};
-
-startApp();
+module.exports = app;
