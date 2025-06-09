@@ -12,7 +12,7 @@ const app = express();
 
 export const AppDataSource = new DataSource({
   type: "postgres",
-  entities: [CustomerEntity],
+  entities: [`${__dirname}/../**/*.entity.{js,ts}`],
   url: process.env.DATABASE_URL
 });
 app.use(cors());
