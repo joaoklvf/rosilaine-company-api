@@ -2,7 +2,7 @@ import { inject, injectable } from 'inversify';
 import { IOrderItemService } from '../interfaces/order-item-service';
 import { INJECTABLE_TYPES } from '../types/inversify-types';
 import { OrderItemRepository } from '../database/repository/order-item.repository';
-import { AppDataSource } from '../../api/index-old';
+import { AppDataSource } from '../../api';
 import { IOrderItemStatusService } from '../interfaces/order-item-status-service';
 import { OrderItemEntity } from '../database/entities/order/order-item/order-item.entity';
 import { EntityManager } from 'typeorm';
