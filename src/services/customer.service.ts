@@ -17,11 +17,19 @@ export class CustomerService implements ICustomerService {
   }
 
   public index = async (filters: CustomerSearchFilter) => {
+    const teste = await this.customerRepository.createQueryBuilder()
+      .select(['id', 'name', 'phone', 'birthDate', 'isDeleted'])
+      // .where("isDeleted = 0", { name: filters.name ?? '' })
+      .execute()
+
+    return teste;
     const customers = await this.customerRepository.find({
       where: {
         name: ILike(`%${filters.name ?? ''}%`),
         isDeleted: false
-      }
+      },
+      take: filters.take,
+      skip: filters.offset * filters.take
     });
 
     return customers;
