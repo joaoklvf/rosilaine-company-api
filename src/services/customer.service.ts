@@ -26,7 +26,7 @@ export class CustomerService implements ICustomerService {
       skip
     });
 
-    return customers as any;
+    return customers;
   }
 
   public create = async (customer: CustomerEntity) => {

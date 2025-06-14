@@ -14,12 +14,14 @@ export class OrderItemStatusService implements IOrderItemStatusService {
     this.orderItemStatusRepository = AppDataSource.getRepository(OrderItemStatusEntity);
   }
 
-  public index = async (filters: DescriptionFilter) => {
-    const orderItemStatus = await this.orderItemStatusRepository.find({
+  public index = async ({ description, skip, take }: DescriptionFilter) => {
+    const orderItemStatus = await this.orderItemStatusRepository.findAndCount({
       where: {
-        description: ILike(`%${filters.description ?? ''}%`),
+        description: ILike(`%${description ?? ''}%`),
         isDeleted: false
-      }
+      },
+      take,
+      skip
     });
 
     return orderItemStatus;

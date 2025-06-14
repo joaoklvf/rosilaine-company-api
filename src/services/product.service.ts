@@ -18,15 +18,14 @@ export class ProductService implements IProductService {
     this.productRepository = AppDataSource.getRepository(ProductEntity);
   }
 
-  public index = async (filters: DescriptionFilter) => {
-    const products = await this.productRepository.find({
-      relations: {
-        category: true
-      },
+  public index = async ({ description, skip, take }: DescriptionFilter) => {
+    const products = await this.productRepository.findAndCount({
       where: {
-        description: ILike(`%${filters.description ?? ''}%`),
+        description: ILike(`%${description ?? ''}%`),
         isDeleted: false
-      }
+      },
+      take,
+      skip
     });
 
     return products;

@@ -14,12 +14,14 @@ export class ProductCategoryService implements IProductCategoryService {
     this.productCategoryRepository = AppDataSource.getRepository(ProductCategoryEntity);
   }
   
-  public index = async (filters: DescriptionFilter) => {
-    const productCategories = await this.productCategoryRepository.find({
+  public index = async ({ description, skip, take }: DescriptionFilter) => {
+    const productCategories = await this.productCategoryRepository.findAndCount({
       where: {
-        description: ILike(`%${filters.description ?? ''}%`),
+        description: ILike(`%${description ?? ''}%`),
         isDeleted: false
-      }
+      },
+      take,
+      skip
     });
 
     return productCategories;

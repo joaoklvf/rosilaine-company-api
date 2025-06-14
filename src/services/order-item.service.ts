@@ -52,7 +52,7 @@ export class OrderItemService implements IOrderItemService {
   }
 
   public index = async () => {
-    const productCategories = await this.orderItemRepository.find()
+    const productCategories = await this.orderItemRepository.findAndCount()
     return productCategories;
   }
 

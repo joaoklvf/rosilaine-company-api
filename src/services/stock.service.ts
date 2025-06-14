@@ -14,12 +14,14 @@ export class StockService implements IStockService {
     this.stockRepository = AppDataSource.getRepository(StockEntity);
   }
 
-  public index = async (filters: DescriptionFilter) => {
-    const stocks = await this.stockRepository.find({
+  public index = async ({ description, skip, take }: DescriptionFilter) => {
+    const stocks = await this.stockRepository.findAndCount({
       where: {
-        description: ILike(`%${filters.description ?? ''}%`),
+        description: ILike(`%${description ?? ''}%`),
         isDeleted: false
-      }
+      },
+      take,
+      skip
     });
 
     return stocks;

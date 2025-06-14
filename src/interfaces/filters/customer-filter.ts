@@ -1,5 +1,5 @@
-export interface CustomerSearchFilter {
+import { TakeSkipFilter } from "./take-skip-filter";
+
+export interface CustomerSearchFilter extends TakeSkipFilter {
   name?: string;
-  skip: number;
-  take: number;
 }

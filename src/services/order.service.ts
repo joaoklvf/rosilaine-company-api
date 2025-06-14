@@ -23,8 +23,8 @@ export class OrderService implements IOrderService {
     this.orderRepository = AppDataSource.getRepository(OrderEntity);
   }
 
-  public index = async (filters: OrderSearchFilter) => {
-    const orders = await this.orderRepository.find({
+  public index = async ({ take, skip, customerId, statusId }: OrderSearchFilter) => {
+    const orders = await this.orderRepository.findAndCount({
       relations: {
         customer: true,
         status: true
@@ -41,12 +41,14 @@ export class OrderService implements IOrderService {
       },
       where: {
         customer: {
-          id: filters.customerId
+          id: customerId
         },
         status: {
-          id: filters.statusId
+          id: statusId
         }
-      }
+      },
+      take,
+      skip
     });
 
     return orders;

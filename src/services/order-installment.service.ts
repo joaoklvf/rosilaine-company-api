@@ -29,7 +29,7 @@ export class OrderInstallmentService implements IOrderInstallmentService {
   }
 
   public index = async () => {
-    const productCategories = await this.orderInstallmentRepository.find()
+    const productCategories = await this.orderInstallmentRepository.findAndCount()
     return productCategories;
   }
 
