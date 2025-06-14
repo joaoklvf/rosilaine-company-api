@@ -24,8 +24,11 @@ export class ProductService implements IProductService {
         description: ILike(`%${description ?? ''}%`),
         isDeleted: false
       },
+      relations: {
+        category: true
+      },
       take,
-      skip
+      skip,
     });
 
     return products;
