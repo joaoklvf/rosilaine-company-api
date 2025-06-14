@@ -1,5 +1,5 @@
 export interface CustomerSearchFilter {
   name?: string;
-  offset: number;
+  skip: number;
   take: number;
 }

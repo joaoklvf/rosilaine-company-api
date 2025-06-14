@@ -16,23 +16,17 @@ export class CustomerService implements ICustomerService {
     this.customerRepository = AppDataSource.getRepository(CustomerEntity);
   }
 
-  public index = async (filters: CustomerSearchFilter) => {
-    const teste = await this.customerRepository.createQueryBuilder()
-      .select(['id', 'name', 'phone', 'birthDate', 'isDeleted'])
-      // .where("isDeleted = 0", { name: filters.name ?? '' })
-      .execute()
-
-    return teste;
-    const customers = await this.customerRepository.find({
+  public index = async ({ name, skip, take }: CustomerSearchFilter) => {
+    const customers = await this.customerRepository.findAndCount({
       where: {
-        name: ILike(`%${filters.name ?? ''}%`),
+        name: ILike(`%${name ?? ''}%`),
         isDeleted: false
       },
-      take: filters.take,
-      skip: filters.offset * filters.take
+      take,
+      skip
     });
 
-    return customers;
+    return customers as any;
   }
 
   public create = async (customer: CustomerEntity) => {
