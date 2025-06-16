@@ -63,7 +63,9 @@ export class OrderService implements IOrderService {
 
       order.orderItems = await this.orderItemService.createUpdateManyByOrder(order, transactionalEntityManager);
 
-      this.orderInstallmentService.recreateInstallmentsByOrder(order, transactionalEntityManager);
+      if (order.installments)
+        this.orderInstallmentService.recreateInstallmentsByOrder(order, transactionalEntityManager);
+
       return this.mapOrderResponse(order);
     });
   }
