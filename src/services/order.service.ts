@@ -25,10 +25,6 @@ export class OrderService implements IOrderService {
 
   public index = async ({ take, skip, customerId, statusId }: OrderSearchFilter) => {
     const orders = await this.orderRepository.findAndCount({
-      relations: {
-        customer: true,
-        status: true
-      },
       select: {
         id: true,
         orderDate: true,
@@ -38,6 +34,10 @@ export class OrderService implements IOrderService {
         customer: {
           name: true
         },
+      },
+      relations: {
+        customer: true,
+        status: true
       },
       where: {
         customer: {

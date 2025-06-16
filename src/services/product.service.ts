@@ -20,15 +20,25 @@ export class ProductService implements IProductService {
 
   public index = async ({ description, skip, take }: DescriptionFilter) => {
     const products = await this.productRepository.findAndCount({
-      where: {
-        description: ILike(`%${description ?? ''}%`),
-        isDeleted: false
+      select: {
+        id: true,
+        description: true,
+        productCode: true,
+        productPrice: true,
+        category: {
+          id: true,
+          description: true
+        }
       },
       relations: {
         category: true
       },
+      where: {
+        description: ILike(`%${description ?? ''}%`),
+        isDeleted: false
+      },
       take,
-      skip,
+      skip
     });
 
     return products;

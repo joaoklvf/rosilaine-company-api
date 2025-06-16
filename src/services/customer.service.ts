@@ -18,6 +18,12 @@ export class CustomerService implements ICustomerService {
 
   public index = async ({ name, skip, take }: CustomerSearchFilter) => {
     const customers = await this.customerRepository.findAndCount({
+      select: {
+        id: true,
+        name: true,
+        phone: true,
+        birthDate: true
+      },
       where: {
         name: ILike(`%${name ?? ''}%`),
         isDeleted: false
