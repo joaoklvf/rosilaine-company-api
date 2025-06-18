@@ -21,7 +21,7 @@ export class CustomerTagService implements ICustomerTagService {
         isDeleted: false
       },
       take,
-      skip
+      skip: take * skip
     });
 
     return tags;

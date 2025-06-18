@@ -48,7 +48,7 @@ export class OrderService implements IOrderService {
         }
       },
       take,
-      skip
+      skip: take * skip
     });
 
     return orders;

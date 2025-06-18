@@ -21,7 +21,7 @@ export class OrderItemStatusService implements IOrderItemStatusService {
         isDeleted: false
       },
       take,
-      skip
+      skip: take * skip
     });
 
     return orderItemStatus;

@@ -21,7 +21,7 @@ export class ProductCategoryService implements IProductCategoryService {
         isDeleted: false
       },
       take,
-      skip
+      skip: take * skip
     });
 
     return productCategories;

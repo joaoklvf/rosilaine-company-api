@@ -38,7 +38,7 @@ export class ProductService implements IProductService {
         isDeleted: false
       },
       take,
-      skip
+      skip: take * skip
     });
 
     return products;

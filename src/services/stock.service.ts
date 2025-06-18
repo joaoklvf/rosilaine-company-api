@@ -21,7 +21,7 @@ export class StockService implements IStockService {
         isDeleted: false
       },
       take,
-      skip
+      skip: take * skip
     });
 
     return stocks;

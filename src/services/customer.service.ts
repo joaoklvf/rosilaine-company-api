@@ -29,7 +29,7 @@ export class CustomerService implements ICustomerService {
         isDeleted: false
       },
       take,
-      skip
+      skip: take * skip
     });
 
     return customers;
