@@ -8,5 +8,6 @@ export const INJECTABLE_TYPES = {
   OrderItemStatusService: Symbol.for('OrderItemStatusServiceId'),
   ProductCategoryService: Symbol.for('ProductCategoryServiceId'),
   ProductService: Symbol.for('ProductServiceId'),
-  StockService: Symbol.for('StockServiceId')
+  StockService: Symbol.for('StockServiceId'),
+  HomeService: Symbol.for('HomeServiceId'),
 }
