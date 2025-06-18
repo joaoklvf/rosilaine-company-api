@@ -1,4 +1,4 @@
-export interface TakeSkipFilter {
-  skip: number;
+export interface OffsetTakeFilter {
+  offset: number;
   take: number;
 }

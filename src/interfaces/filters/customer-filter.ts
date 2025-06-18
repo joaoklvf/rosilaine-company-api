@@ -1,5 +1,5 @@
-import { TakeSkipFilter } from "./take-skip-filter";
+import { OffsetTakeFilter } from "./take-skip-filter";
 
-export interface CustomerSearchFilter extends TakeSkipFilter {
+export interface CustomerSearchFilter extends OffsetTakeFilter {
   name?: string;
 }

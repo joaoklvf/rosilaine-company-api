@@ -14,7 +14,7 @@ export class OrderStatusService implements IOrderStatusService {
     this.orderStatusRepository = AppDataSource.getRepository(OrderStatusEntity);
   }
 
-  public index = async ({ description, skip, take }: DescriptionFilter) => {
+  public index = async ({ description, offset: skip, take }: DescriptionFilter) => {
     const orderStatus = await this.orderStatusRepository.findAndCount({
       where: {
         description: ILike(`%${description ?? ''}%`),

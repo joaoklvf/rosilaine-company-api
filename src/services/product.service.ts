@@ -18,7 +18,7 @@ export class ProductService implements IProductService {
     this.productRepository = AppDataSource.getRepository(ProductEntity);
   }
 
-  public index = async ({ description, skip, take }: DescriptionFilter) => {
+  public index = async ({ description, offset: skip, take }: DescriptionFilter) => {
     const products = await this.productRepository.findAndCount({
       select: {
         id: true,

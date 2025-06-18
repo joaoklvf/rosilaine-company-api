@@ -16,7 +16,7 @@ export class CustomerService implements ICustomerService {
     this.customerRepository = AppDataSource.getRepository(CustomerEntity);
   }
 
-  public index = async ({ name, skip, take }: CustomerSearchFilter) => {
+  public index = async ({ name, offset: skip, take }: CustomerSearchFilter) => {
     const customers = await this.customerRepository.findAndCount({
       select: {
         id: true,

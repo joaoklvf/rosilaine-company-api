@@ -9,7 +9,7 @@ import { getBrCurrencyStr, getBrDateStr } from '../utils/text-format';
 
 @injectable()
 export class HomeService implements IHomeService {
-  public index = async ({ skip, take }: DescriptionFilter) => {
+  public index = async ({ offset: skip, take }: DescriptionFilter) => {
     const repository = AppDataSource.getRepository(OrderInstallmentEntity);
 
     const installments = await repository.findAndCount({

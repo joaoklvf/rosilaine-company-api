@@ -14,7 +14,7 @@ export class ProductCategoryService implements IProductCategoryService {
     this.productCategoryRepository = AppDataSource.getRepository(ProductCategoryEntity);
   }
   
-  public index = async ({ description, skip, take }: DescriptionFilter) => {
+  public index = async ({ description, offset: skip, take }: DescriptionFilter) => {
     const productCategories = await this.productCategoryRepository.findAndCount({
       where: {
         description: ILike(`%${description ?? ''}%`),
