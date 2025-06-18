@@ -36,7 +36,7 @@ export class CustomerService implements ICustomerService {
   }
 
   public create = async (customer: CustomerEntity) => {
-    if (customer.tags.some(x => !x.id)) {
+    if (customer.tags?.some(x => !x.id)) {
       const newTags = await this.customerTagService.createMany(customer.tags);
       customer.tags = [...newTags];
     }
@@ -46,7 +46,7 @@ export class CustomerService implements ICustomerService {
   }
 
   public update = async (customer: CustomerEntity, id: string) => {
-    if (customer.tags.some(x => !x.id)) {
+    if (customer.tags?.some(x => !x.id)) {
       const newTags = await this.customerTagService.createMany(customer.tags);
       customer.tags = [...newTags];
     }
