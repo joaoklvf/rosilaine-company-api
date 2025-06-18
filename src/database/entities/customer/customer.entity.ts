@@ -17,22 +17,22 @@ export class CustomerEntity extends BaseProjectEntity {
   @Column({ length: 10, nullable: true })
   zipCode?: string;
 
-  @Column({ length: 30, nullable: true })
+  @Column({ length: 60, nullable: true })
   street?: string;
 
-  @Column({ length: 30, nullable: true })
+  @Column({ length: 60, nullable: true })
   neighborhood?: string;
 
-  @Column({ length: 10, nullable: true })
+  @Column({ length: 60, nullable: true })
   houseNumber?: string;
 
-  @Column({ length: 30, nullable: true })
+  @Column({ length: 60, nullable: true })
   city?: string;
 
-  @Column({ length: 30, nullable: true })
+  @Column({ length: 60, nullable: true })
   complemento?: string;
 
-  @Column({ length: 30, nullable: true })
+  @Column({ length: 60, nullable: true })
   addressObservation?: string;
 
   @Column({ length: 2, nullable: true })
