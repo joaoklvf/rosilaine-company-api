@@ -26,7 +26,7 @@ export class StockService implements IStockService {
 
     return stocks;
   }
-  
+
   public create = async (stock: StockEntity) => {
     const newStock = await this.stockRepository.save(stock);
     return newStock;
@@ -39,6 +39,17 @@ export class StockService implements IStockService {
 
   public delete = async (id: string) => {
     const deletedStock = await this.stockRepository.delete(id);
+    return deletedStock;
+  }
+
+  public safeDelete = async (id: string) => {
+    const deletedStock = await this.stockRepository
+      .createQueryBuilder()
+      .from(StockEntity, 'stock')
+      .update({ isDeleted: true })
+      .where('id = :id', { id })
+      .execute();
+
     return deletedStock;
   }
 

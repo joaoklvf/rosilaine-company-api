@@ -47,6 +47,17 @@ export class CustomerTagService implements ICustomerTagService {
     return deletedCustomerTag;
   }
 
+  public safeDelete = async (id: string) => {
+    const deletedCustomerTag = await this.customerTagRepository
+      .createQueryBuilder()
+      .from(CustomerTagEntity, 'customer-tag')
+      .update({ isDeleted: true })
+      .where('id = :id', { id })
+      .execute();
+
+    return deletedCustomerTag;
+  }
+
   public get = async (id: string) => {
     const product = await this.customerTagRepository.findOne({
       where: {

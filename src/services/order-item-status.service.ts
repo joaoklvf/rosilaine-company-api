@@ -42,6 +42,17 @@ export class OrderItemStatusService implements IOrderItemStatusService {
     return deletedOrderItemStatus;
   }
 
+  public safeDelete = async (id: string) => {
+    const deletedOrderItemStatus = await this.orderItemStatusRepository
+      .createQueryBuilder()
+      .from(OrderItemStatusEntity, 'order-item-status')
+      .update({ isDeleted: true })
+      .where('id = :id', { id })
+      .execute();
+
+    return deletedOrderItemStatus;
+  }
+
   public get = async (id: string) => {
     const product = await this.orderItemStatusRepository.findOne({
       where: {

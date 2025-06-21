@@ -48,6 +48,17 @@ export class OrderInstallmentService implements IOrderInstallmentService {
     return deletedOrderInstallment;
   }
 
+  public safeDelete = async (id: string) => {
+    const deletedOrderInstallment = await this.orderInstallmentRepository
+      .createQueryBuilder()
+      .from(OrderInstallmentEntity, 'order-installment')
+      .update({ isDeleted: true })
+      .where('id = :id', { id })
+      .execute();
+
+    return deletedOrderInstallment;
+  }
+
   public get = async (id: string) => {
     const category = await this.orderInstallmentRepository.findOne({
       where: {
@@ -59,7 +70,7 @@ export class OrderInstallmentService implements IOrderInstallmentService {
   }
 
   public updateMany = async (installments: OrderInstallmentEntity[]) => {
-    return await this.orderInstallmentRepository.manager.transaction(async (transactionalEntityManager) => { 
+    return await this.orderInstallmentRepository.manager.transaction(async (transactionalEntityManager) => {
       return await transactionalEntityManager.save(OrderInstallmentEntity, installments);
     });
   }

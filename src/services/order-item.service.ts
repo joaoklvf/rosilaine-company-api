@@ -71,6 +71,17 @@ export class OrderItemService implements IOrderItemService {
     return deletedOrderItem;
   }
 
+  public safeDelete = async (id: string) => {
+    const deletedOrderItem = await this.orderItemRepository
+      .createQueryBuilder()
+      .from(OrderItemEntity, 'order-item')
+      .update({ isDeleted: true })
+      .where('id = :id', { id })
+      .execute();
+
+    return deletedOrderItem;
+  }
+
   public get = async (id: string) => {
     const category = await this.orderItemRepository.findOne({
       where: {

@@ -41,6 +41,11 @@ export class ProductController {
     res.send(await this.productService.delete(id));
   }
 
+  public safeDelete = async (req: Request, res: Response) => {
+    const id = req['params']['id'];
+    res.send(await this.productService.safeDelete(id));
+  }
+
   /**
    * Configure the routes of controller
    */
@@ -49,5 +54,6 @@ export class ProductController {
     this.router.post('/', this.create);
     this.router.put('/:id', this.update);
     this.router.delete('/:id', this.delete);
+    this.router.delete('/safe-delete/:id', this.safeDelete);
   }
 }

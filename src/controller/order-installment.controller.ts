@@ -64,6 +64,11 @@ export class OrderInstallmentController {
     });
   }
 
+  public safeDelete = async (req: Request, res: Response) => {
+    const id = req['params']['id'];
+    res.send(await this.orderInstallmentService.safeDelete(id));
+  }
+
   /**
    * Configure the routes of controller
    */
@@ -74,5 +79,6 @@ export class OrderInstallmentController {
     this.router.put('/:id', this.update);
     this.router.put('/', this.updateMany);
     this.router.delete('/:id', this.delete);
+    this.router.delete('/safe-delete/:id', this.safeDelete);
   }
 }

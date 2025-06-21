@@ -41,6 +41,11 @@ export class CustomerTagController {
     res.send(await this.customerTagService.delete(id));
   }
 
+  public safeDelete = async (req: Request, res: Response) => {
+    const id = req['params']['id'];
+    res.send(await this.customerTagService.safeDelete(id));
+  }
+
   /**
    * Configure the routes of controller
    */
@@ -49,5 +54,6 @@ export class CustomerTagController {
     this.router.post('/', this.create);
     this.router.put('/:id', this.update);
     this.router.delete('/:id', this.delete);
+    this.router.delete('/safe-delete/:id', this.safeDelete);
   }
 }

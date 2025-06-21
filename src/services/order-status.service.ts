@@ -26,7 +26,7 @@ export class OrderStatusService implements IOrderStatusService {
 
     return orderStatus;
   }
-  
+
   public create = async (orderStatus: OrderStatusEntity) => {
     const newOrderStatus = await this.orderStatusRepository.save(orderStatus);
     return newOrderStatus;
@@ -39,6 +39,17 @@ export class OrderStatusService implements IOrderStatusService {
 
   public delete = async (id: string) => {
     const deletedOrderStatus = await this.orderStatusRepository.delete(id);
+    return deletedOrderStatus;
+  }
+
+  public safeDelete = async (id: string) => {
+    const deletedOrderStatus = await this.orderStatusRepository
+      .createQueryBuilder()
+      .from(OrderStatusEntity, 'order-status')
+      .update({ isDeleted: true })
+      .where('id = :id', { id })
+      .execute();
+
     return deletedOrderStatus;
   }
 

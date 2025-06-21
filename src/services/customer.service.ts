@@ -60,6 +60,17 @@ export class CustomerService implements ICustomerService {
     return deletedCustomer;
   }
 
+  public safeDelete = async (id: string) => {
+    const deletedCustomer = await this.customerRepository
+      .createQueryBuilder()
+      .from(CustomerEntity, 'customer')
+      .update({ isDeleted: true })
+      .where('id = :id', { id })
+      .execute();
+
+    return deletedCustomer;
+  }
+
   public get = async (id: string) => {
     const customer = await this.customerRepository.findOne({
       relations: {

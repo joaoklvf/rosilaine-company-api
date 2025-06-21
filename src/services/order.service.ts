@@ -110,6 +110,17 @@ export class OrderService implements IOrderService {
     return deleteResult;
   }
 
+  public safeDelete = async (id: string) => {
+    const deletedOrder = await this.orderRepository
+      .createQueryBuilder()
+      .from(OrderEntity, 'order')
+      .update({ isDeleted: true })
+      .where('id = :id', { id })
+      .execute();
+
+    return deletedOrder;
+  }
+
   public get = async (id: string) => {
     const order = await this.orderRepository.findOne({
       relations: {

@@ -13,7 +13,7 @@ export class ProductCategoryService implements IProductCategoryService {
   constructor() {
     this.productCategoryRepository = AppDataSource.getRepository(ProductCategoryEntity);
   }
-  
+
   public index = async ({ description, offset: skip, take }: DescriptionFilter) => {
     const productCategories = await this.productCategoryRepository.findAndCount({
       where: {
@@ -26,7 +26,7 @@ export class ProductCategoryService implements IProductCategoryService {
 
     return productCategories;
   }
-  
+
   public create = async (productCategory: ProductCategoryEntity) => {
     const newProductCategory = await this.productCategoryRepository.save(productCategory);
     return newProductCategory;
@@ -39,6 +39,17 @@ export class ProductCategoryService implements IProductCategoryService {
 
   public delete = async (id: string) => {
     const deletedProductCategory = await this.productCategoryRepository.delete(id);
+    return deletedProductCategory;
+  }
+
+  public safeDelete = async (id: string) => {
+    const deletedProductCategory = await this.productCategoryRepository
+      .createQueryBuilder()
+      .from(ProductCategoryEntity, 'product-category')
+      .update({ isDeleted: true })
+      .where('id = :id', { id })
+      .execute();
+
     return deletedProductCategory;
   }
 

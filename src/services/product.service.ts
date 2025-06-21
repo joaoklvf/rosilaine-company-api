@@ -65,6 +65,17 @@ export class ProductService implements IProductService {
     return deletedOrder;
   }
 
+  public safeDelete = async (id: string) => {
+    const deletedOrder = await this.productRepository
+      .createQueryBuilder()
+      .from(ProductEntity, 'product')
+      .update({ isDeleted: true })
+      .where('id = :id', { id })
+      .execute();
+
+    return deletedOrder;
+  }
+
   public find = async (ids: number[]) => {
     const products = await this.productRepository.findBy({ id: In(ids) })
     return products;

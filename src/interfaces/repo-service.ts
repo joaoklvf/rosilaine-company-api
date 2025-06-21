@@ -1,4 +1,4 @@
-import { DeleteResult } from "typeorm";
+import { DeleteResult, UpdateResult } from "typeorm";
 
 /**
  * @interface IRepoService<T>
@@ -6,6 +6,7 @@ import { DeleteResult } from "typeorm";
  **/
 export interface IRepoService<T> {          // Exportado
   delete(id: string): Promise<DeleteResult>;
+  safeDelete(id: string): Promise<UpdateResult>;
   index(params?: any): Promise<[T[], number]>;
   create(customer: T): Promise<T | null>;
   update(customer: T, id: string): Promise<T | null>;
