@@ -8,13 +8,13 @@ export class OrderInstallmentEntity extends BaseProjectEntity {
   amount: number;
 
   @Column({ nullable: true, type: 'decimal', precision: 10, scale: 2 })
-  amountPaid: number;
+  amountPaid: number | null;
 
   @Column()
   debitDate: Date;
 
-  @Column({ nullable: true })
-  paymentDate: Date;
+  @Column({ nullable: true, type: 'date' })
+  paymentDate: Date | null;
 
   @ManyToOne(() => OrderEntity, order => order.installments)
   order: OrderEntity;
