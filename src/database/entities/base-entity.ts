@@ -11,5 +11,5 @@ export class BaseProjectEntity {
   updatedDate: Date;
 
   @Column({ default: false })
-  isDeleted: boolean;
+  isDeleted?: boolean;
 }
