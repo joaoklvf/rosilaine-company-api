@@ -81,19 +81,11 @@ export class OrderService implements IOrderService {
     return await this.orderRepository.manager.transaction(async (transactionalEntityManager) => {
       order.status = await this.checkToCreateOrderStatus(order, transactionalEntityManager);
       order.orderItems = await this.orderItemService.createUpdateManyByOrder(order, transactionalEntityManager);
-
-      if (order.installments?.some(x => !x.id)) {
-        transactionalEntityManager
-          .createQueryBuilder()
-          .delete()
-          .from(OrderInstallmentEntity)
-          .where("orderId = :orderId", { orderId: order.id })
-          .execute()
-
-        this.orderInstallmentService.recreateInstallmentsByOrder(order, transactionalEntityManager);
-      }
-
       order.total = order.orderItems.reduce((prev, acc) => prev + Number(acc.itemSellingTotal), 0);
+
+      if (order.installments && order.installments.length) {
+        order.installments = await this.orderInstallmentService.recreateInstallmentsByOrder(order, transactionalEntityManager);
+      }
 
       const orderUpdateResult = await transactionalEntityManager.save(OrderEntity, order);
       if (!orderUpdateResult)

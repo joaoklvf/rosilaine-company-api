@@ -5,7 +5,7 @@ import { OrderInstallmentEntity } from '../database/entities/order/order-install
 import { DescriptionFilter } from '../interfaces/filters/product-filter';
 import { IHomeService } from '../interfaces/home-service';
 import { HomeResponse } from '../interfaces/models/home-response';
-import { getBrCurrencyStr, getBrDateStr } from '../utils/text-format';
+import { getBrCurrencyStr, getBrDateStr } from '../utils/text-format-util';
 
 @injectable()
 export class HomeService implements IHomeService {
