@@ -23,7 +23,11 @@ export class OrderService implements IOrderService {
     this.orderRepository = AppDataSource.getRepository(OrderEntity);
   }
 
-  public index = async ({ take, offset: skip, customerId, statusId }: OrderSearchFilter) => {
+  public index = async ({ take, offset, customerId, statusId }: OrderSearchFilter) => {
+    let skip = 0;
+    if (take && offset)
+      skip = take * offset;
+
     const orders = await this.orderRepository.findAndCount({
       select: {
         id: true,
@@ -48,7 +52,7 @@ export class OrderService implements IOrderService {
         }
       },
       take,
-      skip: take * skip
+      skip
     });
 
     return orders;

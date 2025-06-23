@@ -16,7 +16,11 @@ export class CustomerService implements ICustomerService {
     this.customerRepository = AppDataSource.getRepository(CustomerEntity);
   }
 
-  public index = async ({ name, offset: skip, take }: CustomerSearchFilter) => {
+  public index = async ({ name, offset, take }: CustomerSearchFilter) => {
+    let skip = 0;
+    if (take && offset)
+      skip = take * offset;
+
     const customers = await this.customerRepository.findAndCount({
       select: {
         id: true,
@@ -29,7 +33,7 @@ export class CustomerService implements ICustomerService {
         isDeleted: false
       },
       take,
-      skip: take * skip
+      skip
     });
 
     return customers;

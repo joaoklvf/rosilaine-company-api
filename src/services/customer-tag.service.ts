@@ -14,14 +14,18 @@ export class CustomerTagService implements ICustomerTagService {
     this.customerTagRepository = AppDataSource.getRepository(CustomerTagEntity);
   }
 
-  public index = async ({ description, offset: skip, take }: DescriptionFilter) => {
+  public index = async ({ description, offset, take }: DescriptionFilter) => {
+    let skip = 0;
+    if (take && offset)
+      skip = take * offset;
+
     const tags = await this.customerTagRepository.findAndCount({
       where: {
         description: ILike(`%${description ?? ''}%`),
         isDeleted: false
       },
       take,
-      skip: take * skip
+      skip
     });
 
     return tags;

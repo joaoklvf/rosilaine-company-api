@@ -9,9 +9,12 @@ import { getBrCurrencyStr, getBrDateStr } from '../utils/text-format';
 
 @injectable()
 export class HomeService implements IHomeService {
-  public index = async ({ offset: skip, take }: DescriptionFilter) => {
-    const repository = AppDataSource.getRepository(OrderInstallmentEntity);
+  public index = async ({ offset, take }: DescriptionFilter) => {
+    let skip = 0;
+    if (take && offset)
+      skip = take * offset;
 
+    const repository = AppDataSource.getRepository(OrderInstallmentEntity);
     const installments = await repository.findAndCount({
       select: {
         id: true,
@@ -36,7 +39,7 @@ export class HomeService implements IHomeService {
         debitDate: 'ASC'
       },
       take,
-      skip: take * skip
+      skip
     });
 
     const response: [HomeResponse[], number] = [this.mapInstallments(installments[0]), installments[1]];

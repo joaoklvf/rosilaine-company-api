@@ -18,7 +18,11 @@ export class ProductService implements IProductService {
     this.productRepository = AppDataSource.getRepository(ProductEntity);
   }
 
-  public index = async ({ description, offset: skip, take }: DescriptionFilter) => {
+  public index = async ({ description, offset, take }: DescriptionFilter) => {
+    let skip = 0;
+    if (take && offset)
+      skip = take * offset;
+
     const products = await this.productRepository.findAndCount({
       select: {
         id: true,
@@ -38,7 +42,7 @@ export class ProductService implements IProductService {
         isDeleted: false
       },
       take,
-      skip: take * skip
+      skip
     });
 
     return products;
