@@ -14,8 +14,16 @@ export class HomeController {
     this.routes();
   }
 
-  public index = async (req: Request, res: Response) => {
-    await this.homeService.index(req.query).then((data) => {
+  public nextInstallments = async (req: Request, res: Response) => {
+    await this.homeService.nextInstallments(req.query).then((data) => {
+      return res.status(200).json(data);
+    }).catch((error) => {
+      return res.status(500).json({ msg: error });
+    });
+  }
+
+  public installmentsBalance = async (req: Request, res: Response) => {
+    await this.homeService.installmentsBalance(req.query).then((data) => {
       return res.status(200).json(data);
     }).catch((error) => {
       return res.status(500).json({ msg: error });
@@ -26,6 +34,7 @@ export class HomeController {
    * Configure the routes of controller
    */
   public routes() {
-    this.router.get('/', this.index);
+    this.router.get('/installments/next', this.nextInstallments);
+    this.router.get('/installments/balance', this.installmentsBalance);
   }
 }

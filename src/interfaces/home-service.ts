@@ -1,5 +1,6 @@
-import { HomeResponse } from "./models/home-response";
+import { InstallmentsBalance, NextInstallments } from "./models/home";
 
 export interface IHomeService {
-  index(params?: any): Promise<[HomeResponse[], number]>;
+  nextInstallments(params?: any): Promise<[NextInstallments[], number]>;
+  installmentsBalance(params?: any): Promise<InstallmentsBalance | undefined>;
 }
