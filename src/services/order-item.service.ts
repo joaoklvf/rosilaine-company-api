@@ -22,7 +22,7 @@ export class OrderItemService implements IOrderItemService {
   public createUpdateManyByOrder = async (order: OrderEntity, transactionalEntityManager: EntityManager) => {
     const items = [...order.orderItems];
 
-    const itemsWithNewStatus = items.filter(x => !x.itemStatus.id)?.map(x => x.itemStatus);
+    const itemsWithNewStatus = items.filter(x => !x.itemStatus.id)?.map(x => x.itemStatus).filter(status => !!status.description);
     if (itemsWithNewStatus) {
       const statusPromises = itemsWithNewStatus.map(x => transactionalEntityManager.save(OrderItemStatusEntity, x));
       await Promise.all(statusPromises);

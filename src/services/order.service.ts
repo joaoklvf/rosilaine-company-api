@@ -79,7 +79,8 @@ export class OrderService implements IOrderService {
       throw new Error("The order request id does not match with the url id param")
 
     return await this.orderRepository.manager.transaction(async (transactionalEntityManager) => {
-      order.status = await this.checkToCreateOrderStatus(order, transactionalEntityManager);
+      if (order.status.description)
+        order.status = await this.checkToCreateOrderStatus(order, transactionalEntityManager);
       order.orderItems = await this.orderItemService.createUpdateManyByOrder(order, transactionalEntityManager);
       order.total = order.orderItems.reduce((prev, acc) => prev + Number(acc.itemSellingTotal), 0);
 
