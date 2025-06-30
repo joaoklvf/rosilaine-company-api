@@ -24,7 +24,7 @@ export class OrderItemService implements IOrderItemService {
 
     const itemsWithNewStatus = items.filter(x => !x.itemStatus.id)?.map(x => x.itemStatus).filter(status => !!status.description);
     if (itemsWithNewStatus) {
-      const statusPromises = itemsWithNewStatus.map(x => transactionalEntityManager.save(OrderItemStatusEntity, x));
+      const statusPromises = itemsWithNewStatus.map(x => transactionalEntityManager.save(OrderItemStatusEntity, { ...x, description: x.description.trim() }));
       await Promise.all(statusPromises);
     }
 

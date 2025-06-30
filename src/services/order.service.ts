@@ -153,10 +153,11 @@ export class OrderService implements IOrderService {
   }
 
   private async checkToCreateOrderStatus(order: OrderEntity, transactionalEntityManager: EntityManager) {
-    if (order.status.id)
-      return order.status;
+    const status = { ...order.status };
+    if (status.id)
+      return status;
 
-    const newStatus = await transactionalEntityManager.save(OrderStatusEntity, order.status);
+    const newStatus = await transactionalEntityManager.save(OrderStatusEntity, { ...status, description: status.description.trim() });
     if (!newStatus)
       throw new Error("Error creating order status\n");
 
