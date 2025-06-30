@@ -95,6 +95,9 @@ export class ProductService implements IProductService {
     if (category.id && category.id.length > 0)
       return category;
 
+    if (!category.description)
+      throw new Error('Category description empty');
+
     const created = await this.productCategoryService.create(category);
 
     if (!created?.id)

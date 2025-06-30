@@ -22,10 +22,15 @@ export class OrderItemService implements IOrderItemService {
   public createUpdateManyByOrder = async (order: OrderEntity, transactionalEntityManager: EntityManager) => {
     const items = [...order.orderItems];
 
-    const itemsWithNewStatus = items.filter(x => !x.itemStatus.id)?.map(x => x.itemStatus).filter(status => !!status.description);
-    if (itemsWithNewStatus) {
-      const statusPromises = itemsWithNewStatus.map(x => transactionalEntityManager.save(OrderItemStatusEntity, { ...x, description: x.description.trim() }));
-      await Promise.all(statusPromises);
+    const newItemStatuses = items.filter(x => !x.itemStatus.id)?.map(x => x.itemStatus).filter(status => !!status.description);
+    if (newItemStatuses) {
+      const statusPromises = newItemStatuses.map(x => transactionalEntityManager.save(OrderItemStatusEntity, { ...x, description: x.description.trim() }));
+      const statusesCreated = await Promise.all(statusPromises);
+
+      items.forEach(item => {
+        if (!item.itemStatus.id)
+          item.itemStatus = statusesCreated.find(x => x.description === item.itemStatus.description)!;
+      });
     }
 
     const promises = items.map(x => transactionalEntityManager.save(OrderItemEntity, this.getRecalculatedOrderItem(order, x)));
