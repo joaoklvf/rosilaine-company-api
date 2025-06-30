@@ -57,16 +57,30 @@ export class HomeService implements IHomeService {
 
   public installmentsBalance = async (params?: any): Promise<InstallmentsBalance | undefined> => {
     const repository = AppDataSource.getRepository(OrderInstallmentEntity);
-    const balance = await repository
-      .createQueryBuilder('installment')
-      .select('SUM(installment.amount)', 'amountTotal')
-      .addSelect('SUM(installment.amountPaid)', 'amountPaid')
-      .getRawOne<InstallmentsBalance>();
+    try {
+      const balance = await repository
+        .createQueryBuilder('installment')
+        .select('SUM(installment.amount)', 'amountTotal')
+        .addSelect('SUM(installment.amountPaid)', 'amountPaid')
+        .addSelect('(SELECT COUNT (t2.id) from order_installment t2 where t2."amountPaid" is null or t2."amountPaid" = 0)', 'pendingInstallments')
+        .getRawOne<InstallmentsBalance>();
 
-    const balanceResponse: InstallmentsBalance = {
-      amountPaid: Number(balance?.amountPaid ?? 0),
-      amountTotal: Number(balance?.amountTotal ?? 0)
-    };
-    return balanceResponse;
+      const amountPaid = Number(balance?.amountPaid ?? 0);
+      const amountTotal = Number(balance?.amountTotal ?? 0);
+      const amountToReceive = amountTotal - amountPaid;
+
+      const balanceResponse: InstallmentsBalance = {
+        amountPaid,
+        amountTotal,
+        amountToReceive,
+        pendingInstallments: Number(balance?.pendingInstallments ?? 0)
+      };
+
+      return balanceResponse;
+    }
+    catch (error) {
+      console.log(error, 'error')
+      throw error
+    }
   }
 }
