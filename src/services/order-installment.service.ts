@@ -78,7 +78,11 @@ export class OrderInstallmentService implements IOrderInstallmentService {
   }
 
   public generateInstallments(order: OrderEntity, installmentsAmount: number) {
-    const installmentPrice = Math.round((order.total / installmentsAmount) * 100) / 100;
+    const remainder = order.total % installmentsAmount;
+    const valueMinusRemainder = order.total - remainder;
+    const priceToUse = valueMinusRemainder / installmentsAmount;
+    const firsInstallmentPrice = Math.round(priceToUse + remainder)
+    const otherInstallmentsPrice = priceToUse;
     const installments: OrderInstallmentEntity[] = [];
     const now = new Date();
 
@@ -88,8 +92,8 @@ export class OrderInstallmentService implements IOrderInstallmentService {
     order.firstInstallmentDate = new Date(currentDebitDate);
 
     for (let index = 0; index < installmentsAmount; index++) {
-      const price = index === installmentsAmount - 1 ?
-        order.total - installments.reduce((prev, acc) => prev + acc.amount, 0) : installmentPrice;
+      const price = index === 0 ?
+        firsInstallmentPrice : otherInstallmentsPrice;
 
       installments.push({
         amount: price,
