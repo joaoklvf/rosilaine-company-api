@@ -1,21 +1,18 @@
-import { inject, injectable } from 'inversify';
-import { IOrderItemService } from '../interfaces/order-item-service';
-import { INJECTABLE_TYPES } from '../types/inversify-types';
-import { OrderItemRepository } from '../database/repository/order-item.repository';
-import { AppDataSource } from '../../api';
-import { IOrderItemStatusService } from '../interfaces/order-item-status-service';
-import { OrderItemEntity } from '../database/entities/order/order-item/order-item.entity';
+import { injectable } from 'inversify';
 import { EntityManager } from 'typeorm';
-import { OrderEntity } from '../database/entities/order/order.entity';
+import { AppDataSource } from '../../api';
 import { OrderItemStatusEntity } from '../database/entities/order/order-item/order-item-status.entity';
+import { OrderItemEntity } from '../database/entities/order/order-item/order-item.entity';
+import { OrderEntity } from '../database/entities/order/order.entity';
+import { OrderItemRepository } from '../database/repository/order-item.repository';
+import { OrderItemByStatus } from '../interfaces/models/order-item-by-status';
+import { GetByStatusRequestParams, IOrderItemService } from '../interfaces/order-item-service';
 
 @injectable()
 export class OrderItemService implements IOrderItemService {
   private orderItemRepository: OrderItemRepository;
 
-  constructor(
-    @inject(INJECTABLE_TYPES.OrderItemStatusService) private orderItemStatusService: IOrderItemStatusService
-  ) {
+  constructor() {
     this.orderItemRepository = AppDataSource.getRepository(OrderItemEntity);
   }
 
@@ -95,5 +92,32 @@ export class OrderItemService implements IOrderItemService {
     });
 
     return category;
+  }
+
+  public getByStatus = async ({ statusId, take, offset }: GetByStatusRequestParams) => {
+    const skip = Number(take) * Number(offset);
+    const itensByCategory = await this.orderItemRepository.createQueryBuilder('orderItem')
+      .select('COUNT(product.id)', 'amount')
+      .addSelect('product.id', 'productId')
+      .addSelect('product.description', 'productDescription')
+      .addSelect('status.id', 'statusId')
+      .addSelect('status.description', 'statusDescription')
+      .innerJoin('orderItem.product', 'product')
+      .innerJoin('orderItem.itemStatus', 'status')
+      .where('status.id = :statusId', { statusId })
+      .groupBy('product.id, status.id')
+      .take(take)
+      .skip(skip)
+      .getRawMany<OrderItemByStatus>()
+
+    const countResult = await this.orderItemRepository.createQueryBuilder('orderItem')
+      .select('COUNT(*)')
+      .innerJoin('orderItem.product', 'product')
+      .innerJoin('orderItem.itemStatus', 'status')
+      .where('status.id = :statusId', { statusId })
+      .groupBy('product.id, status.id')
+      .getRawOne<{ count: number }>()
+
+    return [itensByCategory, countResult?.count];
   }
 }

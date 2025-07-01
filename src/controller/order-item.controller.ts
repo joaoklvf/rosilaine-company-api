@@ -2,7 +2,7 @@ import { Router, Response, Request } from "express";
 import { inject, injectable } from "inversify";
 import { INJECTABLE_TYPES } from "../types/inversify-types";
 import { OrderItemEntity } from "../database/entities/order/order-item/order-item.entity";
-import { IOrderItemService } from "../interfaces/order-item-service";
+import { GetByStatusRequestParams, IOrderItemService } from "../interfaces/order-item-service";
 
 @injectable()
 export class OrderItemController {
@@ -46,8 +46,14 @@ export class OrderItemController {
   }
 
   public get = async (req: Request, res: Response) => {
-    const id = req['params']['id'];
-    await this.orderItemService.get(id).then((data) => {
+    if (typeof req.query === 'string') {
+      await this.orderItemService.get(req.params.id).then((data) => {
+        return res.status(200).json(data);
+      }).catch((error) => {
+        return res.status(500).json({ msg: error });
+      });
+    }
+    await this.orderItemService.getByStatus(req.query as unknown as GetByStatusRequestParams).then((data) => {
       return res.status(200).json(data);
     }).catch((error) => {
       return res.status(500).json({ msg: error });
@@ -58,7 +64,7 @@ export class OrderItemController {
     const id = req['params']['id'];
     res.send(await this.orderItemService.safeDelete(id));
   }
-  
+
   /**
    * Configure the routes of controller
    */
