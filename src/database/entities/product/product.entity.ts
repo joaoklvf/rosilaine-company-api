@@ -9,7 +9,7 @@ export class ProductEntity extends BaseProjectEntity {
   @Column({ length: 150 })
   description: string;
 
-  @Column({ length: 10, unique: true, nullable: true })
+  @Column({ length: 10, nullable: true })
   productCode?: string;
 
   @Column({ type: 'decimal', precision: 10, scale: 2 })
