@@ -5,7 +5,7 @@ import { OrderItemStatusEntity } from '../database/entities/order/order-item/ord
 import { OrderItemEntity } from '../database/entities/order/order-item/order-item.entity';
 import { OrderEntity } from '../database/entities/order/order.entity';
 import { OrderItemRepository } from '../database/repository/order-item.repository';
-import { OrderItemByStatus } from '../interfaces/models/order-item-by-status';
+import { OrderItemByStatus, UpdateManyStatusRequest } from '../interfaces/models/order-item-by-status';
 import { GetByStatusRequestParams, IOrderItemService } from '../interfaces/order-item-service';
 
 @injectable()
@@ -97,7 +97,7 @@ export class OrderItemService implements IOrderItemService {
   public getByStatus = async ({ statusId, take, offset }: GetByStatusRequestParams) => {
     const skip = Number(take) * Number(offset);
     const itensByCategory = await this.orderItemRepository.createQueryBuilder('orderItem')
-      .select('COUNT(product.id)', 'amount')
+      .select('SUM(orderItem.itemAmount)', 'amount')
       .addSelect('product.id', 'productId')
       .addSelect('product.description', 'productDescription')
       .addSelect('status.id', 'statusId')
@@ -119,5 +119,17 @@ export class OrderItemService implements IOrderItemService {
       .getRawOne<{ count: number }>()
 
     return [itensByCategory, countResult?.count];
+  }
+
+  public changeManyStatus = async (request: UpdateManyStatusRequest) => {
+    return await this.orderItemRepository.createQueryBuilder()
+      .update(OrderItemEntity)
+      .set({
+        itemStatus: {
+          id: request.newStatusId
+        }
+      })
+      .where('itemStatusId = :oldStatusId', { oldStatusId: request.oldStatusId })
+      .execute()
   }
 }

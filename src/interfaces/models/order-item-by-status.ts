@@ -5,3 +5,8 @@ export interface OrderItemByStatus {
   productId: string;
   productDescription: string;
 }
+
+export interface UpdateManyStatusRequest {
+  oldStatusId: string;
+  newStatusId: string;
+}

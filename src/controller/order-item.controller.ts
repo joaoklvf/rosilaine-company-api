@@ -30,14 +30,24 @@ export class OrderItemController {
   }
 
   public update = async (req: Request, res: Response) => {
-    const orderItemItem = req['body'] as OrderItemEntity;
-    const id = req['params']['id'];
+    var message;
+    if (req.path === '/many-status-change') {
+      await this.orderItemService.changeManyStatus(req['body']).then(requestBody => {
+        message = (requestBody);
+      }).catch(error => {
+        message = (error);
+      })
+    }
+    const requestBody = req['body'];
+    const id = req.params.id;
 
-    this.orderItemService.update(orderItemItem, id).then(orderItemItem => {
-      return res.send(orderItemItem);
+    await this.orderItemService.update(requestBody, id).then(orderItemItem => {
+      message = (orderItemItem);
     }).catch(error => {
-      return res.send(error);
+      message = (error);
     })
+
+    return res.send(message)
   }
 
   public delete = async (req: Request, res: Response) => {
@@ -64,7 +74,6 @@ export class OrderItemController {
     const id = req['params']['id'];
     res.send(await this.orderItemService.safeDelete(id));
   }
-
   /**
    * Configure the routes of controller
    */
