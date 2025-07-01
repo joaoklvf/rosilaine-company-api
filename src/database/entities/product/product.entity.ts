@@ -6,7 +6,7 @@ import { BaseProjectEntity } from "../base-entity";
 
 @Entity('product')
 export class ProductEntity extends BaseProjectEntity {
-  @Column({ length: 50 })
+  @Column({ length: 150 })
   description: string;
 
   @Column({ length: 10, unique: true, nullable: true })
