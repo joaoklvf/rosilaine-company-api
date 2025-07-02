@@ -11,6 +11,7 @@ import { OrderInstallmentEntity } from '../database/entities/order/order-install
 import { IOrderInstallmentService } from '../interfaces/order-installment-service';
 import { OrderStatusEntity } from '../database/entities/order/order-status.entity';
 import { OrderSearchFilter } from '../interfaces/filters/order-filter';
+import { EndCustomerEntity } from '../database/entities/customer/end-customer/customer.entity';
 
 @injectable()
 export class OrderService implements IOrderService {
@@ -51,6 +52,11 @@ export class OrderService implements IOrderService {
           id: statusId
         }
       },
+      order: {
+        createdDate: {
+          direction: 'DESC'
+        }
+      },
       take,
       skip
     });
@@ -61,6 +67,7 @@ export class OrderService implements IOrderService {
   public create = async (order: OrderEntity) => {
     return await this.orderRepository.manager.transaction(async (transactionalEntityManager) => {
       order.status = await this.checkToCreateOrderStatus(order, transactionalEntityManager);
+      order.endCustomer = await this.checkToCreateEndCustomer(order, transactionalEntityManager);
 
       order.total = order.orderItems.reduce((prev, orderItem) => prev + (Number(orderItem.itemAmount) * Number(orderItem.itemSellingPrice)), 0);
       order = await transactionalEntityManager.save(OrderEntity, order);
@@ -79,8 +86,10 @@ export class OrderService implements IOrderService {
       throw new Error("The order request id does not match with the url id param")
 
     return await this.orderRepository.manager.transaction(async (transactionalEntityManager) => {
-      if (order.status.description)
-        order.status = await this.checkToCreateOrderStatus(order, transactionalEntityManager);
+
+      order.status = await this.checkToCreateOrderStatus(order, transactionalEntityManager);
+      order.endCustomer = await this.checkToCreateEndCustomer(order, transactionalEntityManager);
+
       order.orderItems = await this.orderItemService.createUpdateManyByOrder(order, transactionalEntityManager);
       order.total = order.orderItems.reduce((prev, acc) => prev + Number(acc.itemSellingTotal), 0);
 
@@ -127,7 +136,8 @@ export class OrderService implements IOrderService {
           product: true,
           itemStatus: true
         },
-        installments: true
+        installments: true,
+        endCustomer: true
       },
       where: {
         id
@@ -162,5 +172,21 @@ export class OrderService implements IOrderService {
       throw new Error("Error creating order status\n");
 
     return { ...newStatus };
+  }
+
+  private async checkToCreateEndCustomer(order: OrderEntity, transactionalEntityManager: EntityManager) {
+    console.log('\norder.endcustomer\n', order.endCustomer)
+    if (!(order.endCustomer && order.endCustomer.name))
+      return;
+
+    const endCustomer = { ...order.endCustomer, customer: order.customer };
+    if (endCustomer.id)
+      return endCustomer;
+
+    const newEndCustomer = await transactionalEntityManager.save(EndCustomerEntity, { ...endCustomer, description: endCustomer.name.trim() });
+    if (!newEndCustomer)
+      throw new Error("Error creating end customer\n");
+
+    return { ...newEndCustomer };
   }
 }
