@@ -56,7 +56,7 @@ const startApp = async () => {
     const endCustomerController = container.get(EndCustomerController);
 
     app.use(`/api/customers/`, customerController.router);
-    app.use(`/api/customers/{customerId}/end-customers`, endCustomerController.router);
+    app.use(`/api/customers/:customerId/end-customers`, endCustomerController.router);
     app.use(`/api/customer-tags/`, customerTagController.router);
     app.use('/api/products/', productController.router);
     app.use('/api/orders/', orderController.router);
