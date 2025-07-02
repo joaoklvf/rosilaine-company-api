@@ -10,4 +10,5 @@ export const INJECTABLE_TYPES = {
   ProductService: Symbol.for('ProductServiceId'),
   StockService: Symbol.for('StockServiceId'),
   HomeService: Symbol.for('HomeServiceId'),
+  EndCustomerService: Symbol.for('EndCustomerServiceId'),
 }

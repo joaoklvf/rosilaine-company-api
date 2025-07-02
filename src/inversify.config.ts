@@ -25,6 +25,8 @@ import { OrderInstallmentService } from './services/order-installment.service';
 import { OrderInstallmentController } from './controller/order-installment.controller';
 import { HomeController } from './controller/home.controller';
 import { HomeService } from './services/home.service';
+import { EndCustomerController } from './controller/end-customer.controller';
+import { EndCustomerService } from './services/end-customer.service';
 
 export const container = new Container();
 
@@ -39,6 +41,7 @@ container.bind(CustomerTagController).toSelf();
 container.bind(OrderItemController).toSelf();
 container.bind(OrderInstallmentController).toSelf();
 container.bind(HomeController).toSelf();
+container.bind(EndCustomerController).toSelf();
 
 container.bind(INJECTABLE_TYPES.CustomerService).to(CustomerService);
 container.bind(INJECTABLE_TYPES.CustomerTagService).to(CustomerTagService);
@@ -51,3 +54,4 @@ container.bind(INJECTABLE_TYPES.ProductService).to(ProductService);
 container.bind(INJECTABLE_TYPES.StockService).to(StockService);
 container.bind(INJECTABLE_TYPES.OrderInstallmentService).to(OrderInstallmentService);
 container.bind(INJECTABLE_TYPES.HomeService).to(HomeService);
+container.bind(INJECTABLE_TYPES.EndCustomerService).to(EndCustomerService);
