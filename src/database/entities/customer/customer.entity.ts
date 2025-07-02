@@ -2,6 +2,7 @@ import { Column, Entity, JoinTable, ManyToMany, OneToMany } from "typeorm";
 import { OrderEntity } from "../order/order.entity";
 import { CustomerTagEntity } from "./customer-tag.entity";
 import { BaseProjectEntity } from "../base-entity";
+import { EndCustomerEntity } from "./end-customer/customer.entity";
 
 @Entity('customer')
 export class CustomerEntity extends BaseProjectEntity {
@@ -40,6 +41,9 @@ export class CustomerEntity extends BaseProjectEntity {
 
   @OneToMany(() => OrderEntity, (order) => order.customer)
   orders: OrderEntity[];
+
+  @OneToMany(() => EndCustomerEntity, (endCustomer) => endCustomer.customer)
+  endCustomers: EndCustomerEntity[];
 
   @ManyToMany(() => CustomerTagEntity, (tags) => tags)
   @JoinTable()

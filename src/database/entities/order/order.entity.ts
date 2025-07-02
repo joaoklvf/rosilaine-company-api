@@ -4,6 +4,7 @@ import { OrderInstallmentEntity } from "./order-installment.entity";
 import { OrderItemEntity } from "./order-item/order-item.entity";
 import { OrderStatusEntity } from "./order-status.entity";
 import { BaseProjectEntity } from "../base-entity";
+import { EndCustomerEntity } from "../customer/end-customer/customer.entity";
 
 @Entity('order')
 export class OrderEntity extends BaseProjectEntity {
@@ -21,6 +22,9 @@ export class OrderEntity extends BaseProjectEntity {
 
   @ManyToOne(() => CustomerEntity, customer => customer.orders)
   customer: CustomerEntity;
+
+  @ManyToOne(() => EndCustomerEntity, endCustomer => endCustomer.orders, { nullable: true })
+  endCustomer: EndCustomerEntity;
 
   @ManyToOne(() => OrderStatusEntity, orderStatus => orderStatus.orders)
   status: OrderStatusEntity;
