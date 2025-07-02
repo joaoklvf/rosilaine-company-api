@@ -24,7 +24,7 @@ export class OrderEntity extends BaseProjectEntity {
   customer: CustomerEntity;
 
   @ManyToOne(() => EndCustomerEntity, endCustomer => endCustomer.orders, { nullable: true })
-  endCustomer: EndCustomerEntity;
+  endCustomer?: EndCustomerEntity;
 
   @ManyToOne(() => OrderStatusEntity, orderStatus => orderStatus.orders)
   status: OrderStatusEntity;
