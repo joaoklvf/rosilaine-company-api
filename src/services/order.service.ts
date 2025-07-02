@@ -12,6 +12,7 @@ import { IOrderInstallmentService } from '../interfaces/order-installment-servic
 import { OrderStatusEntity } from '../database/entities/order/order-status.entity';
 import { OrderSearchFilter } from '../interfaces/filters/order-filter';
 import { EndCustomerEntity } from '../database/entities/customer/end-customer/end-customer.entity';
+import { OrderRequest } from '../interfaces/models/order/order-request';
 
 @injectable()
 export class OrderService implements IOrderService {
@@ -68,7 +69,7 @@ export class OrderService implements IOrderService {
     return orders;
   }
 
-  public create = async (order: OrderEntity) => {
+  public create = async (order: OrderRequest) => {
     return await this.orderRepository.manager.transaction(async (transactionalEntityManager) => {
       order.status = await this.checkToCreateOrderStatus(order, transactionalEntityManager);
       order.endCustomer = await this.checkToCreateEndCustomer(order, transactionalEntityManager);
@@ -85,7 +86,7 @@ export class OrderService implements IOrderService {
     });
   }
 
-  public update = async (order: OrderEntity, id: string) => {
+  public update = async (order: OrderRequest, id: string) => {
     if (order.id !== id)
       throw new Error("The order request id does not match with the url id param")
 

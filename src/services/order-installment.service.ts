@@ -1,11 +1,12 @@
 import { injectable } from 'inversify';
-import { IOrderInstallmentService } from '../interfaces/order-installment-service';
-import { OrderInstallmentRepository } from '../database/repository/order-installment.repository';
+import { EntityManager } from 'typeorm';
 import { AppDataSource } from '../../api';
 import { OrderInstallmentEntity } from '../database/entities/order/order-installment.entity';
 import { OrderEntity } from '../database/entities/order/order.entity';
-import { EntityManager } from 'typeorm';
-import { getNextMonthDate } from '../utils/date-util';
+import { OrderInstallmentRepository } from '../database/repository/order-installment.repository';
+import { IOrderInstallmentService } from '../interfaces/order-installment-service';
+import { generateInstallments } from '../utils/installments-util';
+import { OrderRequest } from '../interfaces/models/order/order-request';
 
 @injectable()
 export class OrderInstallmentService implements IOrderInstallmentService {
@@ -16,14 +17,14 @@ export class OrderInstallmentService implements IOrderInstallmentService {
     this.orderInstallmentRepository = AppDataSource.getRepository(OrderInstallmentEntity);
   }
 
-  public recreateInstallmentsByOrder = async (order: OrderEntity, transactionalEntityManager: EntityManager) => {
+  public recreateInstallmentsByOrder = async (order: OrderRequest, transactionalEntityManager: EntityManager) => {
     await transactionalEntityManager.createQueryBuilder()
       .delete()
       .from(OrderInstallmentEntity)
       .where("orderId = :orderId", { orderId: order.id })
       .execute().catch(error => console.log(error));
 
-    const newInstallments = this.generateInstallments(order, order.installments.length);
+    const newInstallments = generateInstallments(order);
     const promises = newInstallments.map(x => transactionalEntityManager.save(OrderInstallmentEntity, { ...x, order }));
     const savePromises = await Promise.all(promises);
 
@@ -75,39 +76,5 @@ export class OrderInstallmentService implements IOrderInstallmentService {
     return await this.orderInstallmentRepository.manager.transaction(async (transactionalEntityManager) => {
       return await transactionalEntityManager.save(OrderInstallmentEntity, installments);
     });
-  }
-
-  public generateInstallments(order: OrderEntity, installmentsAmount: number) {
-    const remainder = order.total % installmentsAmount;
-    const valueMinusRemainder = order.total - remainder;
-    const priceToUse = valueMinusRemainder / installmentsAmount;
-    const firsInstallmentPrice = Math.round(priceToUse + remainder)
-    const otherInstallmentsPrice = priceToUse;
-    const installments: OrderInstallmentEntity[] = [];
-    const now = new Date();
-
-    let currentDebitDate = order.firstInstallmentDate ?
-      new Date(order.firstInstallmentDate) : getNextMonthDate(now);
-
-    order.firstInstallmentDate = new Date(currentDebitDate);
-
-    for (let index = 0; index < installmentsAmount; index++) {
-      const price = index === 0 ?
-        firsInstallmentPrice : otherInstallmentsPrice;
-
-      installments.push({
-        amount: price,
-        amountPaid: null,
-        createdDate: now,
-        updatedDate: now,
-        debitDate: new Date(currentDebitDate),
-        paymentDate: null,
-        order: order
-      });
-
-      currentDebitDate = getNextMonthDate(currentDebitDate);
-    }
-
-    return [...installments];
   }
 }
