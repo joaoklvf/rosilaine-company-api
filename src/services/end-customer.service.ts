@@ -4,7 +4,7 @@ import { AppDataSource } from '../../api';
 import { CustomerSearchFilter } from '../interfaces/filters/customer-filter';
 import { EndCustomerRepository } from '../database/repository/end-customer.repository';
 import { IEndCustomerService } from '../interfaces/end-customer-service';
-import { EndCustomerEntity } from '../database/entities/customer/end-customer/customer.entity';
+import { EndCustomerEntity } from '../database/entities/customer/end-customer/end-customer.entity';
 
 @injectable()
 export class EndCustomerService implements IEndCustomerService {
@@ -14,7 +14,7 @@ export class EndCustomerService implements IEndCustomerService {
     this.endCustomerRepository = AppDataSource.getRepository(EndCustomerEntity);
   }
 
-  public index = async ({ name, offset, take }: CustomerSearchFilter) => {
+  public index = async ({ name, offset, take, customerId }: any) => {
     let skip = 0;
     if (take && offset)
       skip = take * offset;
@@ -26,7 +26,10 @@ export class EndCustomerService implements IEndCustomerService {
       },
       where: {
         name: ILike(`%${name ?? ''}%`),
-        isDeleted: false
+        isDeleted: false,
+        customer: {
+          id: customerId
+        }
       },
       take,
       skip

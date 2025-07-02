@@ -4,7 +4,7 @@ import { OrderInstallmentEntity } from "./order-installment.entity";
 import { OrderItemEntity } from "./order-item/order-item.entity";
 import { OrderStatusEntity } from "./order-status.entity";
 import { BaseProjectEntity } from "../base-entity";
-import { EndCustomerEntity } from "../customer/end-customer/customer.entity";
+import { EndCustomerEntity } from "../customer/end-customer/end-customer.entity";
 
 @Entity('order')
 export class OrderEntity extends BaseProjectEntity {

@@ -2,7 +2,7 @@ import { Column, Entity, JoinTable, ManyToMany, OneToMany } from "typeorm";
 import { OrderEntity } from "../order/order.entity";
 import { CustomerTagEntity } from "./customer-tag.entity";
 import { BaseProjectEntity } from "../base-entity";
-import { EndCustomerEntity } from "./end-customer/customer.entity";
+import { EndCustomerEntity } from "./end-customer/end-customer.entity";
 
 @Entity('customer')
 export class CustomerEntity extends BaseProjectEntity {

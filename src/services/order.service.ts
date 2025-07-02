@@ -11,7 +11,7 @@ import { OrderInstallmentEntity } from '../database/entities/order/order-install
 import { IOrderInstallmentService } from '../interfaces/order-installment-service';
 import { OrderStatusEntity } from '../database/entities/order/order-status.entity';
 import { OrderSearchFilter } from '../interfaces/filters/order-filter';
-import { EndCustomerEntity } from '../database/entities/customer/end-customer/customer.entity';
+import { EndCustomerEntity } from '../database/entities/customer/end-customer/end-customer.entity';
 
 @injectable()
 export class OrderService implements IOrderService {
@@ -33,6 +33,9 @@ export class OrderService implements IOrderService {
       select: {
         id: true,
         orderDate: true,
+        endCustomer: {
+          name: true
+        },
         status: {
           description: true
         },
@@ -42,7 +45,8 @@ export class OrderService implements IOrderService {
       },
       relations: {
         customer: true,
-        status: true
+        status: true,
+        endCustomer: true
       },
       where: {
         customer: {
@@ -132,12 +136,12 @@ export class OrderService implements IOrderService {
       relations: {
         customer: true,
         status: true,
+        endCustomer: true,
+        installments: true,
         orderItems: {
           product: true,
           itemStatus: true
         },
-        installments: true,
-        endCustomer: true
       },
       where: {
         id
@@ -175,7 +179,6 @@ export class OrderService implements IOrderService {
   }
 
   private async checkToCreateEndCustomer(order: OrderEntity, transactionalEntityManager: EntityManager) {
-    console.log('\norder.endcustomer\n', order.endCustomer)
     if (!(order.endCustomer && order.endCustomer.name))
       return;
 
