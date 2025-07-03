@@ -64,7 +64,8 @@ export class HomeService implements IHomeService {
       installmentId: x.id!,
       customerName: x.order.customer.name,
       installmentDate: getBrDateStr(x.debitDate),
-      installmentAmount: getBrCurrencyStr(x.amount)
+      installmentAmount: getBrCurrencyStr(x.amount),
+      orderId: x.order.id!
     })));
   }
 

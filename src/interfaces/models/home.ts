@@ -3,6 +3,7 @@ export interface DashInstallments {
   installmentDate: string;
   installmentAmount: string;
   customerName: string;
+  orderId: string;
 }
 
 export interface InstallmentsBalance {
