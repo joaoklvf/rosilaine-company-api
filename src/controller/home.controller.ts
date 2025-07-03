@@ -22,6 +22,14 @@ export class HomeController {
     });
   }
 
+  public overdueInstallments = async (req: Request, res: Response) => {
+    await this.homeService.overdueInstallments(req.query).then((data) => {
+      return res.status(200).json(data);
+    }).catch((error) => {
+      return res.status(500).json({ msg: error });
+    });
+  }
+
   public installmentsBalance = async (req: Request, res: Response) => {
     await this.homeService.installmentsBalance(req.query).then((data) => {
       return res.status(200).json(data);
@@ -35,6 +43,7 @@ export class HomeController {
    */
   public routes() {
     this.router.get('/installments/next', this.nextInstallments);
+    this.router.get('/installments/overdue', this.overdueInstallments);
     this.router.get('/installments/balance', this.installmentsBalance);
   }
 }

@@ -1,15 +1,15 @@
 import { injectable } from 'inversify';
-import { MoreThan } from 'typeorm';
+import { Equal, FindOptionsWhere, IsNull, LessThan, MoreThan, Or } from 'typeorm';
 import { AppDataSource } from '../../api';
 import { OrderInstallmentEntity } from '../database/entities/order/order-installment.entity';
 import { DescriptionFilter } from '../interfaces/filters/product-filter';
 import { IHomeService } from '../interfaces/home-service';
-import { InstallmentsBalance, NextInstallments } from '../interfaces/models/home';
+import { DashInstallments, InstallmentsBalance } from '../interfaces/models/home';
 import { getBrCurrencyStr, getBrDateStr } from '../utils/text-format-util';
 
 @injectable()
 export class HomeService implements IHomeService {
-  public nextInstallments = async ({ offset, take }: DescriptionFilter) => {
+  private async getInstallmentsByCondition({ offset, take }: DescriptionFilter, condition: FindOptionsWhere<OrderInstallmentEntity> | FindOptionsWhere<OrderInstallmentEntity>[] | undefined) {
     let skip = 0;
     if (take && offset)
       skip = take * offset;
@@ -32,9 +32,7 @@ export class HomeService implements IHomeService {
           customer: true
         }
       },
-      where: {
-        debitDate: MoreThan(new Date())
-      },
+      where: condition,
       order: {
         debitDate: 'ASC'
       },
@@ -42,12 +40,27 @@ export class HomeService implements IHomeService {
       skip
     });
 
-    const response: [NextInstallments[], number] = [this.mapInstallments(installments[0]), installments[1]];
+    const response: [DashInstallments[], number] = [this.mapInstallments(installments[0]), installments[1]];
     return response;
   }
 
+  public nextInstallments = async (filters: DescriptionFilter) => {
+    const condition: FindOptionsWhere<OrderInstallmentEntity> | FindOptionsWhere<OrderInstallmentEntity> = {
+      debitDate: MoreThan(new Date())
+    };
+    return this.getInstallmentsByCondition(filters, condition);
+  }
+
+  public overdueInstallments = async (filters: DescriptionFilter) => {
+    const condition: FindOptionsWhere<OrderInstallmentEntity> | FindOptionsWhere<OrderInstallmentEntity> = {
+      debitDate: LessThan(new Date()),
+      amountPaid: Or(IsNull(), Equal(0))
+    };
+    return this.getInstallmentsByCondition(filters, condition);
+  }
+
   private mapInstallments(installments: OrderInstallmentEntity[]) {
-    return installments.map<NextInstallments>((x => ({
+    return installments.map<DashInstallments>((x => ({
       installmentId: x.id!,
       customerName: x.order.customer.name,
       installmentDate: getBrDateStr(x.debitDate),

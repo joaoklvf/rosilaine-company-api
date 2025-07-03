@@ -1,4 +1,4 @@
-export interface NextInstallments {
+export interface DashInstallments {
   installmentId: string;
   installmentDate: string;
   installmentAmount: string;
