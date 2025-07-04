@@ -79,7 +79,7 @@ export class OrderService implements IOrderService {
 
       order.orderItems = await this.orderItemService.createUpdateManyByOrder(order, transactionalEntityManager);
 
-      if (order.installmentsAmount)
+      if (order.installmentsAmount || this.hasFirstInstallmentDateChange(order))
         this.orderInstallmentService.recreateInstallmentsByOrder(order, transactionalEntityManager);
 
       return this.mapOrderResponse(order);
@@ -98,7 +98,7 @@ export class OrderService implements IOrderService {
       order.orderItems = await this.orderItemService.createUpdateManyByOrder(order, transactionalEntityManager);
       order.total = order.orderItems.reduce((prev, acc) => prev + Number(acc.itemSellingTotal), 0);
 
-      if (order.installmentsAmount)
+      if (order.installmentsAmount || this.hasFirstInstallmentDateChange(order))
         order.installments = await this.orderInstallmentService.recreateInstallmentsByOrder(order, transactionalEntityManager);
 
       const orderUpdateResult = await transactionalEntityManager.save(OrderEntity, order);
@@ -191,5 +191,11 @@ export class OrderService implements IOrderService {
       throw new Error("Error creating end customer\n");
 
     return { ...newEndCustomer };
+  }
+
+  private hasFirstInstallmentDateChange(order: OrderEntity) {
+    return order.installments &&
+      order.installments[0] &&
+      order.installments[0].debitDate !== order.firstInstallmentDate;
   }
 }
