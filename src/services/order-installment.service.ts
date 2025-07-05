@@ -2,11 +2,10 @@ import { injectable } from 'inversify';
 import { EntityManager } from 'typeorm';
 import { AppDataSource } from '../../api';
 import { OrderInstallmentEntity } from '../database/entities/order/order-installment.entity';
-import { OrderEntity } from '../database/entities/order/order.entity';
 import { OrderInstallmentRepository } from '../database/repository/order-installment.repository';
+import { OrderRequest } from '../interfaces/models/order/order-request';
 import { IOrderInstallmentService } from '../interfaces/order-installment-service';
 import { generateInstallments } from '../utils/installments-util';
-import { OrderRequest } from '../interfaces/models/order/order-request';
 
 @injectable()
 export class OrderInstallmentService implements IOrderInstallmentService {
