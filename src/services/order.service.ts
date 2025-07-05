@@ -78,9 +78,7 @@ export class OrderService implements IOrderService {
       order = await transactionalEntityManager.save(OrderEntity, order);
 
       order.orderItems = await this.orderItemService.createUpdateManyByOrder(order, transactionalEntityManager);
-
-      if (order.installmentsAmount || this.hasFirstInstallmentDateChange(order))
-        this.orderInstallmentService.recreateInstallmentsByOrder(order, transactionalEntityManager);
+      order.installments = await this.orderInstallmentService.recreateInstallmentsByOrder(order, transactionalEntityManager);
 
       return this.mapOrderResponse(order);
     });
@@ -98,8 +96,7 @@ export class OrderService implements IOrderService {
       order.orderItems = await this.orderItemService.createUpdateManyByOrder(order, transactionalEntityManager);
       order.total = order.orderItems.reduce((prev, acc) => prev + Number(acc.itemSellingTotal), 0);
 
-      if (order.installmentsAmount || this.hasFirstInstallmentDateChange(order))
-        order.installments = await this.orderInstallmentService.recreateInstallmentsByOrder(order, transactionalEntityManager);
+      order.installments = await this.orderInstallmentService.recreateInstallmentsByOrder(order, transactionalEntityManager);
 
       const orderUpdateResult = await transactionalEntityManager.save(OrderEntity, order);
       if (!orderUpdateResult)
