@@ -18,6 +18,7 @@ import { OrderItemController } from '../src/controller/order-item.controller';
 import { OrderInstallmentController } from '../src/controller/order-installment.controller';
 import { HomeController } from '../src/controller/home.controller';
 import { EndCustomerController } from '../src/controller/end-customer.controller';
+import { CustomerInstallmentsController } from '../src/controller/customer-installments.controller';
 
 dotenv.config();
 
@@ -54,9 +55,11 @@ const startApp = async () => {
     const orderInstallmentController = container.get(OrderInstallmentController);
     const homeController = container.get(HomeController);
     const endCustomerController = container.get(EndCustomerController);
+    const customerInstallmentsController = container.get(CustomerInstallmentsController);
 
     app.use(`/api/customers/`, customerController.router);
     app.use(`/api/customers/:customerId/end-customers`, endCustomerController.router);
+    app.use(`/api/customers/:customerId/installments`, customerInstallmentsController.router);
     app.use(`/api/customer-tags/`, customerTagController.router);
     app.use('/api/products/', productController.router);
     app.use('/api/orders/', orderController.router);
