@@ -34,6 +34,7 @@ export class OrderService implements IOrderService {
       select: {
         id: true,
         orderDate: true,
+        total: true,
         endCustomer: {
           name: true
         },
