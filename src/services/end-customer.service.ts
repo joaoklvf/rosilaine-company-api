@@ -4,6 +4,7 @@ import { AppDataSource } from '../../api';
 import { EndCustomerRepository } from '../database/repository/end-customer.repository';
 import { IEndCustomerService } from '../interfaces/end-customer-service';
 import { EndCustomerEntity } from '../database/entities/customer/end-customer/end-customer.entity';
+import { CustomerSearchFilter } from '../interfaces/filters/customer-filter';
 
 @injectable()
 export class EndCustomerService implements IEndCustomerService {
@@ -13,7 +14,7 @@ export class EndCustomerService implements IEndCustomerService {
     this.endCustomerRepository = AppDataSource.getRepository(EndCustomerEntity);
   }
 
-  public index = async ({ name, offset, take, customerId }: any) => {
+  public index = async ({ name, offset, take, customerId }: CustomerSearchFilter) => {
     let skip = 0;
     if (take && offset)
       skip = take * offset;
