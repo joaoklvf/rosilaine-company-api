@@ -1,7 +1,6 @@
 import { injectable } from 'inversify';
 import { ILike } from 'typeorm';
 import { AppDataSource } from '../../api';
-import { CustomerSearchFilter } from '../interfaces/filters/customer-filter';
 import { EndCustomerRepository } from '../database/repository/end-customer.repository';
 import { IEndCustomerService } from '../interfaces/end-customer-service';
 import { EndCustomerEntity } from '../database/entities/customer/end-customer/end-customer.entity';
