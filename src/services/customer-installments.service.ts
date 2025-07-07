@@ -80,13 +80,14 @@ export class CustomerInstallmentsService implements ICustomerInstallmentsService
   }
 
   public installmentsBalance = async ({ customerId }: CustomerSearchFilter): Promise<InstallmentsBalance | undefined> => {
+    console.log('customerId: ' + customerId + '\n')
     const repository = AppDataSource.getRepository(OrderInstallmentEntity);
     try {
       const balance = await repository
         .createQueryBuilder('installment')
         .select('SUM(installment.amount)', 'amountTotal')
         .addSelect('SUM(installment.amountPaid)', 'amountPaid')
-        .addSelect('(SELECT COUNT (t2.id) from order_installment t2 where t2."amountPaid" is null or t2."amountPaid" = 0)', 'pendingInstallments')
+        .addSelect(`(SELECT COUNT (t2.id) from order_installment t2 join "order" t3 on t3.id = t2."orderId" where (t2."amountPaid" is null or t2."amountPaid" = 0) and t3."customerId" = '${customerId}')`, 'pendingInstallments')
         .innerJoin('installment.order', 'order')
         .where('order.customerId = :customerId', { customerId })
         .getRawOne<InstallmentsBalance>();
