@@ -80,7 +80,6 @@ export class CustomerInstallmentsService implements ICustomerInstallmentsService
   }
 
   public installmentsBalance = async ({ customerId }: CustomerSearchFilter): Promise<InstallmentsBalance | undefined> => {
-    console.log('customerId: ' + customerId + '\n')
     const repository = AppDataSource.getRepository(OrderInstallmentEntity);
     try {
       const balance = await repository
