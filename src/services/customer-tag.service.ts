@@ -24,6 +24,9 @@ export class CustomerTagService implements ICustomerTagService {
         description: ILike(`%${description ?? ''}%`),
         isDeleted: false
       },
+      order: {
+        description: 'ASC'
+      },
       take,
       skip
     });

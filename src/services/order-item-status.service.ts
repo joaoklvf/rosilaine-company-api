@@ -24,6 +24,9 @@ export class OrderItemStatusService implements IOrderItemStatusService {
         description: ILike(`%${description ?? ''}%`),
         isDeleted: false
       },
+      order: {
+        description: 'ASC'
+      },
       take,
       skip
     });

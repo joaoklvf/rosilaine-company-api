@@ -24,6 +24,9 @@ export class ProductCategoryService implements IProductCategoryService {
         description: ILike(`%${description ?? ''}%`),
         isDeleted: false
       },
+      order: {
+        description: 'ASC'
+      },
       take,
       skip
     });

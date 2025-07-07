@@ -18,11 +18,14 @@ export class OrderStatusService implements IOrderStatusService {
     let skip = 0;
     if (take && offset)
       skip = take * offset;
-    
+
     const orderStatus = await this.orderStatusRepository.findAndCount({
       where: {
         description: ILike(`%${description ?? ''}%`),
         isDeleted: false
+      },
+      order: {
+        description: 'ASC'
       },
       take,
       skip

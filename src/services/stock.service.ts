@@ -24,6 +24,9 @@ export class StockService implements IStockService {
         description: ILike(`%${description ?? ''}%`),
         isDeleted: false
       },
+      order: {
+        description: 'ASC'
+      },
       take,
       skip
     });

@@ -31,6 +31,9 @@ export class EndCustomerService implements IEndCustomerService {
           id: customerId
         }
       },
+      order: {
+        name: 'ASC'
+      },
       take,
       skip
     });
