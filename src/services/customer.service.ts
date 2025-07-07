@@ -32,6 +32,9 @@ export class CustomerService implements ICustomerService {
         name: ILike(`%${name ?? ''}%`),
         isDeleted: false
       },
+      order: {
+        name: 'ASC'
+      },
       take,
       skip
     });
