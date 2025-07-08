@@ -11,7 +11,6 @@ export function generateInstallments({ isToRound, installmentsAmount, ...order }
   let currentDebitDate = order.firstInstallmentDate ?
     new Date(order.firstInstallmentDate) : getNextMonthDate(now);
 
-  order.firstInstallmentDate = new Date(currentDebitDate);
 
   for (let index = 0; index < installmentsAmount; index++) {
     const price = index === 0 ?
