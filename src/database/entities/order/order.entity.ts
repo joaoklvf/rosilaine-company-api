@@ -34,4 +34,7 @@ export class OrderEntity extends BaseProjectEntity {
 
   @OneToMany(() => OrderInstallmentEntity, orderInstallments => orderInstallments.order)
   installments: OrderInstallmentEntity[];
+
+  @Column({ default: true })
+  isRounded?: boolean;
 }
