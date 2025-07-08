@@ -98,7 +98,9 @@ export class OrderService implements IOrderService {
       order.total = order.orderItems.reduce((prev, acc) => prev + Number(acc.itemSellingTotal), 0);
 
       order.installments = await this.orderInstallmentService.recreateInstallmentsByOrder(order, transactionalEntityManager);
-
+      order.firstInstallmentDate = order.installments[0].debitDate;
+      order.isRounded = order.isToRound;
+      
       const orderUpdateResult = await transactionalEntityManager.save(OrderEntity, order);
       if (!orderUpdateResult)
         throw new Error("Error updating order\n");
