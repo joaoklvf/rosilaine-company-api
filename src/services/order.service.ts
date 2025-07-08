@@ -89,24 +89,31 @@ export class OrderService implements IOrderService {
     if (order.id !== id)
       throw new Error("The order request id does not match with the url id param")
 
-    return await this.orderRepository.manager.transaction(async (transactionalEntityManager) => {
+    try {
+      return await this.orderRepository.manager.transaction(async (transactionalEntityManager) => {
 
-      order.status = await this.checkToCreateOrderStatus(order, transactionalEntityManager);
-      order.endCustomer = await this.checkToCreateEndCustomer(order, transactionalEntityManager);
+        order.status = await this.checkToCreateOrderStatus(order, transactionalEntityManager);
+        order.endCustomer = await this.checkToCreateEndCustomer(order, transactionalEntityManager);
 
-      order.orderItems = await this.orderItemService.createUpdateManyByOrder(order, transactionalEntityManager);
-      order.total = order.orderItems.reduce((prev, acc) => prev + Number(acc.itemSellingTotal), 0);
+        order.orderItems = await this.orderItemService.createUpdateManyByOrder(order, transactionalEntityManager);
+        order.total = order.orderItems.reduce((prev, acc) => prev + Number(acc.itemSellingTotal), 0);
 
-      order.installments = await this.orderInstallmentService.recreateInstallmentsByOrder(order, transactionalEntityManager);
-      order.firstInstallmentDate = order.installments[0].debitDate;
-      order.isRounded = order.isToRound;
-      
-      const orderUpdateResult = await transactionalEntityManager.save(OrderEntity, order);
-      if (!orderUpdateResult)
-        throw new Error("Error updating order\n");
+        const installments = await this.orderInstallmentService.recreateInstallmentsByOrder(order, transactionalEntityManager);
+        order.installments = [...installments];
+        if (installments.length)
+          order.firstInstallmentDate = installments[0].debitDate;
+        order.isRounded = order.isToRound;
 
-      return this.mapOrderResponse(orderUpdateResult);
-    });
+        const orderUpdateResult = await transactionalEntityManager.save(OrderEntity, order);
+        if (!orderUpdateResult)
+          throw new Error("Error updating order\n");
+
+        return this.mapOrderResponse(orderUpdateResult);
+      });
+    } catch (error) {
+      console.error('error updating order', error)
+      throw error
+    }
   }
 
   public delete = async (id: string) => {
@@ -191,11 +198,5 @@ export class OrderService implements IOrderService {
       throw new Error("Error creating end customer\n");
 
     return { ...newEndCustomer };
-  }
-
-  private hasFirstInstallmentDateChange(order: OrderEntity) {
-    return order.installments &&
-      order.installments[0] &&
-      order.installments[0].debitDate !== order.firstInstallmentDate;
   }
 }
