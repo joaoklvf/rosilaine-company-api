@@ -38,6 +38,14 @@ export class CustomerInstallmentsController {
     });
   }
 
+  public customerMonthInstallments = async (req: Request, res: Response) => {
+    await this.customerInstallmentsService.customerMonthInstallments(req.query).then((data) => {
+      return res.status(200).json(data);
+    }).catch((error) => {
+      return res.status(500).json({ msg: error });
+    });
+  }
+
   /**
    * Configure the routes of controller
    */
@@ -45,5 +53,6 @@ export class CustomerInstallmentsController {
     this.router.get('/next', this.nextInstallments);
     this.router.get('/overdue', this.overdueInstallments);
     this.router.get('/balance', this.installmentsBalance);
+    this.router.get('/monthly', this.customerMonthInstallments);
   }
 }

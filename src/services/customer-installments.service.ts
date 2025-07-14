@@ -2,7 +2,7 @@ import { injectable } from 'inversify';
 import { Equal, FindOptionsWhere, IsNull, LessThan, MoreThan, Or } from 'typeorm';
 import { AppDataSource } from '../../api';
 import { OrderInstallmentEntity } from '../database/entities/order/order-installment.entity';
-import { DashInstallments, InstallmentsBalance } from '../interfaces/models/home';
+import { CustomercustomerMonthInstallmentsResponse, DashInstallmentsResponse, InstallmentsBalanceResponse } from '../interfaces/models/home';
 import { getBrCurrencyStr, getBrDateStr } from '../utils/text-format-util';
 import { ICustomerInstallmentsService } from '../interfaces/customer-installments-service';
 import { CustomerSearchFilter } from '../interfaces/filters/customer-filter';
@@ -40,7 +40,7 @@ export class CustomerInstallmentsService implements ICustomerInstallmentsService
       skip
     });
 
-    const response: [DashInstallments[], number] = [this.mapInstallments(installments[0]), installments[1]];
+    const response: [DashInstallmentsResponse[], number] = [this.mapInstallments(installments[0]), installments[1]];
     return response;
   }
 
@@ -70,7 +70,7 @@ export class CustomerInstallmentsService implements ICustomerInstallmentsService
   }
 
   private mapInstallments(installments: OrderInstallmentEntity[]) {
-    return installments.map<DashInstallments>((x => ({
+    return installments.map<DashInstallmentsResponse>((x => ({
       installmentId: x.id!,
       customerName: x.order.customer.name,
       installmentDate: getBrDateStr(x.debitDate),
@@ -79,7 +79,7 @@ export class CustomerInstallmentsService implements ICustomerInstallmentsService
     })));
   }
 
-  public installmentsBalance = async ({ customerId }: CustomerSearchFilter): Promise<InstallmentsBalance | undefined> => {
+  public installmentsBalance = async ({ customerId }: CustomerSearchFilter): Promise<InstallmentsBalanceResponse | undefined> => {
     const repository = AppDataSource.getRepository(OrderInstallmentEntity);
     try {
       const balance = await repository
@@ -89,13 +89,13 @@ export class CustomerInstallmentsService implements ICustomerInstallmentsService
         .addSelect(`(SELECT COUNT (t2.id) from order_installment t2 join "order" t3 on t3.id = t2."orderId" where (t2."amountPaid" is null or t2."amountPaid" = 0) and t3."customerId" = '${customerId}')`, 'pendingInstallments')
         .innerJoin('installment.order', 'order')
         .where('order.customerId = :customerId', { customerId })
-        .getRawOne<InstallmentsBalance>();
+        .getRawOne<InstallmentsBalanceResponse>();
 
       const amountPaid = Number(balance?.amountPaid ?? 0);
       const amountTotal = Number(balance?.amountTotal ?? 0);
       const amountToReceive = amountTotal - amountPaid;
 
-      const balanceResponse: InstallmentsBalance = {
+      const balanceResponse: InstallmentsBalanceResponse = {
         amountPaid,
         amountTotal,
         amountToReceive,
@@ -103,6 +103,42 @@ export class CustomerInstallmentsService implements ICustomerInstallmentsService
       };
 
       return balanceResponse;
+    }
+    catch (error) {
+      console.log(error, 'error')
+      throw error
+    }
+  }
+
+  public customerMonthInstallments = async ({ customerId, month }: CustomerSearchFilter): Promise<CustomercustomerMonthInstallmentsResponse[]> => {
+    const repository = AppDataSource.getRepository(OrderInstallmentEntity);
+    try {
+      const response = await repository
+        .query(`
+            WITH installments_with_number AS (
+              SELECT 
+                o."orderDate" as order_date,
+                oi."debitDate" as debit_date,
+                oi."amount" as installment_amount,
+                o.total as order_total,
+                ROW_NUMBER() OVER (PARTITION BY oi."orderId" ORDER BY oi."debitDate") AS installment_number,
+                (select COUNT(*) from order_installment oi2 where oi2."orderId" = o.id) as installments_total
+              FROM 
+                order_installment oi
+              JOIN 
+                "order" o ON oi."orderId" = o.id
+              JOIN 
+                customer c ON o."customerId" = c.id
+              WHERE 
+                c.id = $1
+            )
+            SELECT *
+            FROM installments_with_number
+            WHERE TO_CHAR(debit_date, 'MM') = $2
+            ORDER BY order_date, debit_date;
+          `, [customerId, month])
+
+      return response;
     }
     catch (error) {
       console.log(error, 'error')

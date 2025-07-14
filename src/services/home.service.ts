@@ -4,7 +4,7 @@ import { AppDataSource } from '../../api';
 import { OrderInstallmentEntity } from '../database/entities/order/order-installment.entity';
 import { DescriptionFilter } from '../interfaces/filters/product-filter';
 import { IHomeService } from '../interfaces/home-service';
-import { DashInstallments, InstallmentsBalance } from '../interfaces/models/home';
+import { DashInstallmentsResponse, InstallmentsBalanceResponse } from '../interfaces/models/home';
 import { getBrCurrencyStr, getBrDateStr } from '../utils/text-format-util';
 
 @injectable()
@@ -40,7 +40,7 @@ export class HomeService implements IHomeService {
       skip
     });
 
-    const response: [DashInstallments[], number] = [this.mapInstallments(installments[0]), installments[1]];
+    const response: [DashInstallmentsResponse[], number] = [this.mapInstallments(installments[0]), installments[1]];
     return response;
   }
 
@@ -60,7 +60,7 @@ export class HomeService implements IHomeService {
   }
 
   private mapInstallments(installments: OrderInstallmentEntity[]) {
-    return installments.map<DashInstallments>((x => ({
+    return installments.map<DashInstallmentsResponse>((x => ({
       installmentId: x.id!,
       customerName: x.order.customer.name,
       installmentDate: getBrDateStr(x.debitDate),
@@ -69,7 +69,7 @@ export class HomeService implements IHomeService {
     })));
   }
 
-  public installmentsBalance = async (params?: any): Promise<InstallmentsBalance | undefined> => {
+  public installmentsBalance = async (params?: any): Promise<InstallmentsBalanceResponse | undefined> => {
     const repository = AppDataSource.getRepository(OrderInstallmentEntity);
     try {
       const balance = await repository
@@ -77,13 +77,13 @@ export class HomeService implements IHomeService {
         .select('SUM(installment.amount)', 'amountTotal')
         .addSelect('SUM(installment.amountPaid)', 'amountPaid')
         .addSelect('(SELECT COUNT (t2.id) from order_installment t2 where t2."amountPaid" is null or t2."amountPaid" = 0)', 'pendingInstallments')
-        .getRawOne<InstallmentsBalance>();
+        .getRawOne<InstallmentsBalanceResponse>();
 
       const amountPaid = Number(balance?.amountPaid ?? 0);
       const amountTotal = Number(balance?.amountTotal ?? 0);
       const amountToReceive = amountTotal - amountPaid;
 
-      const balanceResponse: InstallmentsBalance = {
+      const balanceResponse: InstallmentsBalanceResponse = {
         amountPaid,
         amountTotal,
         amountToReceive,
