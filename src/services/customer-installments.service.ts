@@ -2,7 +2,7 @@ import { injectable } from 'inversify';
 import { Equal, FindOptionsWhere, IsNull, LessThan, MoreThan, Or } from 'typeorm';
 import { AppDataSource } from '../../api';
 import { OrderInstallmentEntity } from '../database/entities/order/order-installment.entity';
-import { CustomercustomerMonthInstallmentsResponse, DashInstallmentsResponse, InstallmentsBalanceResponse } from '../interfaces/models/home';
+import { CustomerMonthInstallmentsResponse, DashInstallmentsResponse, InstallmentsBalanceResponse } from '../interfaces/models/home';
 import { getBrCurrencyStr, getBrDateStr } from '../utils/text-format-util';
 import { ICustomerInstallmentsService } from '../interfaces/customer-installments-service';
 import { CustomerSearchFilter } from '../interfaces/filters/customer-filter';
@@ -110,8 +110,10 @@ export class CustomerInstallmentsService implements ICustomerInstallmentsService
     }
   }
 
-  public customerMonthInstallments = async ({ customerId, month }: CustomerSearchFilter): Promise<CustomercustomerMonthInstallmentsResponse[]> => {
+  public customerMonthInstallments = async ({ customerId, month }: CustomerSearchFilter): Promise<CustomerMonthInstallmentsResponse[]> => {
     const repository = AppDataSource.getRepository(OrderInstallmentEntity);
+    const currentYear = new Date().getFullYear();
+    const filterDate = `01/${Number(month) + 1}/${currentYear}`;
     try {
       const response = await repository
         .query(`
@@ -119,6 +121,7 @@ export class CustomerInstallmentsService implements ICustomerInstallmentsService
               SELECT 
                 o."orderDate" as order_date,
                 oi."debitDate" as debit_date,
+                oi."amountPaid" as amount_paid,
                 oi."amount" as installment_amount,
                 o.total as order_total,
                 ROW_NUMBER() OVER (PARTITION BY oi."orderId" ORDER BY oi."debitDate") AS installment_number,
@@ -134,9 +137,9 @@ export class CustomerInstallmentsService implements ICustomerInstallmentsService
             )
             SELECT *
             FROM installments_with_number
-            WHERE TO_CHAR(debit_date, 'MM') = $2
+            WHERE debit_date < $2 AND (amount_paid is null or amount_paid = 0)
             ORDER BY order_date, debit_date;
-          `, [customerId, month])
+          `, [customerId, filterDate])
 
       return response;
     }
