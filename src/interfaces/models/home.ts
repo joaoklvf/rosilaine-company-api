@@ -13,7 +13,7 @@ export interface InstallmentsBalanceResponse {
   pendingInstallments: number;
 }
 
-export interface CustomercustomerMonthInstallmentsResponse {
+export interface CustomerMonthInstallmentsResponse {
   order_date: string;
   debit_date: string;
   installment_amount: string;

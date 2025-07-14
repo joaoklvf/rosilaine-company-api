@@ -1,7 +1,7 @@
-import { InstallmentsBalance, DashInstallments } from "./models/home";
+import { InstallmentsBalanceResponse, DashInstallmentsResponse } from "./models/home";
 
 export interface IHomeService {
-  nextInstallments(params?: any): Promise<[DashInstallments[], number]>;
-  overdueInstallments(params?: any): Promise<[DashInstallments[], number]>;
-  installmentsBalance(params?: any): Promise<InstallmentsBalance | undefined>;
+  nextInstallments(params?: any): Promise<[DashInstallmentsResponse[], number]>;
+  overdueInstallments(params?: any): Promise<[DashInstallmentsResponse[], number]>;
+  installmentsBalance(params?: any): Promise<InstallmentsBalanceResponse | undefined>;
 }
