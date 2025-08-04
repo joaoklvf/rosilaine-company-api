@@ -14,7 +14,7 @@ export class EndCustomerService implements IEndCustomerService {
     this.endCustomerRepository = AppDataSource.getRepository(EndCustomerEntity);
   }
 
-  public index = async ({ name, offset, take, customerId }: CustomerSearchFilter) => {
+  public index = async ({ name, offset, take, collectionId }: CustomerSearchFilter) => {
     let skip = 0;
     if (take && offset)
       skip = take * offset;
@@ -28,7 +28,7 @@ export class EndCustomerService implements IEndCustomerService {
         name: ILike(`%${name ?? ''}%`),
         isDeleted: false,
         customer: {
-          id: customerId
+          id: collectionId
         }
       },
       order: {
