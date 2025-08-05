@@ -1,4 +1,4 @@
-import { AppDataSource } from '../../api';
+import { AppDataSource } from '../data-source';
 import { CustomerTagEntity } from '../database/entities/customer/customer-tag.entity';
 import { injectable } from 'inversify';
 import { CustomerTagRepository } from '../database/repository/customer-tag.repository';

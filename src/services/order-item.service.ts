@@ -1,6 +1,6 @@
 import { injectable } from 'inversify';
 import { EntityManager } from 'typeorm';
-import { AppDataSource } from '../../api';
+import { AppDataSource } from '../data-source';
 import { OrderItemStatusEntity } from '../database/entities/order/order-item/order-item-status.entity';
 import { OrderItemEntity } from '../database/entities/order/order-item/order-item.entity';
 import { OrderEntity } from '../database/entities/order/order.entity';
