@@ -1,59 +1,45 @@
-import { Router, Response, Request } from "express";
-import { inject, injectable } from "inversify";
-import { INJECTABLE_TYPES } from "../types/inversify-types";
-import { OrderItemStatusEntity } from "../database/entities/order/order-item/order-item-status.entity";
-import { IOrderItemStatusService } from "../interfaces/order-item-status-service";
+import { Hono } from 'hono'
+import { Context } from 'hono'
+import { OrderItemStatusEntity } from '../database/entities/order/order-item/order-item-status.entity'
+import { IOrderItemStatusService } from '../interfaces/order-item-status-service'
 
-@injectable()
-export class OrderItemStatusController {
-  public router: Router;
+export const orderItemStatusController = (orderItemStatusService: IOrderItemStatusService) => {
+  const router = new Hono()
 
-  constructor(
-    @inject(INJECTABLE_TYPES.OrderItemStatusService) private orderItemStatusService: IOrderItemStatusService
-  ) {
-    this.router = Router();
-    this.routes();
-  }
+  router.get('/', async (c: Context) => {
+    try {
+      const query = c.req.query()
+      const data = await orderItemStatusService.index(query)
+      return c.json(data, 200)
+    } catch (error) {
+      return c.json({ msg: error }, 500)
+    }
+  })
 
-  public index = async (req: Request, res: Response) => {
-    await this.orderItemStatusService.index(req.query).then((data) => {
-      return res.status(200).json(data);
-    }).catch((error) => {
-      return res.status(500).json({ msg: error });
-    });
-  }
+  router.post('/', async (c: Context) => {
+    const body = await c.req.json<OrderItemStatusEntity>()
+    const newStatus = await orderItemStatusService.create(body)
+    return c.json(newStatus)
+  })
 
-  public create = async (req: Request, res: Response) => {
-    const orderItemStatus = req['body'] as OrderItemStatusEntity;
-    const newOrderItemStatus = await this.orderItemStatusService.create(orderItemStatus);
-    res.send(newOrderItemStatus);
-  }
+  router.put('/:id', async (c: Context) => {
+    const id = c.req.param('id')
+    const body = await c.req.json<OrderItemStatusEntity>()
+    const updated = await orderItemStatusService.update(body, id)
+    return c.json(updated)
+  })
 
-  public update = async (req: Request, res: Response) => {
-    const orderItemStatus = req['body'] as OrderItemStatusEntity;
-    const id = req['params']['id'];
+  router.delete('/:id', async (c: Context) => {
+    const id = c.req.param('id')
+    const result = await orderItemStatusService.delete(id)
+    return c.json(result)
+  })
 
-    res.send(await this.orderItemStatusService.update(orderItemStatus, id));
-  }
+  router.delete('/safe-delete/:id', async (c: Context) => {
+    const id = c.req.param('id')
+    const result = await orderItemStatusService.safeDelete(id)
+    return c.json(result)
+  })
 
-  public delete = async (req: Request, res: Response) => {
-    const id = req['params']['id'];
-    res.send(await this.orderItemStatusService.delete(id));
-  }
-
-  public safeDelete = async (req: Request, res: Response) => {
-    const id = req['params']['id'];
-    res.send(await this.orderItemStatusService.safeDelete(id));
-  }
-
-  /**
-   * Configure the routes of controller
-   */
-  public routes() {
-    this.router.get('/', this.index);
-    this.router.post('/', this.create);
-    this.router.put('/:id', this.update);
-    this.router.delete('/:id', this.delete);
-    this.router.delete('/safe-delete/:id', this.safeDelete);
-  }
+  return router
 }
