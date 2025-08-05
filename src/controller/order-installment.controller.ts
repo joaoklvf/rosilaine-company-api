@@ -1,84 +1,69 @@
-import { Router, Response, Request } from "express";
-import { inject, injectable } from "inversify";
-import { INJECTABLE_TYPES } from "../types/inversify-types";
-import { OrderInstallmentEntity } from "../database/entities/order/order-installment.entity";
-import { IOrderInstallmentService } from "../interfaces/order-installment-service";
+import { Hono } from 'hono'
+import { Context } from 'hono'
+import { OrderInstallmentEntity } from '../database/entities/order/order-installment.entity'
+import { IOrderInstallmentService } from '../interfaces/order-installment-service'
 
-@injectable()
-export class OrderInstallmentController {
-  public router: Router;
+export const orderInstallmentController = (orderInstallmentService: IOrderInstallmentService) => {
+  const router = new Hono()
 
-  constructor(
-    @inject(INJECTABLE_TYPES.OrderInstallmentService) private orderInstallmentService: IOrderInstallmentService
-  ) {
-    this.router = Router();
-    this.routes();
-  }
+  router.get('/', async (c: Context) => {
+    try {
+      const query = c.req.query()
+      const data = await orderInstallmentService.index(query)
+      return c.json(data, 200)
+    } catch (error) {
+      return c.json({ msg: error }, 500)
+    }
+  })
 
-  public index = async (req: Request, res: Response) => {
-    await this.orderInstallmentService.index(req.query).then((data) => {
-      return res.status(200).json(data);
-    }).catch((error) => {
-      return res.status(500).json({ msg: error });
-    });
-  }
+  router.get('/:id', async (c: Context) => {
+    try {
+      const id = c.req.param('id')
+      const data = await orderInstallmentService.get(id)
+      return c.json(data, 200)
+    } catch (error) {
+      return c.json({ msg: error }, 500)
+    }
+  })
 
-  public create = async (req: Request, res: Response) => {
-    const orderInstallment = req['body'] as OrderInstallmentEntity;
-    const newOrderInstallment = await this.orderInstallmentService.create(orderInstallment);
-    res.send(newOrderInstallment);
-  }
+  router.post('/', async (c: Context) => {
+    const body = await c.req.json<OrderInstallmentEntity>()
+    const newOrderInstallment = await orderInstallmentService.create(body)
+    return c.json(newOrderInstallment, 200)
+  })
 
-  public update = async (req: Request, res: Response) => {
-    const orderInstallment = req['body'] as OrderInstallmentEntity;
-    const id = req['params']['id'];
+  router.put('/:id', async (c: Context) => {
+    try {
+      const id = c.req.param('id')
+      const body = await c.req.json<OrderInstallmentEntity>()
+      const updated = await orderInstallmentService.update(body, id)
+      return c.json(updated, 200)
+    } catch (error) {
+      return c.json({ msg: error }, 500)
+    }
+  })
 
-    this.orderInstallmentService.update(orderInstallment, id).then(orderInstallment => {
-      return res.send(orderInstallment);
-    }).catch(error => {
-      return res.send(error);
-    })
-  }
+  router.put('/', async (c: Context) => {
+    try {
+      const body = await c.req.json<OrderInstallmentEntity[]>()
+      const updated = await orderInstallmentService.updateMany(body)
+      return c.json(updated, 200)
+    } catch (error) {
+      return c.json({ msg: error }, 500)
+    }
+  })
 
-  public updateMany = async (req: Request, res: Response) => {
-    const orderInstallments = req['body'] as OrderInstallmentEntity[];
+  router.delete('/:id', async (c: Context) => {
+    const id = c.req.param('id')
+    const result = await orderInstallmentService.delete(id)
+    return c.json(result, 200)
+  })
 
-    this.orderInstallmentService.updateMany(orderInstallments).then(orderInstallments => {
-      return res.send(orderInstallments);
-    }).catch(error => {
-      return res.send(error);
-    })
-  }
+  router.delete('/safe-delete/:id', async (c: Context) => {
+    const id = c.req.param('id')
+    const result = await orderInstallmentService.safeDelete(id)
+    return c.json(result, 200)
+  })
 
-  public delete = async (req: Request, res: Response) => {
-    const id = req['params']['id'];
-    res.send(await this.orderInstallmentService.delete(id));
-  }
-
-  public get = async (req: Request, res: Response) => {
-    const id = req['params']['id'];
-    await this.orderInstallmentService.get(id).then((data) => {
-      return res.status(200).json(data);
-    }).catch((error) => {
-      return res.status(500).json({ msg: error });
-    });
-  }
-
-  public safeDelete = async (req: Request, res: Response) => {
-    const id = req['params']['id'];
-    res.send(await this.orderInstallmentService.safeDelete(id));
-  }
-
-  /**
-   * Configure the routes of controller
-   */
-  public routes() {
-    this.router.get('/', this.index);
-    this.router.get('/:id', this.get);
-    this.router.post('/', this.create);
-    this.router.put('/:id', this.update);
-    this.router.put('/', this.updateMany);
-    this.router.delete('/:id', this.delete);
-    this.router.delete('/safe-delete/:id', this.safeDelete);
-  }
+  return router
 }

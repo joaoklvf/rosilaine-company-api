@@ -1,69 +1,54 @@
-import { Router, Response, Request } from "express";
-import { CustomerEntity } from "../database/entities/customer/customer.entity";
-import { ICustomerService } from "../interfaces/customer-service";
-import { inject, injectable } from "inversify";
-import { INJECTABLE_TYPES } from "../types/inversify-types";
+import { Hono } from 'hono'
+import { Context } from 'hono'
+import { CustomerEntity } from '../database/entities/customer/customer.entity'
+import { ICustomerService } from '../interfaces/customer-service'
 
-@injectable()
-export class CustomerController {
-  public router: Router;
+export const customerController = (customerService: ICustomerService) => {
+  const router = new Hono()
 
-  constructor(
-    @inject(INJECTABLE_TYPES.CustomerService) private customerService: ICustomerService
-  ) {
-    this.router = Router();
-    this.routes();
-  }
+  router.get('/', async (c: Context) => {
+    try {
+      const data = await customerService.index(c.req.query())
+      return c.json(data, 200)
+    } catch (error) {
+      return c.json({ msg: error }, 500)
+    }
+  })
 
-  public index = async (req: Request, res: Response) => {
-    await this.customerService.index(req.query).then((data) => {
-      return res.status(200).json(data);
-    }).catch((error) => {
-      return res.status(500).json({ msg: error });
-    });
-  }
+  router.get('/:id', async (c: Context) => {
+    const id = c.req.param('id')
+    try {
+      const data = await customerService.get(id)
+      return c.json(data, 200)
+    } catch (error) {
+      return c.json({ msg: error }, 500)
+    }
+  })
 
-  public create = async (req: Request, res: Response) => {
-    const customer = req['body'] as CustomerEntity;
-    const newCustomer = await this.customerService.create(customer);
-    res.send(newCustomer);
-  }
+  router.post('/', async (c: Context) => {
+    const customer = await c.req.json<CustomerEntity>()
+    const newCustomer = await customerService.create(customer)
+    return c.json(newCustomer)
+  })
 
-  public update = async (req: Request, res: Response) => {
-    const customer = req['body'] as CustomerEntity;
-    const id = req['params']['id'];
+  router.put('/:id', async (c: Context) => {
+    const customer = await c.req.json<CustomerEntity>()
+    const id = c.req.param('id')
+    const updated = await customerService.update(customer, id)
+    return c.json(updated)
+  })
 
-    res.send(await this.customerService.update(customer, id));
-  }
+  router.delete('/:id', async (c: Context) => {
+    const id = c.req.param('id')
+    const result = await customerService.delete(id)
+    return c.json(result)
+  })
 
-  public delete = async (req: Request, res: Response) => {
-    const id = req['params']['id'];
-    res.send(await this.customerService.delete(id));
-  }
+  router.delete('/safe-delete/:id', async (c: Context) => {
+    const id = c.req.param('id')
+    const result = await customerService.safeDelete(id)
+    return c.json(result)
+  })
 
-  public safeDelete = async (req: Request, res: Response) => {
-    const id = req['params']['id'];
-    res.send(await this.customerService.safeDelete(id));
-  }
-
-  public get = async (req: Request, res: Response) => {
-    const id = req['params']['id'];
-    await this.customerService.get(id).then((data) => {
-      return res.status(200).json(data);
-    }).catch((error) => {
-      return res.status(500).json({ msg: error });
-    });
-  }
-
-  /**
-   * Configure the routes of controller
-   */
-  public routes() {
-    this.router.get('/', this.index);
-    this.router.get('/:id', this.get);
-    this.router.post('/', this.create);
-    this.router.put('/:id', this.update);
-    this.router.delete('/:id', this.delete);
-    this.router.delete('/safe-delete/:id', this.safeDelete);
-  }
+  return router
 }

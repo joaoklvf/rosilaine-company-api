@@ -1,58 +1,45 @@
-import { Request, Response, Router } from "express";
-import { inject, injectable } from "inversify";
-import { INJECTABLE_TYPES } from "../types/inversify-types";
-import { ICustomerInstallmentsService } from "../interfaces/customer-installments-service";
+import { Hono } from 'hono'
+import { Context } from 'hono'
+import { ICustomerInstallmentsService } from '../interfaces/customer-installments-service'
 
-@injectable()
-export class CustomerInstallmentsController {
-  public router: Router;
+export const customerInstallmentsController = (customerInstallmentsService: ICustomerInstallmentsService) => {
+  const router = new Hono()
 
-  constructor(
-    @inject(INJECTABLE_TYPES.CustomerInstallmentsService) private customerInstallmentsService: ICustomerInstallmentsService
-  ) {
-    this.router = Router();
-    this.routes();
-  }
+  router.get('/next', async (c: Context) => {
+    try {
+      const data = await customerInstallmentsService.nextInstallments(c.req.query())
+      return c.json(data, 200)
+    } catch (error) {
+      return c.json({ msg: error }, 500)
+    }
+  })
 
-  public nextInstallments = async (req: Request, res: Response) => {
-    await this.customerInstallmentsService.nextInstallments(req.query).then((data) => {
-      return res.status(200).json(data);
-    }).catch((error) => {
-      return res.status(500).json({ msg: error });
-    });
-  }
+  router.get('/overdue', async (c: Context) => {
+    try {
+      const data = await customerInstallmentsService.overdueInstallments(c.req.query())
+      return c.json(data, 200)
+    } catch (error) {
+      return c.json({ msg: error }, 500)
+    }
+  })
 
-  public overdueInstallments = async (req: Request, res: Response) => {
-    await this.customerInstallmentsService.overdueInstallments(req.query).then((data) => {
-      return res.status(200).json(data);
-    }).catch((error) => {
-      return res.status(500).json({ msg: error });
-    });
-  }
+  router.get('/balance', async (c: Context) => {
+    try {
+      const data = await customerInstallmentsService.installmentsBalance(c.req.query())
+      return c.json(data, 200)
+    } catch (error) {
+      return c.json({ msg: error }, 500)
+    }
+  })
 
-  public installmentsBalance = async (req: Request, res: Response) => {
-    await this.customerInstallmentsService.installmentsBalance(req.query).then((data) => {
-      return res.status(200).json(data);
-    }).catch((error) => {
-      return res.status(500).json({ msg: error });
-    });
-  }
+  router.get('/monthly', async (c: Context) => {
+    try {
+      const data = await customerInstallmentsService.customerMonthInstallments(c.req.query())
+      return c.json(data, 200)
+    } catch (error) {
+      return c.json({ msg: error }, 500)
+    }
+  })
 
-  public customerMonthInstallments = async (req: Request, res: Response) => {
-    await this.customerInstallmentsService.customerMonthInstallments(req.query).then((data) => {
-      return res.status(200).json(data);
-    }).catch((error) => {
-      return res.status(500).json({ msg: error });
-    });
-  }
-
-  /**
-   * Configure the routes of controller
-   */
-  public routes() {
-    this.router.get('/next', this.nextInstallments);
-    this.router.get('/overdue', this.overdueInstallments);
-    this.router.get('/balance', this.installmentsBalance);
-    this.router.get('/monthly', this.customerMonthInstallments);
-  }
+  return router
 }
