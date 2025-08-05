@@ -86,6 +86,11 @@ export class OrderService implements IOrderService {
   }
 
   public update = async (order: OrderRequest, id: string) => {
+    const updateOrder = await this.orderRepository.update(id, order);
+    return updateOrder.affected ? order : null;
+  }
+
+  public update2 = async (order: OrderRequest, id: string) => {
     if (order.id !== id)
       throw new Error("The order request id does not match with the url id param")
 

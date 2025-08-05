@@ -1,4 +1,4 @@
-import { injectable } from 'inversify';
+import { inject, injectable } from 'inversify';
 import { EntityManager } from 'typeorm';
 import { AppDataSource } from '../../api';
 import { OrderItemStatusEntity } from '../database/entities/order/order-item/order-item-status.entity';
@@ -7,12 +7,16 @@ import { OrderEntity } from '../database/entities/order/order.entity';
 import { OrderItemRepository } from '../database/repository/order-item.repository';
 import { OrderItemByStatus, UpdateManyStatusRequest } from '../interfaces/models/order-item-by-status';
 import { GetByStatusRequestParams, IOrderItemService } from '../interfaces/order-item-service';
+import { IOrderInstallmentService } from '../interfaces/order-installment-service';
+import { INJECTABLE_TYPES } from '../types/inversify-types';
 
 @injectable()
 export class OrderItemService implements IOrderItemService {
   private orderItemRepository: OrderItemRepository;
 
-  constructor() {
+  constructor(
+    @inject(INJECTABLE_TYPES.OrderInstallmentService) private orderInstallmentService: IOrderInstallmentService
+  ) {
     this.orderItemRepository = AppDataSource.getRepository(OrderItemEntity);
   }
 
@@ -59,13 +63,60 @@ export class OrderItemService implements IOrderItemService {
   }
 
   public create = async (orderItem: OrderItemEntity) => {
-    const newOrderItem = await this.orderItemRepository.save(orderItem);
-    return newOrderItem;
+    return await this.updateItemAndDependencies(orderItem);
   }
 
   public update = async (orderItem: OrderItemEntity, id: string) => {
-    const updatedOrderItem = await this.orderItemRepository.update(id, orderItem);
-    return updatedOrderItem.affected ? orderItem : null;
+    return await this.updateItemAndDependencies(orderItem);
+  }
+
+  private async updateItemAndDependencies(orderItem: OrderItemEntity) {
+    try {
+      return await this.orderItemRepository.manager.transaction(async (transactionalEntityManager) => {
+        const orders = await transactionalEntityManager.find(OrderEntity, {
+          where: {
+            id: orderItem.order.id
+          },
+          relations: {
+            orderItems: true,
+            installments: true
+          },
+          take: 1
+        });
+
+        const order = { ...orders[0] };
+        let total = 0;
+
+        if (orderItem.id) {
+          total = order.orderItems.reduce((prev, acc) =>
+            prev + Number(acc.id === orderItem.id ? orderItem.itemSellingTotal : acc.itemSellingTotal), 0);
+        }
+        else {
+          total = order.orderItems.reduce((prev, acc) => prev + Number(acc.itemSellingTotal), 0);
+          total += orderItem.itemSellingTotal;
+        }
+
+        order.total = total;
+        const installments = await this.orderInstallmentService.recreateInstallmentsByOrder({
+          ...order,
+          isToRound: order.isRounded!,
+          installmentsAmount: order.installments.length
+        }, transactionalEntityManager);
+
+        if (installments.length)
+          order.firstInstallmentDate = installments[0].debitDate;
+
+        const orderUpdateResult = await transactionalEntityManager.update(OrderEntity, `id = ${order.id}`, order);
+        if (!orderUpdateResult)
+          throw new Error("Error updating order\n");
+
+        const changedItem = await transactionalEntityManager.save(OrderItemEntity, orderItem);
+        return changedItem;
+      });
+    } catch (error) {
+      console.error('error updating order', error)
+      throw error
+    }
   }
 
   public delete = async (id: string) => {
