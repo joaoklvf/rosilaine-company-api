@@ -63,55 +63,95 @@ export class OrderItemService implements IOrderItemService {
   }
 
   public create = async (orderItem: OrderItemEntity) => {
-    return await this.updateItemAndDependencies(orderItem);
+    return await this.saveItemAndDependencies(orderItem);
   }
 
   public update = async (orderItem: OrderItemEntity, id: string) => {
-    return await this.updateItemAndDependencies(orderItem);
+    return await this.saveItemAndDependencies(orderItem);
   }
 
-  private async updateItemAndDependencies(orderItem: OrderItemEntity) {
+  private async getOrderByItem(orderItem: OrderItemEntity, transactionalEntityManager: EntityManager) {
+    const orders = await transactionalEntityManager.find(OrderEntity, {
+      where: {
+        id: orderItem.order.id
+      },
+      relations: {
+        orderItems: true,
+        installments: true
+      },
+      take: 1
+    });
+
+    return orders[0];
+  }
+
+  private getTotalByItemOperator(orderItem: OrderItemEntity, currentItems: OrderItemEntity[], isDelete: boolean) {
+    let total = 0;
+
+    if (!orderItem.id) {
+      total = currentItems.reduce((prev, acc) => prev + Number(acc.itemSellingTotal), 0);
+      total += orderItem.itemSellingTotal;
+      return total;
+    }
+
+    if (orderItem.id && isDelete) {
+      total = currentItems.reduce((prev, acc) =>
+        prev + Number(acc.id === orderItem.id ? 0 : acc.itemSellingTotal), 0);
+
+      return total;
+    }
+
+    total = currentItems.reduce((prev, acc) =>
+      prev + Number(acc.id === orderItem.id ? orderItem.itemSellingTotal : acc.itemSellingTotal), 0);
+
+    return total;
+  }
+
+  private async getUpdatedInstallments(order: OrderEntity, transactionalEntityManager: EntityManager) {
+    const installments = await this.orderInstallmentService.recreateInstallmentsByOrder({
+      ...order,
+      isToRound: order.isRounded!,
+      installmentsAmount: order.installments.length
+    }, transactionalEntityManager);
+
+    return installments;
+  }
+
+  private async saveItemAndDependencies(orderItem: OrderItemEntity, isDelete = false) {
     try {
       return await this.orderItemRepository.manager.transaction(async (transactionalEntityManager) => {
-        const orders = await transactionalEntityManager.find(OrderEntity, {
-          where: {
-            id: orderItem.order.id
-          },
-          relations: {
-            orderItems: true,
-            installments: true
-          },
-          take: 1
-        });
+        const order = await this.getOrderByItem(orderItem, transactionalEntityManager);
+        const itemRequest = {
+          ...orderItem,
+          itemSellingTotal: Number(orderItem.itemAmount) * Number(orderItem.itemSellingPrice)
+        };
 
-        const order = { ...orders[0] };
-        let total = 0;
+        const total = this.getTotalByItemOperator(itemRequest, order.orderItems, isDelete);
+        const installments = await this.getUpdatedInstallments(order, transactionalEntityManager);
 
-        if (orderItem.id) {
-          total = order.orderItems.reduce((prev, acc) =>
-            prev + Number(acc.id === orderItem.id ? orderItem.itemSellingTotal : acc.itemSellingTotal), 0);
-        }
-        else {
-          total = order.orderItems.reduce((prev, acc) => prev + Number(acc.itemSellingTotal), 0);
-          total += orderItem.itemSellingTotal;
-        }
+        const orderUpdateResult = transactionalEntityManager
+          .createQueryBuilder()
+          .update(OrderEntity)
+          .set({
+            total,
+            firstInstallmentDate: installments?.[0].debitDate
+          })
+          .where("id = :id", { id: order.id })
+          .execute();
 
-        order.total = total;
-        const installments = await this.orderInstallmentService.recreateInstallmentsByOrder({
-          ...order,
-          isToRound: order.isRounded!,
-          installmentsAmount: order.installments.length
-        }, transactionalEntityManager);
-
-        if (installments.length)
-          order.firstInstallmentDate = installments[0].debitDate;
-
-        const orderUpdateResult = await transactionalEntityManager.update(OrderEntity, `id = ${order.id}`, order);
         if (!orderUpdateResult)
           throw new Error("Error updating order\n");
 
-        const changedItem = await transactionalEntityManager.save(OrderItemEntity, orderItem);
-        return changedItem;
+        if (isDelete) {
+          const deletedOrderItem = await transactionalEntityManager.delete(OrderItemEntity, itemRequest.id);
+          if (deletedOrderItem.affected)
+            return { installments, total };
+
+          throw new Error('Delete orderItem failed\n');
+        }
+
+        const changedItem = await transactionalEntityManager.save(OrderItemEntity, itemRequest);
+        return { installments, total, orderItem: changedItem };
       });
     } catch (error) {
       console.error('error updating order', error)
@@ -120,7 +160,19 @@ export class OrderItemService implements IOrderItemService {
   }
 
   public delete = async (id: string) => {
-    const deletedOrderItem = await this.orderItemRepository.delete(id);
+    const orderItem = await this.orderItemRepository.findOne({
+      where: {
+        id
+      },
+      relations: {
+        order: true
+      }
+    });
+
+    if (!orderItem)
+      throw new Error('Error searching orderItem');
+
+    const deletedOrderItem = await this.saveItemAndDependencies(orderItem, true);
     return deletedOrderItem;
   }
 

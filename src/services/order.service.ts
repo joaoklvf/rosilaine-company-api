@@ -90,37 +90,6 @@ export class OrderService implements IOrderService {
     return updateOrder.affected ? order : null;
   }
 
-  public update2 = async (order: OrderRequest, id: string) => {
-    if (order.id !== id)
-      throw new Error("The order request id does not match with the url id param")
-
-    try {
-      return await this.orderRepository.manager.transaction(async (transactionalEntityManager) => {
-
-        order.status = await this.checkToCreateOrderStatus(order, transactionalEntityManager);
-        order.endCustomer = await this.checkToCreateEndCustomer(order, transactionalEntityManager);
-
-        order.orderItems = await this.orderItemService.createUpdateManyByOrder(order, transactionalEntityManager);
-        order.total = order.orderItems.reduce((prev, acc) => prev + Number(acc.itemSellingTotal), 0);
-
-        const installments = await this.orderInstallmentService.recreateInstallmentsByOrder(order, transactionalEntityManager);
-        order.installments = [...installments];
-        if (installments.length)
-          order.firstInstallmentDate = installments[0].debitDate;
-        order.isRounded = order.isToRound;
-
-        const orderUpdateResult = await transactionalEntityManager.save(OrderEntity, order);
-        if (!orderUpdateResult)
-          throw new Error("Error updating order\n");
-
-        return this.mapOrderResponse(orderUpdateResult);
-      });
-    } catch (error) {
-      console.error('error updating order', error)
-      throw error
-    }
-  }
-
   public delete = async (id: string) => {
     let deleteResult = new DeleteResult();
     await this.orderRepository.manager.transaction(async (transactionalEntityManager) => {
