@@ -1,49 +1,39 @@
-import { Request, Response, Router } from "express";
-import { inject, injectable } from "inversify";
-import { IHomeService } from "../interfaces/home-service";
-import { INJECTABLE_TYPES } from "../types/inversify-types";
+import { Hono } from 'hono'
+import { Context } from 'hono'
+import { IHomeService } from '../interfaces/home-service'
 
-@injectable()
-export class HomeController {
-  public router: Router;
+export const homeController = (homeService: IHomeService) => {
+  const router = new Hono()
 
-  constructor(
-    @inject(INJECTABLE_TYPES.HomeService) private homeService: IHomeService
-  ) {
-    this.router = Router();
-    this.routes();
-  }
+  router.get('/installments/next', async (c: Context) => {
+    try {
+      const query = c.req.query() ?? {}
+      const data = await homeService.nextInstallments(query)
+      return c.json(data, 200)
+    } catch (error) {
+      return c.json({ msg: error }, 500)
+    }
+  })
 
-  public nextInstallments = async (req: Request, res: Response) => {
-    await this.homeService.nextInstallments(req.query).then((data) => {
-      return res.status(200).json(data);
-    }).catch((error) => {
-      return res.status(500).json({ msg: error });
-    });
-  }
+  router.get('/installments/overdue', async (c: Context) => {
+    try {
+      const query = c.req.query() ?? {}
+      const data = await homeService.overdueInstallments(query)
+      return c.json(data, 200)
+    } catch (error) {
+      return c.json({ msg: error }, 500)
+    }
+  })
 
-  public overdueInstallments = async (req: Request, res: Response) => {
-    await this.homeService.overdueInstallments(req.query).then((data) => {
-      return res.status(200).json(data);
-    }).catch((error) => {
-      return res.status(500).json({ msg: error });
-    });
-  }
+  router.get('/installments/balance', async (c: Context) => {
+    try {
+      const query = c.req.query() ?? {}
+      const data = await homeService.installmentsBalance(query)
+      return c.json(data, 200)
+    } catch (error) {
+      return c.json({ msg: error }, 500)
+    }
+  })
 
-  public installmentsBalance = async (req: Request, res: Response) => {
-    await this.homeService.installmentsBalance(req.query).then((data) => {
-      return res.status(200).json(data);
-    }).catch((error) => {
-      return res.status(500).json({ msg: error });
-    });
-  }
-
-  /**
-   * Configure the routes of controller
-   */
-  public routes() {
-    this.router.get('/installments/next', this.nextInstallments);
-    this.router.get('/installments/overdue', this.overdueInstallments);
-    this.router.get('/installments/balance', this.installmentsBalance);
-  }
+  return router
 }

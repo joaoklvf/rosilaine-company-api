@@ -1,59 +1,45 @@
-import { Router, Response, Request } from "express";
-import { ProductCategoryEntity } from "../database/entities/product/product-category.entity";
-import { IProductCategoryService } from "../interfaces/product-category-service";
-import { inject, injectable } from "inversify";
-import { INJECTABLE_TYPES } from "../types/inversify-types";
+import { Hono } from 'hono'
+import { Context } from 'hono'
+import { ProductCategoryEntity } from '../database/entities/product/product-category.entity'
+import { IProductCategoryService } from '../interfaces/product-category-service'
 
-@injectable()
-export class ProductCategoryController {
-  public router: Router;
+export const productCategoryController = (productCategoryService: IProductCategoryService) => {
+  const router = new Hono()
 
-  constructor(
-    @inject(INJECTABLE_TYPES.ProductCategoryService) private productCategoryService: IProductCategoryService
-  ) {
-    this.router = Router();
-    this.routes();
-  }
+  router.get('/', async (c: Context) => {
+    try {
+      const query = c.req.query()
+      const data = await productCategoryService.index(query)
+      return c.json(data, 200)
+    } catch (error) {
+      return c.json({ msg: error }, 500)
+    }
+  })
 
-  public index = async (req: Request, res: Response) => {
-    await this.productCategoryService.index(req.query).then((data) => {
-      return res.status(200).json(data);
-    }).catch((error) => {
-      return res.status(500).json({ msg: error });
-    });
-  }
+  router.post('/', async (c: Context) => {
+    const body = await c.req.json<ProductCategoryEntity>()
+    const newCategory = await productCategoryService.create(body)
+    return c.json(newCategory)
+  })
 
-  public create = async (req: Request, res: Response) => {
-    const productCategory = req['body'] as ProductCategoryEntity;
-    const newProductCategory = await this.productCategoryService.create(productCategory);
-    res.send(newProductCategory);
-  }
+  router.put('/:id', async (c: Context) => {
+    const id = c.req.param('id')
+    const body = await c.req.json<ProductCategoryEntity>()
+    const updated = await productCategoryService.update(body, id)
+    return c.json(updated)
+  })
 
-  public update = async (req: Request, res: Response) => {
-    const productCategory = req['body'] as ProductCategoryEntity;
-    const id = req['params']['id'];
+  router.delete('/:id', async (c: Context) => {
+    const id = c.req.param('id')
+    const result = await productCategoryService.delete(id)
+    return c.json(result)
+  })
 
-    res.send(await this.productCategoryService.update(productCategory, id));
-  }
+  router.delete('/safe-delete/:id', async (c: Context) => {
+    const id = c.req.param('id')
+    const result = await productCategoryService.safeDelete(id)
+    return c.json(result)
+  })
 
-  public delete = async (req: Request, res: Response) => {
-    const id = req['params']['id'];
-    res.send(await this.productCategoryService.delete(id));
-  }
-
-  public safeDelete = async (req: Request, res: Response) => {
-    const id = req['params']['id'];
-    res.send(await this.productCategoryService.safeDelete(id));
-  }
-
-  /**
-   * Configure the routes of controller
-   */
-  public routes() {
-    this.router.get('/', this.index);
-    this.router.post('/', this.create);
-    this.router.put('/:id', this.update);
-    this.router.delete('/:id', this.delete);
-    this.router.delete('/safe-delete/:id', this.safeDelete);
-  }
+  return router
 }

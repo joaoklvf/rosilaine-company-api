@@ -1,10 +1,10 @@
 import { StockEntity } from '../database/entities/stock/stock.entity';
 import { StockRepository } from '../database/repository/stock.repository';
-import { AppDataSource } from '../../api';
 import { IStockService } from '../interfaces/stock-service';
 import { injectable } from 'inversify';
 import { ILike } from 'typeorm';
 import { DescriptionFilter } from '../interfaces/filters/product-filter';
+import { AppDataSource } from '../data-source';
 
 @injectable()
 export class StockService implements IStockService {

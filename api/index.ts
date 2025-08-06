@@ -1,85 +1,81 @@
 import 'reflect-metadata';
-import express from 'express';
-import cors from 'cors';
-import dotenv from 'dotenv';
-import { DataSource } from "typeorm";
-import { container } from '../src/inversify.config';
+import { Hono } from 'hono';
+import { cors } from 'hono/cors';
+import { AppDataSource } from '../src/data-source';
+import { customerInstallmentsController } from '../src/controller/customer-installments.controller';
+import { customerTagController } from '../src/controller/customer-tag.controller';
+import { customerController } from '../src/controller/customer.controller';
+import { endCustomerController } from '../src/controller/end-customer.controller';
+import { homeController } from '../src/controller/home.controller';
+import { orderInstallmentController } from '../src/controller/order-installment.controller';
+import { orderItemStatusController } from '../src/controller/order-item-status.controller';
+import { orderItemController } from '../src/controller/order-item.controller';
+import { orderStatusController } from '../src/controller/order-status.controller';
+import { orderController } from '../src/controller/order.controller';
+import { productCategoryController } from '../src/controller/product-category.controller';
+import { productController } from '../src/controller/product.controller';
+import { stockController } from '../src/controller/stock.controller';
+import { CustomerInstallmentsService } from '../src/services/customer-installments.service';
+import { CustomerTagService } from '../src/services/customer-tag.service';
+import { CustomerService } from '../src/services/customer.service';
+import { EndCustomerService } from '../src/services/end-customer.service';
+import { HomeService } from '../src/services/home.service';
+import { OrderInstallmentService } from '../src/services/order-installment.service';
+import { OrderItemStatusService } from '../src/services/order-item-status.service';
+import { OrderItemService } from '../src/services/order-item.service';
+import { OrderStatusService } from '../src/services/order-status.service';
+import { OrderService } from '../src/services/order.service';
+import { ProductCategoryService } from '../src/services/product-category.service';
+import { ProductService } from '../src/services/product.service';
+import { StockService } from '../src/services/stock.service';
+import { serve } from '@hono/node-server';
 
-// Importações dos controllers
-import { CustomerController } from '../src/controller/customer.controller';
-import { ProductController } from '../src/controller/product.controller';
-import { OrderController } from '../src/controller/order.controller';
-import { OrderStatusController } from '../src/controller/order-status.controller';
-import { ProductCategoryController } from '../src/controller/product-category.controller';
-import { StockController } from '../src/controller/stock.controller';
-import { CustomerTagController } from '../src/controller/customer-tag.controller';
-import { OrderItemStatusController } from '../src/controller/order-item-status.controller';
-import { OrderItemController } from '../src/controller/order-item.controller';
-import { OrderInstallmentController } from '../src/controller/order-installment.controller';
-import { HomeController } from '../src/controller/home.controller';
-import { EndCustomerController } from '../src/controller/end-customer.controller';
-import { CustomerInstallmentsController } from '../src/controller/customer-installments.controller';
+const app = new Hono();
+app.use('*', cors());
 
-dotenv.config();
-
-const app = express();
-app.use(cors());
-app.use(express.json());
-
-export const AppDataSource = new DataSource({
-  type: "postgres",
-  host: process.env.DATABASE_HOST,
-  port: Number(process.env.DATABASE_PORT),
-  username: process.env.DATABASE_USERNAME,
-  password: process.env.DATABASE_PASSWORD,
-  database: process.env.DATABASE_NAME,
-  entities: [`${__dirname}/../**/*.entity.{js,ts}`],
-  synchronize: true,
-  name: process.env.DATABASE_NAME
+// Middleware para garantir que o banco esteja inicializado
+app.use(async (_, next) => {
+  if (!AppDataSource.isInitialized) {
+    await AppDataSource.initialize()
+  }
+  await next()
 });
 
-const startApp = async () => {
-  try {
-    await AppDataSource.initialize().catch(error => console.error(`Erro ao inicializar data source: ${JSON.stringify(error)}`));
+// Instanciar serviços e montar rotas
+const orderStatusService = new OrderStatusService();
+const productCategoryService = new ProductCategoryService();
+const stockService = new StockService();
+const customerTagService = new CustomerTagService();
+const orderItemStatusService = new OrderItemStatusService();
+const orderItemService = new OrderItemService();
+const orderInstallmentService = new OrderInstallmentService();
+const homeService = new HomeService();
+const endCustomerService = new EndCustomerService();
+const customerInstallmentsService = new CustomerInstallmentsService();
+const customerService = new CustomerService(customerTagService);
+const productService = new ProductService(productCategoryService);
+const orderService = new OrderService(orderItemService, orderInstallmentService);
 
-    // Obtendo controllers do container com dependências injetadas
-    const customerController = container.get(CustomerController);
-    const customerTagController = container.get(CustomerTagController);
-    const productController = container.get(ProductController);
-    const orderController = container.get(OrderController);
-    const orderStatusController = container.get(OrderStatusController);
-    const orderItemStatusController = container.get(OrderItemStatusController);
-    const productCategoryController = container.get(ProductCategoryController);
-    const stockController = container.get(StockController);
-    const orderItemController = container.get(OrderItemController);
-    const orderInstallmentController = container.get(OrderInstallmentController);
-    const homeController = container.get(HomeController);
-    const endCustomerController = container.get(EndCustomerController);
-    const customerInstallmentsController = container.get(CustomerInstallmentsController);
+app.route('/api/customers', customerController(customerService));
+app.route('/api/customers/:customerId/end-customers', endCustomerController(endCustomerService));
+app.route('/api/customers/:customerId/installments', customerInstallmentsController(customerInstallmentsService));
+app.route('/api/customer-tags', customerTagController(customerTagService));
+app.route('/api/products', productController(productService));
+app.route('/api/orders', orderController(orderService));
+app.route('/api/order-status', orderStatusController(orderStatusService));
+app.route('/api/order-item-status', orderItemStatusController(orderItemStatusService));
+app.route('/api/product-categories', productCategoryController(productCategoryService));
+app.route('/api/stocks', stockController(stockService));
+app.route('/api/order-items', orderItemController(orderItemService));
+app.route('/api/order-installments', orderInstallmentController(orderInstallmentService));
+app.route('/api/home', homeController(homeService));
 
-    app.use(`/api/customers/`, customerController.router);
-    app.use(`/api/customers/:customerId/end-customers`, endCustomerController.router);
-    app.use(`/api/customers/:customerId/installments`, customerInstallmentsController.router);
-    app.use(`/api/customer-tags/`, customerTagController.router);
-    app.use('/api/products/', productController.router);
-    app.use('/api/orders/', orderController.router);
-    app.use(`/api/order-status/`, orderStatusController.router);
-    app.use(`/api/order-item-status/`, orderItemStatusController.router);
-    app.use('/api/product-categories/', productCategoryController.router);
-    app.use('/api/stocks/', stockController.router);
-    app.use('/api/order-items/', orderItemController.router);
-    app.use('/api/order-installments/', orderInstallmentController.router);
-    app.use('/api/home/', homeController.router);
+if (process.env.NODE_ENV === 'development') {
+  const port = Number(process.env.APP_PORT) || 3000;
 
-    const port = process.env.APP_PORT;
+  serve({ fetch: app.fetch, port }, () => {
+    console.log(`✅ Server running on http://localhost:${port}`);
+  });
+}
 
-    app.listen(port, () => {
-      console.log(`Server is running on port ${port}`);
-    });
-  }
-  catch (error) {
-    console.error(error)
-  }
-};
-
-startApp();
+export default app;

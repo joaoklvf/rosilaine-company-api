@@ -1,88 +1,68 @@
-import { Router, Response, Request } from "express";
-import { inject, injectable } from "inversify";
-import { INJECTABLE_TYPES } from "../types/inversify-types";
-import { OrderItemEntity } from "../database/entities/order/order-item/order-item.entity";
-import { GetByStatusRequestParams, IOrderItemService } from "../interfaces/order-item-service";
+import { Hono } from 'hono'
+import { Context } from 'hono'
+import { OrderItemEntity } from '../database/entities/order/order-item/order-item.entity'
+import { GetByStatusRequestParams, IOrderItemService } from '../interfaces/order-item-service'
 
-@injectable()
-export class OrderItemController {
-  public router: Router;
+export const orderItemController = (orderItemService: IOrderItemService) => {
+  const router = new Hono()
 
-  constructor(
-    @inject(INJECTABLE_TYPES.OrderItemService) private orderItemService: IOrderItemService
-  ) {
-    this.router = Router();
-    this.routes();
-  }
-
-  public index = async (req: Request, res: Response) => {
-    await this.orderItemService.index(req.query).then((data) => {
-      return res.status(200).json(data);
-    }).catch((error) => {
-      return res.status(500).json({ msg: error });
-    });
-  }
-
-  public create = async (req: Request, res: Response) => {
-    const orderItemItem = req['body'] as OrderItemEntity;
-    const newOrderItem = await this.orderItemService.create(orderItemItem);
-    res.send(newOrderItem);
-  }
-
-  public update = async (req: Request, res: Response) => {
-    var message;
-    if (req.path === '/many-status-change') {
-      await this.orderItemService.changeManyStatus(req['body']).then(requestBody => {
-        message = (requestBody);
-      }).catch(error => {
-        message = (error);
-      })
+  router.get('/', async (c: Context) => {
+    try {
+      const query = c.req.query()
+      const data = await orderItemService.index(query)
+      return c.json(data, 200)
+    } catch (error) {
+      return c.json({ msg: error }, 500)
     }
-    const requestBody = req['body'];
-    const id = req.params.id;
+  })
 
-    await this.orderItemService.update(requestBody, id).then(orderItemItem => {
-      message = (orderItemItem);
-    }).catch(error => {
-      message = (error);
-    })
-
-    return res.send(message)
-  }
-
-  public delete = async (req: Request, res: Response) => {
-    const id = req['params']['id'];
-    res.send(await this.orderItemService.delete(id));
-  }
-
-  public get = async (req: Request, res: Response) => {
-    if (typeof req.query === 'string') {
-      await this.orderItemService.get(req.params.id).then((data) => {
-        return res.status(200).json(data);
-      }).catch((error) => {
-        return res.status(500).json({ msg: error });
-      });
+  router.get('/:id', async (c: Context) => {
+    try {
+      const id = c.req.param('id')
+      const query = c.req.query()
+      // Se query for string, pega get(id), senão getByStatus(query)
+      if (typeof query === 'string') {
+        const data = await orderItemService.get(id)
+        return c.json(data, 200)
+      }
+      const data = await orderItemService.getByStatus(query as unknown as GetByStatusRequestParams)
+      return c.json(data, 200)
+    } catch (error) {
+      return c.json({ msg: error }, 500)
     }
-    await this.orderItemService.getByStatus(req.query as unknown as GetByStatusRequestParams).then((data) => {
-      return res.status(200).json(data);
-    }).catch((error) => {
-      return res.status(500).json({ msg: error });
-    });
-  }
+  })
 
-  public safeDelete = async (req: Request, res: Response) => {
-    const id = req['params']['id'];
-    res.send(await this.orderItemService.safeDelete(id));
-  }
-  /**
-   * Configure the routes of controller
-   */
-  public routes() {
-    this.router.get('/', this.index);
-    this.router.get('/:id', this.get);
-    this.router.post('/', this.create);
-    this.router.put('/:id', this.update);
-    this.router.delete('/:id', this.delete);
-    this.router.delete('/safe-delete/:id', this.safeDelete);
-  }
+  router.post('/', async (c: Context) => {
+    const body = await c.req.json<OrderItemEntity>()
+    const newOrderItem = await orderItemService.create(body)
+    return c.json(newOrderItem)
+  })
+
+  router.put('/:id', async (c: Context) => {
+    try {
+      if (c.req.path === '/many-status-change') {
+        const body = await c.req.json()
+        return c.json(await orderItemService.changeManyStatus(body))
+      }
+      const id = c.req.param('id')
+      const body = await c.req.json()
+      return c.json(await orderItemService.update(body, id));
+    } catch (error) {
+      return c.json({ msg: error }, 500)
+    }
+  })
+
+  router.delete('/:id', async (c: Context) => {
+    const id = c.req.param('id')
+    const result = await orderItemService.delete(id)
+    return c.json(result)
+  })
+
+  router.delete('/safe-delete/:id', async (c: Context) => {
+    const id = c.req.param('id')
+    const result = await orderItemService.safeDelete(id)
+    return c.json(result)
+  })
+
+  return router
 }

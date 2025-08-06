@@ -1,6 +1,6 @@
 import { injectable } from 'inversify';
 import { Equal, FindOptionsWhere, IsNull, LessThan, MoreThan, Or } from 'typeorm';
-import { AppDataSource } from '../../api';
+import { AppDataSource } from '../data-source';
 import { OrderInstallmentEntity } from '../database/entities/order/order-installment.entity';
 import { CustomerMonthInstallmentsResponse, DashInstallmentsResponse, InstallmentsBalanceResponse } from '../interfaces/models/home';
 import { getBrCurrencyStr, getBrDateStr } from '../utils/text-format-util';

@@ -1,6 +1,6 @@
 import { injectable } from 'inversify';
 import { Equal, FindOptionsWhere, IsNull, LessThan, MoreThan, Or } from 'typeorm';
-import { AppDataSource } from '../../api';
+import { AppDataSource } from '../data-source';
 import { OrderInstallmentEntity } from '../database/entities/order/order-installment.entity';
 import { DescriptionFilter } from '../interfaces/filters/product-filter';
 import { IHomeService } from '../interfaces/home-service';

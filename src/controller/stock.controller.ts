@@ -1,58 +1,45 @@
-import { Router, Response, Request } from "express";
-import { StockEntity } from "../database/entities/stock/stock.entity";
-import { IStockService } from "../interfaces/stock-service";
-import { inject, injectable } from "inversify";
-import { INJECTABLE_TYPES } from "../types/inversify-types";
+import { Hono } from 'hono'
+import { Context } from 'hono'
+import { StockEntity } from '../database/entities/stock/stock.entity'
+import { IStockService } from '../interfaces/stock-service'
 
-@injectable()
-export class StockController {
-  public router: Router;
+export const stockController = (stockService: IStockService) => {
+  const router = new Hono()
 
-  constructor(
-    @inject(INJECTABLE_TYPES.StockService) private stockService: IStockService
-  ) {
-    this.router = Router();
-    this.routes();
-  }
+  router.get('/', async (c: Context) => {
+    try {
+      const query = c.req.query()
+      const data = await stockService.index(query)
+      return c.json(data, 200)
+    } catch (error) {
+      return c.json({ msg: error }, 500)
+    }
+  })
 
-  public index = async (req: Request, res: Response) => {
-    await this.stockService.index(req.query).then((data) => {
-      return res.status(200).json(data);
-    }).catch((error) => {
-      return res.status(500).json({ msg: error });
-    });
-  }
+  router.post('/', async (c: Context) => {
+    const body = await c.req.json<StockEntity>()
+    const newStock = await stockService.create(body)
+    return c.json(newStock)
+  })
 
-  public create = async (req: Request, res: Response) => {
-    const stock = req['body'] as StockEntity;
-    const newStock = await this.stockService.create(stock);
-    res.send(newStock);
-  }
+  router.put('/:id', async (c: Context) => {
+    const id = c.req.param('id')
+    const body = await c.req.json<StockEntity>()
+    const updated = await stockService.update(body, id)
+    return c.json(updated)
+  })
 
-  public update = async (req: Request, res: Response) => {
-    const stock = req['body'] as StockEntity;
-    const id = req['params']['id'];
+  router.delete('/:id', async (c: Context) => {
+    const id = c.req.param('id')
+    const result = await stockService.delete(id)
+    return c.json(result)
+  })
 
-    res.send(await this.stockService.update(stock, id));
-  }
+  router.delete('/safe-delete/:id', async (c: Context) => {
+    const id = c.req.param('id')
+    const result = await stockService.safeDelete(id)
+    return c.json(result)
+  })
 
-  public delete = async (req: Request, res: Response) => {
-    const id = req['params']['id'];
-    res.send(await this.stockService.delete(id));
-  }
-  
-  public safeDelete = async (req: Request, res: Response) => {
-    const id = req['params']['id'];
-    res.send(await this.stockService.safeDelete(id));
-  }
-  /**
-   * Configure the routes of controller
-   */
-  public routes() {
-    this.router.get('/', this.index);
-    this.router.post('/', this.create);
-    this.router.put('/:id', this.update);
-    this.router.delete('/:id', this.delete);
-    this.router.delete('/safe-delete/:id', this.safeDelete);
-  }
+  return router
 }

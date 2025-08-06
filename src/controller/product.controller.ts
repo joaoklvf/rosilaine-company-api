@@ -1,59 +1,45 @@
-import { Router, Response, Request } from "express";
-import { ProductEntity } from "../database/entities/product/product.entity";
-import { IProductService } from "../interfaces/product-service";
-import { inject, injectable } from "inversify";
-import { INJECTABLE_TYPES } from "../types/inversify-types";
+import { Hono } from 'hono'
+import { Context } from 'hono'
+import { ProductEntity } from '../database/entities/product/product.entity'
+import { IProductService } from '../interfaces/product-service'
 
-@injectable()
-export class ProductController {
-  public router: Router;
+export const productController = (productService: IProductService) => {
+  const router = new Hono()
 
-  constructor(
-    @inject(INJECTABLE_TYPES.ProductService) private productService: IProductService
-  ) {
-    this.router = Router();
-    this.routes();
-  }
+  router.get('/', async (c: Context) => {
+    try {
+      const query = c.req.query()
+      const data = await productService.index(query)
+      return c.json(data, 200)
+    } catch (error) {
+      return c.json({ msg: error }, 500)
+    }
+  })
 
-  public index = async (req: Request, res: Response) => {
-    await this.productService.index(req.query).then((data) => {
-      return res.status(200).json(data);
-    }).catch((error) => {
-      return res.status(500).json({ msg: error });
-    });
-  }
+  router.post('/', async (c: Context) => {
+    const body = await c.req.json<ProductEntity>()
+    const newProduct = await productService.create(body)
+    return c.json(newProduct)
+  })
 
-  public create = async (req: Request, res: Response) => {
-    const product = req['body'] as ProductEntity;
-    const newCustomer = await this.productService.create(product);
-    res.send(newCustomer);
-  }
+  router.put('/:id', async (c: Context) => {
+    const id = c.req.param('id')
+    const body = await c.req.json<ProductEntity>()
+    const updated = await productService.update(body, id)
+    return c.json(updated)
+  })
 
-  public update = async (req: Request, res: Response) => {
-    const product = req['body'] as ProductEntity;
-    const id = req['params']['id'];
+  router.delete('/:id', async (c: Context) => {
+    const id = c.req.param('id')
+    const result = await productService.delete(id)
+    return c.json(result)
+  })
 
-    res.send(await this.productService.update(product, id));
-  }
+  router.delete('/safe-delete/:id', async (c: Context) => {
+    const id = c.req.param('id')
+    const result = await productService.safeDelete(id)
+    return c.json(result)
+  })
 
-  public delete = async (req: Request, res: Response) => {
-    const id = req['params']['id'];
-    res.send(await this.productService.delete(id));
-  }
-
-  public safeDelete = async (req: Request, res: Response) => {
-    const id = req['params']['id'];
-    res.send(await this.productService.safeDelete(id));
-  }
-
-  /**
-   * Configure the routes of controller
-   */
-  public routes() {
-    this.router.get('/', this.index);
-    this.router.post('/', this.create);
-    this.router.put('/:id', this.update);
-    this.router.delete('/:id', this.delete);
-    this.router.delete('/safe-delete/:id', this.safeDelete);
-  }
+  return router
 }
