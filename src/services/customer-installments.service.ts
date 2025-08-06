@@ -113,7 +113,7 @@ export class CustomerInstallmentsService implements ICustomerInstallmentsService
   public customerMonthInstallments = async ({ customerId, month }: CustomerSearchFilter): Promise<CustomerMonthInstallmentsResponse[]> => {
     const repository = AppDataSource.getRepository(OrderInstallmentEntity);
     const currentYear = new Date().getFullYear();
-    const filterDate = `${currentYear}-${Number(month)}-01`;
+    const filterDate = `${currentYear}-${Number(month) + 1}-01`;
     try {
       const response = await repository
         .query(`
