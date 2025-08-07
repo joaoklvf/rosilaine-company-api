@@ -86,6 +86,7 @@ export class OrderService implements IOrderService {
   }
 
   public update = async (order: OrderRequest, id: string) => {
+    console.log(`order request: `, JSON.stringify(order));
     if (order.id !== id)
       throw new Error("The order request id does not match with the url id param")
 
@@ -166,11 +167,15 @@ export class OrderService implements IOrderService {
   }
 
   private mapOrderResponse(order: OrderEntity) {
-    return ({
+    const response = ({
       ...order,
       orderItems: order.orderItems.map(x => ({ ...x, order: {} as OrderEntity })),
       installments: order.installments?.map(x => ({ ...x, order: {} as OrderEntity }))
     });
+
+    console.log(`order response: `, JSON.stringify(response));
+
+    return response;
   }
 
   private async checkToCreateOrderStatus(order: OrderEntity, transactionalEntityManager: EntityManager) {
