@@ -1,5 +1,4 @@
-import { Hono } from 'hono'
-import { Context } from 'hono'
+import { Hono, Context } from 'hono'
 import { OrderInstallmentEntity } from '../database/entities/order/order-installment.entity'
 import { IOrderInstallmentService } from '../interfaces/order-installment-service'
 
@@ -37,16 +36,6 @@ export const orderInstallmentController = (orderInstallmentService: IOrderInstal
       const id = c.req.param('id')
       const body = await c.req.json<OrderInstallmentEntity>()
       const updated = await orderInstallmentService.update(body, id)
-      return c.json(updated, 200)
-    } catch (error) {
-      return c.json({ msg: error }, 500)
-    }
-  })
-
-  router.put('/', async (c: Context) => {
-    try {
-      const body = await c.req.json<OrderInstallmentEntity[]>()
-      const updated = await orderInstallmentService.updateMany(body)
       return c.json(updated, 200)
     } catch (error) {
       return c.json({ msg: error }, 500)

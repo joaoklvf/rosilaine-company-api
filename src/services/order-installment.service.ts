@@ -9,7 +9,7 @@ import { generateInstallments } from '../utils/installments-util';
 
 @injectable()
 export class OrderInstallmentService implements IOrderInstallmentService {
-  private orderInstallmentRepository: OrderInstallmentRepository;
+  private readonly orderInstallmentRepository: OrderInstallmentRepository;
 
   constructor(
   ) {
@@ -72,8 +72,14 @@ export class OrderInstallmentService implements IOrderInstallmentService {
   }
 
   public updateMany = async (installments: OrderInstallmentEntity[]) => {
-    return await this.orderInstallmentRepository.manager.transaction(async (transactionalEntityManager) => {
-      return await transactionalEntityManager.save(OrderInstallmentEntity, installments);
-    });
+    try {
+      return await this.orderInstallmentRepository.manager.transaction(async (transactionalEntityManager) => {
+        return await transactionalEntityManager.save(OrderInstallmentEntity, installments);
+      });
+    }
+    catch (error) {
+      console.log('error', error)
+      throw new Error('Erro ao atualizar parcelas');
+    }
   }
 }

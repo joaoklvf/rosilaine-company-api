@@ -16,11 +16,11 @@ import { OrderRequest } from '../interfaces/models/order/order-request';
 
 @injectable()
 export class OrderService implements IOrderService {
-  private orderRepository: OrderRepository;
+  private readonly orderRepository: OrderRepository;
 
   constructor(
-    @inject(INJECTABLE_TYPES.OrderItemService) private orderItemService: IOrderItemService,
-    @inject(INJECTABLE_TYPES.OrderInstallmentService) private orderInstallmentService: IOrderInstallmentService
+    @inject(INJECTABLE_TYPES.OrderItemService) private readonly orderItemService: IOrderItemService,
+    @inject(INJECTABLE_TYPES.OrderInstallmentService) private readonly orderInstallmentService: IOrderInstallmentService
   ) {
     this.orderRepository = AppDataSource.getRepository(OrderEntity);
   }
@@ -86,8 +86,30 @@ export class OrderService implements IOrderService {
   }
 
   public update = async (order: OrderRequest, id: string) => {
-    const updateOrder = await this.orderRepository.update(id, order);
-    return updateOrder.affected ? order : null;
+    try {
+      const updateOrder = await this.orderRepository
+        .createQueryBuilder()
+        .update(OrderEntity, {
+          customer: order.customer,
+          deliveryDate: order.deliveryDate,
+          endCustomer: order.endCustomer,
+          firstInstallmentDate: order.firstInstallmentDate,
+          isRounded: order.isRounded,
+          orderDate: order.orderDate,
+          status: order.status,
+          total: order.total
+        })
+        .where('id = :id', { id })
+        .returning(['updatedDate'])
+        .execute();
+
+      return updateOrder.affected ?
+        { ...order, updatedDate: updateOrder.raw[0].updatedDate } : null;
+    }
+    catch (error) {
+      console.log('error', error);
+      throw new Error('Falha ao atualizar pedido');
+    }
   }
 
   public delete = async (id: string) => {
@@ -132,6 +154,9 @@ export class OrderService implements IOrderService {
           debitDate: {
             direction: 'ASC'
           }
+        },
+        orderItems: {
+          createdDate: 'ASC'
         }
       }
     });
@@ -160,7 +185,7 @@ export class OrderService implements IOrderService {
   }
 
   private async checkToCreateEndCustomer(order: OrderEntity, transactionalEntityManager: EntityManager) {
-    if (!(order.endCustomer && order.endCustomer.name))
+    if (!order.endCustomer?.name)
       return;
 
     const endCustomer = { ...order.endCustomer, customer: order.customer };
@@ -172,5 +197,27 @@ export class OrderService implements IOrderService {
       throw new Error("Error creating end customer\n");
 
     return { ...newEndCustomer };
+  }
+
+  public async recreateInstallments(order: OrderRequest, id: string) {
+    if (order.id !== id)
+      throw new Error('O pedido não corresponde ao id informado.');
+
+    return await this.orderRepository.manager.transaction(async (transactionalEntityManager) => {
+      const installments = await this.orderInstallmentService.recreateInstallmentsByOrder(order, transactionalEntityManager);
+      const orderUpdateResult = await transactionalEntityManager
+        .createQueryBuilder()
+        .update(OrderEntity)
+        .set({
+          firstInstallmentDate: installments?.[0]?.debitDate
+        })
+        .where("id = :id", { id: order.id })
+        .execute();
+
+      if (!orderUpdateResult.affected)
+        throw new Error('Falha ao atualizar pedido');
+
+      return installments;
+    });
   }
 }

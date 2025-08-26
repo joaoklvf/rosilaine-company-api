@@ -61,7 +61,7 @@ app.route('/api/customers/:customerId/end-customers', endCustomerController(endC
 app.route('/api/customers/:customerId/installments', customerInstallmentsController(customerInstallmentsService));
 app.route('/api/customer-tags', customerTagController(customerTagService));
 app.route('/api/products', productController(productService));
-app.route('/api/orders', orderController(orderService));
+app.route('/api/orders', orderController(orderService, orderInstallmentService));
 app.route('/api/order-status', orderStatusController(orderStatusService));
 app.route('/api/order-item-status', orderItemStatusController(orderItemStatusService));
 app.route('/api/product-categories', productCategoryController(productCategoryService));

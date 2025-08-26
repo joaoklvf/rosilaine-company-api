@@ -12,10 +12,10 @@ import { INJECTABLE_TYPES } from '../types/inversify-types';
 
 @injectable()
 export class OrderItemService implements IOrderItemService {
-  private orderItemRepository: OrderItemRepository;
+  private readonly orderItemRepository: OrderItemRepository;
 
   constructor(
-    @inject(INJECTABLE_TYPES.OrderInstallmentService) private orderInstallmentService: IOrderInstallmentService
+    @inject(INJECTABLE_TYPES.OrderInstallmentService) private readonly orderInstallmentService: IOrderInstallmentService
   ) {
     this.orderItemRepository = AppDataSource.getRepository(OrderItemEntity);
   }
@@ -67,6 +67,9 @@ export class OrderItemService implements IOrderItemService {
   }
 
   public update = async (orderItem: OrderItemEntity, id: string) => {
+    if (id !== orderItem.id)
+      throw new Error(`O item não corresponde ao id informado.`);
+
     return await this.saveItemAndDependencies(orderItem);
   }
 
@@ -129,14 +132,15 @@ export class OrderItemService implements IOrderItemService {
         const total = this.getTotalByItemOperator(itemRequest, order.orderItems, isDelete);
         const installments = await this.getUpdatedInstallments(order, transactionalEntityManager);
 
-        const orderUpdateResult = transactionalEntityManager
+        const orderUpdateResult = await transactionalEntityManager
           .createQueryBuilder()
           .update(OrderEntity)
           .set({
             total,
-            firstInstallmentDate: installments?.[0].debitDate
+            firstInstallmentDate: installments?.[0]?.debitDate
           })
           .where("id = :id", { id: order.id })
+          .returning(['updatedDate'])
           .execute();
 
         if (!orderUpdateResult)
@@ -151,7 +155,7 @@ export class OrderItemService implements IOrderItemService {
         }
 
         const changedItem = await transactionalEntityManager.save(OrderItemEntity, itemRequest);
-        return { installments, total, orderItem: changedItem };
+        return { installments, total, orderItem: changedItem, updatedDate: orderUpdateResult.raw[0].updatedDate };
       });
     } catch (error) {
       console.error('error updating order', error)

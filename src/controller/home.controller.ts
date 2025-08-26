@@ -1,5 +1,4 @@
-import { Hono } from 'hono'
-import { Context } from 'hono'
+import { Hono, Context } from 'hono'
 import { IHomeService } from '../interfaces/home-service'
 
 export const homeController = (homeService: IHomeService) => {
