@@ -5,7 +5,7 @@ import { OrderInstallmentEntity } from '../database/entities/order/order-install
 import { DescriptionFilter } from '../interfaces/filters/product-filter';
 import { IHomeService } from '../interfaces/home-service';
 import { DashInstallmentsResponse, InstallmentsBalanceResponse } from '../interfaces/models/home';
-import { getBrCurrencyStr, getBrDateStr } from '../utils/text-format-util';
+import { getAmountStr, getBrCurrencyStr, getBrDateStr } from '../utils/text-format-util';
 
 @injectable()
 export class HomeService implements IHomeService {
@@ -45,8 +45,9 @@ export class HomeService implements IHomeService {
   }
 
   public nextInstallments = async (filters: DescriptionFilter) => {
+    const filterDate = new Date(this.getNextMonthFilter());
     const condition: FindOptionsWhere<OrderInstallmentEntity> | FindOptionsWhere<OrderInstallmentEntity> = {
-      debitDate: MoreThan(new Date())
+      debitDate: Equal(filterDate)
     };
     return this.getInstallmentsByCondition(filters, condition);
   }
@@ -69,16 +70,28 @@ export class HomeService implements IHomeService {
     })));
   }
 
+  private getNextMonthFilter() {
+    const now = new Date();
+    const filterDate = `${now.getFullYear()}-${getAmountStr(String(now.getMonth() + 1))}-01`;
+    return filterDate;
+  }
+
   public installmentsBalance = async (params?: any): Promise<InstallmentsBalanceResponse | undefined> => {
     const repository = AppDataSource.getRepository(OrderInstallmentEntity);
-    try {
-      const balance = await repository
-        .createQueryBuilder('installment')
-        .select('SUM(installment.amount)', 'amountTotal')
-        .addSelect('SUM(installment.amountPaid)', 'amountPaid')
-        .addSelect('(SELECT COUNT (t2.id) from order_installment t2 where t2."amountPaid" is null or t2."amountPaid" = 0)', 'pendingInstallments')
-        .getRawOne<InstallmentsBalanceResponse>();
+    const filterDate = this.getNextMonthFilter();
 
+    try {
+      const response = await repository.query(`
+      SELECT
+        SUM(installment."amount") AS "amountTotal",
+        SUM(installment."amountPaid") AS "amountPaid",
+        ((SELECT COUNT (t2.id) from order_installment t2 where (t2."amountPaid" is null or t2."amountPaid" = 0) and t2."debitDate" < $1)) AS "pendingInstallments"
+      FROM order_installment installment
+      WHERE 
+        installment."debitDate" < $1
+        `, [filterDate]);
+
+      const balance = response[0];
       const amountPaid = Number(balance?.amountPaid ?? 0);
       const amountTotal = Number(balance?.amountTotal ?? 0);
       const amountToReceive = amountTotal - amountPaid;
