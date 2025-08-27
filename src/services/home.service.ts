@@ -72,7 +72,7 @@ export class HomeService implements IHomeService {
 
   private getNextMonthFilter() {
     const now = new Date();
-    const filterDate = `${now.getFullYear()}-${getAmountStr(String(now.getMonth() + 1))}-01`;
+    const filterDate = `${now.getFullYear()}-${getAmountStr(String(now.getMonth() + 2))}-01`;
     return filterDate;
   }
 
