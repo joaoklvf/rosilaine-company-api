@@ -9,6 +9,9 @@ export class CustomerEntity extends BaseProjectEntity {
   @Column()
   name: string;
 
+  @Column({ nullable: true })
+  nickname?: string;
+
   @Column({ length: 15 })
   phone: string;
 

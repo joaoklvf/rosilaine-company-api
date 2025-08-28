@@ -10,9 +10,11 @@ import { ILike } from 'typeorm';
 
 @injectable()
 export class CustomerService implements ICustomerService {
-  private customerRepository: CustomerRepository;
+  private readonly customerRepository: CustomerRepository;
 
-  constructor(@inject(INJECTABLE_TYPES.CustomerTagService) private customerTagService: ICustomerTagService) {
+  constructor(
+    @inject(INJECTABLE_TYPES.CustomerTagService) private readonly customerTagService: ICustomerTagService
+  ) {
     this.customerRepository = AppDataSource.getRepository(CustomerEntity);
   }
 
@@ -25,6 +27,7 @@ export class CustomerService implements ICustomerService {
       select: {
         id: true,
         name: true,
+        nickname: true,
         phone: true,
         birthDate: true
       },
