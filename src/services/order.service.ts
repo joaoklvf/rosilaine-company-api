@@ -42,7 +42,8 @@ export class OrderService implements IOrderService {
           description: true
         },
         customer: {
-          name: true
+          name: true,
+          nickname: true
         },
       },
       relations: {
@@ -209,7 +210,8 @@ export class OrderService implements IOrderService {
         .createQueryBuilder()
         .update(OrderEntity)
         .set({
-          firstInstallmentDate: installments?.[0]?.debitDate
+          firstInstallmentDate: order.firstInstallmentDate,
+          isRounded: order.isToRound,
         })
         .where("id = :id", { id: order.id })
         .execute();
