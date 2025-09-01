@@ -1,5 +1,4 @@
-import { Hono } from 'hono'
-import { Context } from 'hono'
+import { Hono, Context } from 'hono'
 import { ProductEntity } from '../database/entities/product/product.entity'
 import { IProductService } from '../interfaces/product-service'
 
@@ -10,6 +9,16 @@ export const productController = (productService: IProductService) => {
     try {
       const query = c.req.query()
       const data = await productService.index(query)
+      return c.json(data, 200)
+    } catch (error) {
+      return c.json({ msg: error }, 500)
+    }
+  })
+
+  router.get('/:id', async (c: Context) => {
+    const id = c.req.param('id')
+    try {
+      const data = await productService.get(id)
       return c.json(data, 200)
     } catch (error) {
       return c.json({ msg: error }, 500)

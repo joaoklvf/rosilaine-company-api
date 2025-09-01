@@ -10,10 +10,10 @@ import { DescriptionFilter } from '../interfaces/filters/product-filter';
 
 @injectable()
 export class ProductService implements IProductService {
-  private productRepository: ProductRepository;
+  private readonly productRepository: ProductRepository;
 
   constructor(
-    @inject(INJECTABLE_TYPES.ProductCategoryService) private productCategoryService: IProductCategoryService
+    @inject(INJECTABLE_TYPES.ProductCategoryService) private readonly productCategoryService: IProductCategoryService,
   ) {
     this.productRepository = AppDataSource.getRepository(ProductEntity);
   }
@@ -93,7 +93,7 @@ export class ProductService implements IProductService {
     return newOrder;
   }
 
-  private createCategoryByProduct = async (product: ProductEntity) => {
+  private readonly createCategoryByProduct = async (product: ProductEntity) => {
     const { category } = product;
     if (category.id && category.id.length > 0)
       return category;
