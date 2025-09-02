@@ -18,7 +18,7 @@ export class ProductService implements IProductService {
     this.productRepository = AppDataSource.getRepository(ProductEntity);
   }
 
-  public index = async ({ description, offset, take }: DescriptionFilter) => {
+  public index = async ({ description, productCode, offset, take }: DescriptionFilter) => {
     let skip = 0;
     if (take && offset)
       skip = take * offset;
@@ -39,6 +39,7 @@ export class ProductService implements IProductService {
       },
       where: {
         description: ILike(`%${description ?? ''}%`),
+        productCode: ILike(`%${productCode ?? ''}%`),
         isDeleted: false
       },
       order: {

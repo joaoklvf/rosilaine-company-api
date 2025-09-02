@@ -1,12 +1,11 @@
+import { inject, injectable } from 'inversify';
+import { AppDataSource } from '../data-source';
 import { CustomerEntity } from '../database/entities/customer/customer.entity';
 import { CustomerRepository } from '../database/repository/customer.repository';
-import { AppDataSource } from '../data-source';
 import { ICustomerService } from '../interfaces/customer-service';
-import { inject, injectable } from 'inversify';
-import { INJECTABLE_TYPES } from '../types/inversify-types';
 import { ICustomerTagService } from '../interfaces/customer-tag-service';
 import { CustomerSearchFilter } from '../interfaces/filters/customer-filter';
-import { ILike } from 'typeorm';
+import { INJECTABLE_TYPES } from '../types/inversify-types';
 
 @injectable()
 export class CustomerService implements ICustomerService {
@@ -23,26 +22,25 @@ export class CustomerService implements ICustomerService {
     if (take && offset)
       skip = take * offset;
 
-    const customers = await this.customerRepository.findAndCount({
-      select: {
-        id: true,
-        name: true,
-        nickname: true,
-        phone: true,
-        birthDate: true
-      },
-      where: {
-        name: ILike(`%${name ?? ''}%`),
-        isDeleted: false
-      },
-      order: {
-        name: 'ASC'
-      },
-      take,
-      skip
-    });
+    const customers = await this.customerRepository.manager.transaction(async (transactionalEntityManager) => {
+      const data = await transactionalEntityManager
+        .query(`
+            SELECT * 
+            FROM "customer" 
+            WHERE unaccent("name") ILike unaccent('%${name}%')
+            LIMIT $1
+            OFFSET $2;
+        `, [take, skip]);
+      const dataCount = await transactionalEntityManager
+        .query(`
+            SELECT COUNT(*) 
+            FROM "customer" 
+            WHERE unaccent("name") ILike unaccent('%${name}%')
+          `);
+      return [data, dataCount[0].count];
+    })
 
-    return customers;
+    return customers as any;
   }
 
   public create = async (customer: CustomerEntity) => {
