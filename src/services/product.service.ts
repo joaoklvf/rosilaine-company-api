@@ -18,40 +18,75 @@ export class ProductService implements IProductService {
     this.productRepository = AppDataSource.getRepository(ProductEntity);
   }
 
-  public index = async ({ description, productCode, offset, take }: DescriptionFilter) => {
+  public index = async ({ description, productCode, offset, take, categoryId }: DescriptionFilter) => {
     let skip = 0;
     if (take && offset)
       skip = take * offset;
+
     try {
-      const products = await this.productRepository.manager.transaction(async (transactionalEntityManager) => {
-        const data = await transactionalEntityManager
-          .query(`
-            SELECT 
-                  p."id", 
-                  p."productCode", 
-                  p."productPrice", 
-                  p."description", 
-                  c."id" as "categoryId", 
-                  c."description" as "categoryDescription" 
-            FROM "product" p
-            JOIN "product_category" c ON c.id = p."categoryId"
-            WHERE unaccent(p."description") ILIKE unaccent('%${description ?? ''}%')
-            AND p."productCode" ILIKE ('%${productCode ?? ''}%')
-            LIMIT $1
-            OFFSET $2;
-        `, [take, skip]);
-        const dataCount = await transactionalEntityManager
-          .query(`
-            SELECT COUNT(*) 
-            FROM "product" p
-            WHERE unaccent(p."description") ILIKE unaccent('%${description ?? ''}%')
-            AND p."productCode" ILIKE ('%${productCode ?? ''}%')
-          `);
-        const productsMapped = data.map(
-          (x: any) => ({ ...x, category: { id: x.categoryId, description: x.categoryDescription } })
+      const products = await this.productRepository.manager.transaction(async (em) => {
+        const whereClauses: string[] = [];
+        const params: any[] = [];
+
+        // filtro de descrição
+        if (description) {
+          params.push(`%${description}%`);
+          whereClauses.push(`unaccent(p."description") ILIKE unaccent($${params.length})`);
+        }
+
+        // filtro de código
+        if (productCode) {
+          params.push(`%${productCode}%`);
+          whereClauses.push(`p."productCode" ILIKE $${params.length}`);
+        }
+
+        // filtro de categoria
+        if (categoryId) {
+          params.push(categoryId);
+          whereClauses.push(`p."categoryId" = $${params.length}`);
+        }
+
+        const whereSQL = whereClauses.length ? `WHERE ${whereClauses.join(" AND ")}` : "";
+
+        // paginação
+        params.push(take, skip);
+
+        // consulta de dados
+        const data = await em.query(
+          `
+          SELECT 
+            p."id", 
+            p."productCode", 
+            p."productPrice", 
+            p."description", 
+            c."id" as "categoryId", 
+            c."description" as "categoryDescription" 
+          FROM "product" p
+          JOIN "product_category" c ON c.id = p."categoryId"
+          ${whereSQL}
+          LIMIT $${params.length - 1}
+          OFFSET $${params.length};
+        `,
+          params
         );
-        return [productsMapped, dataCount[0].count];
-      })
+
+        // consulta de contagem (reaproveitando filtros sem LIMIT/OFFSET)
+        const count = await em.query(
+          `
+      SELECT COUNT(*) 
+      FROM "product" p
+      ${whereSQL};
+    `,
+          params.slice(0, params.length - 2) // remove take e skip
+        );
+
+        const productsMapped = data.map((x: any) => ({
+          ...x,
+          category: { id: x.categoryId, description: x.categoryDescription }
+        }));
+
+        return [productsMapped, Number(count[0].count)];
+      });
 
       return products as any;
     }
