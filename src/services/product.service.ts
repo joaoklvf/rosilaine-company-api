@@ -1,12 +1,12 @@
+import { inject, injectable } from 'inversify';
+import { In } from 'typeorm';
+import { AppDataSource } from '../data-source';
 import { ProductEntity } from '../database/entities/product/product.entity';
 import { ProductRepository } from '../database/repository/product.repository';
-import { AppDataSource } from '../data-source';
-import { ILike, In } from 'typeorm';
-import { IProductService } from '../interfaces/product-service';
-import { IProductCategoryService } from '../interfaces/product-category-service';
-import { inject, injectable } from 'inversify';
-import { INJECTABLE_TYPES } from '../types/inversify-types';
 import { DescriptionFilter } from '../interfaces/filters/product-filter';
+import { IProductCategoryService } from '../interfaces/product-category-service';
+import { IProductService } from '../interfaces/product-service';
+import { INJECTABLE_TYPES } from '../types/inversify-types';
 
 @injectable()
 export class ProductService implements IProductService {
@@ -22,34 +22,42 @@ export class ProductService implements IProductService {
     let skip = 0;
     if (take && offset)
       skip = take * offset;
+    try {
+      const products = await this.productRepository.manager.transaction(async (transactionalEntityManager) => {
+        const data = await transactionalEntityManager
+          .query(`
+            SELECT 
+                  p."id", 
+                  p."productCode", 
+                  p."productPrice", 
+                  p."description", 
+                  c."id" as "categoryId", 
+                  c."description" as "categoryDescription" 
+            FROM "product" p
+            JOIN "product_category" c ON c.id = p."categoryId"
+            WHERE unaccent(p."description") ILIKE unaccent('%${description ?? ''}%')
+            AND p."productCode" ILIKE ('%${productCode ?? ''}%')
+            LIMIT $1
+            OFFSET $2;
+        `, [take, skip]);
+        const dataCount = await transactionalEntityManager
+          .query(`
+            SELECT COUNT(*) 
+            FROM "product" p
+            WHERE unaccent(p."description") ILIKE unaccent('%${description ?? ''}%')
+            AND p."productCode" ILIKE ('%${productCode ?? ''}%')
+          `);
+        const productsMapped = data.map(
+          (x: any) => ({ ...x, category: { id: x.categoryId, description: x.categoryDescription } })
+        );
+        return [productsMapped, dataCount[0].count];
+      })
 
-    const products = await this.productRepository.findAndCount({
-      select: {
-        id: true,
-        description: true,
-        productCode: true,
-        productPrice: true,
-        category: {
-          id: true,
-          description: true
-        }
-      },
-      relations: {
-        category: true
-      },
-      where: {
-        description: ILike(`%${description ?? ''}%`),
-        productCode: ILike(`%${productCode ?? ''}%`),
-        isDeleted: false
-      },
-      order: {
-        description: 'ASC'
-      },
-      take,
-      skip
-    });
-
-    return products;
+      return products as any;
+    }
+    catch (error) {
+      console.log(error)
+    }
   }
 
   public create = async (product: ProductEntity) => {
