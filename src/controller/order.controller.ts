@@ -37,7 +37,7 @@ export const orderController = (orderService: IOrderService, orderInstallmentSer
   router.post('/:id/recreate-installments', async (c: Context) => {
     const id = c.req.param('id')
     const body = await c.req.json<OrderRequest>()
-    const newOrder = await orderService.recreateInstallments(body, id)
+    const newOrder = await orderService.recreateInstallmentsAndUpdateOrder(body, id)
     return c.json(newOrder)
   })
 

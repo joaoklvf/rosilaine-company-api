@@ -8,7 +8,7 @@ import { AppDataSource } from '../data-source';
 
 @injectable()
 export class StockService implements IStockService {
-  private stockRepository: StockRepository;
+  private readonly stockRepository: StockRepository;
 
   constructor() {
     this.stockRepository = AppDataSource.getRepository(StockEntity);

@@ -1,5 +1,4 @@
-import { Hono } from 'hono'
-import { Context } from 'hono'
+import { Hono, Context } from 'hono'
 import { StockEntity } from '../database/entities/stock/stock.entity'
 import { IStockService } from '../interfaces/stock-service'
 

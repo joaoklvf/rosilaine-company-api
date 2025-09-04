@@ -200,7 +200,7 @@ export class OrderService implements IOrderService {
     return { ...newEndCustomer };
   }
 
-  public async recreateInstallments(order: OrderRequest, id: string) {
+  public async recreateInstallmentsAndUpdateOrder(order: OrderRequest, id: string) {
     if (order.id !== id)
       throw new Error('O pedido não corresponde ao id informado.');
 
@@ -219,7 +219,7 @@ export class OrderService implements IOrderService {
       if (!orderUpdateResult.affected)
         throw new Error('Falha ao atualizar pedido');
 
-      return installments;
+      return installments.map(x => ({ ...x, order: null }));
     });
   }
 }
