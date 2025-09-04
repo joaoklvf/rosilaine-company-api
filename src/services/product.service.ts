@@ -7,6 +7,7 @@ import { DescriptionFilter } from '../interfaces/filters/product-filter';
 import { IProductCategoryService } from '../interfaces/product-category-service';
 import { IProductService } from '../interfaces/product-service';
 import { INJECTABLE_TYPES } from '../types/inversify-types';
+import { getBrCurrencyStr } from '../utils/text-format-util';
 
 @injectable()
 export class ProductService implements IProductService {
@@ -28,30 +29,24 @@ export class ProductService implements IProductService {
         const whereClauses: string[] = [];
         const params: any[] = [];
 
-        // filtro de descrição
         if (description) {
           params.push(`%${description}%`);
           whereClauses.push(`unaccent(p."description") ILIKE unaccent($${params.length})`);
         }
 
-        // filtro de código
         if (productCode) {
           params.push(`%${productCode}%`);
           whereClauses.push(`p."productCode" ILIKE $${params.length}`);
         }
 
-        // filtro de categoria
         if (categoryId) {
           params.push(categoryId);
           whereClauses.push(`p."categoryId" = $${params.length}`);
         }
 
         const whereSQL = whereClauses.length ? `WHERE ${whereClauses.join(" AND ")}` : "";
-
-        // paginação
         params.push(take, skip);
 
-        // consulta de dados
         const data = await em.query(
           `
           SELECT 
@@ -70,19 +65,19 @@ export class ProductService implements IProductService {
           params
         );
 
-        // consulta de contagem (reaproveitando filtros sem LIMIT/OFFSET)
         const count = await em.query(
           `
-      SELECT COUNT(*) 
-      FROM "product" p
-      ${whereSQL};
-    `,
-          params.slice(0, params.length - 2) // remove take e skip
+            SELECT COUNT(*) 
+            FROM "product" p
+            ${whereSQL};
+          `,
+          params.slice(0, params.length - 2)
         );
 
         const productsMapped = data.map((x: any) => ({
           ...x,
-          category: { id: x.categoryId, description: x.categoryDescription }
+          category: { id: x.categoryId, description: x.categoryDescription },
+          productPrice: getBrCurrencyStr(x.productPrice)
         }));
 
         return [productsMapped, Number(count[0].count)];
