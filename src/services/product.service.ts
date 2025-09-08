@@ -77,7 +77,6 @@ export class ProductService implements IProductService {
         const productsMapped = data.map((x: any) => ({
           ...x,
           category: { id: x.categoryId, description: x.categoryDescription },
-          productPrice: getBrCurrencyStr(x.productPrice)
         }));
 
         return [productsMapped, Number(count[0].count)];
