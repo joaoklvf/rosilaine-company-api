@@ -5,9 +5,9 @@ import { OrderItemStatusEntity } from '../database/entities/order/order-item/ord
 import { OrderItemEntity } from '../database/entities/order/order-item/order-item.entity';
 import { OrderEntity } from '../database/entities/order/order.entity';
 import { OrderItemRepository } from '../database/repository/order-item.repository';
-import { OrderItemByStatus, UpdateManyStatusRequest } from '../interfaces/models/order-item-by-status';
-import { GetByStatusRequestParams, IOrderItemService } from '../interfaces/order-item-service';
+import { UpdateManyStatusRequest } from '../interfaces/models/order-item-by-status';
 import { IOrderInstallmentService } from '../interfaces/order-installment-service';
+import { GetByStatusRequestParams, IOrderItemService } from '../interfaces/order-item-service';
 import { INJECTABLE_TYPES } from '../types/inversify-types';
 
 @injectable()
@@ -58,8 +58,8 @@ export class OrderItemService implements IOrderItemService {
   }
 
   public index = async () => {
-    const productCategories = await this.orderItemRepository.findAndCount()
-    return productCategories;
+    const orderItems = await this.orderItemRepository.findAndCount()
+    return orderItems;
   }
 
   public create = async (orderItem: OrderItemEntity) => {
@@ -73,10 +73,10 @@ export class OrderItemService implements IOrderItemService {
     return await this.saveItemAndDependencies(orderItem);
   }
 
-  private async getOrderByItem(orderItem: OrderItemEntity, transactionalEntityManager: EntityManager) {
+  private async getOrderById(id: string, transactionalEntityManager: EntityManager) {
     const orders = await transactionalEntityManager.find(OrderEntity, {
       where: {
-        id: orderItem.order.id
+        id
       },
       relations: {
         orderItems: true,
@@ -123,20 +123,23 @@ export class OrderItemService implements IOrderItemService {
   private async saveItemAndDependencies(orderItem: OrderItemEntity, isDelete = false) {
     try {
       return await this.orderItemRepository.manager.transaction(async (transactionalEntityManager) => {
-        const order = await this.getOrderByItem(orderItem, transactionalEntityManager);
+        const order = await this.getOrderById(orderItem.order.id!, transactionalEntityManager);
+        if (!order)
+          throw new Error('Error fetching order\n');
+
         const itemRequest = {
           ...orderItem,
           itemSellingTotal: Number(orderItem.itemAmount) * Number(orderItem.itemSellingPrice)
         };
 
-        const total = this.getTotalByItemOperator(itemRequest, order.orderItems, isDelete);
-        const installments = await this.getUpdatedInstallments(order, transactionalEntityManager);
+        const itemsTotal = this.getTotalByItemOperator(itemRequest, order.orderItems, isDelete);
+        const installments = await this.getUpdatedInstallments({ ...order, total: itemsTotal }, transactionalEntityManager);
 
         const orderUpdateResult = await transactionalEntityManager
           .createQueryBuilder()
           .update(OrderEntity)
           .set({
-            total,
+            total: itemsTotal,
             firstInstallmentDate: installments?.[0]?.debitDate
           })
           .where("id = :id", { id: order.id })
@@ -149,13 +152,13 @@ export class OrderItemService implements IOrderItemService {
         if (isDelete) {
           const deletedOrderItem = await transactionalEntityManager.delete(OrderItemEntity, itemRequest.id);
           if (deletedOrderItem.affected)
-            return { installments, total };
+            return { installments, total: itemsTotal };
 
           throw new Error('Delete orderItem failed\n');
         }
 
         const changedItem = await transactionalEntityManager.save(OrderItemEntity, itemRequest);
-        return { installments, total, orderItem: changedItem, updatedDate: orderUpdateResult.raw[0].updatedDate };
+        return { installments, total: itemsTotal, orderItem: changedItem, updatedDate: orderUpdateResult.raw[0].updatedDate };
       });
     } catch (error) {
       console.error('error updating order', error)
@@ -202,30 +205,54 @@ export class OrderItemService implements IOrderItemService {
   }
 
   public getByStatus = async ({ statusId, take, offset }: GetByStatusRequestParams) => {
-    const skip = Number(take) * Number(offset);
-    const itensByCategory = await this.orderItemRepository.createQueryBuilder('orderItem')
-      .select('SUM(orderItem.itemAmount)', 'amount')
-      .addSelect('product.id', 'productId')
-      .addSelect('product.description', 'productDescription')
-      .addSelect('status.id', 'statusId')
-      .addSelect('status.description', 'statusDescription')
-      .innerJoin('orderItem.product', 'product')
-      .innerJoin('orderItem.itemStatus', 'status')
-      .where('status.id = :statusId', { statusId })
-      .groupBy('product.id, status.id')
-      .take(take)
-      .skip(skip)
-      .getRawMany<OrderItemByStatus>()
+    try {
+      const skip = Number(take) * Number(offset);
 
-    const countResult = await this.orderItemRepository.createQueryBuilder('orderItem')
-      .select('COUNT(*)')
-      .innerJoin('orderItem.product', 'product')
-      .innerJoin('orderItem.itemStatus', 'status')
-      .where('status.id = :statusId', { statusId })
-      .groupBy('product.id, status.id')
-      .getRawOne<{ count: number }>()
+      const response = await this.orderItemRepository.manager.transaction(async (em) => {
+        const data = await em.query(
+          `
+          SELECT 
+            SUM(oi."itemAmount") AS "amount", 
+            p."id" AS "productId", 
+            p."description" AS "productDescription", 
+            ois."id" as "statusId", 
+            ois."description" as "statusDescription" 
+          FROM "order_item" oi
+          JOIN "product" p ON p.id = oi."productId"
+          JOIN "order_item_status" ois ON ois.id = oi."itemStatusId"
+          WHERE oi."itemStatusId" = $1
+          GROUP BY p.id, ois.id
+          LIMIT $2
+          OFFSET $3;
+        `,
+          [statusId, take, skip]
+        );
 
-    return [itensByCategory, countResult?.count];
+        const count = await em.query(
+          `
+          SELECT COUNT(*) AS total
+          FROM (
+              SELECT 
+                  p.id, 
+                  ois.id
+              FROM "order_item" oi
+              JOIN "product" p ON p.id = oi."productId"
+              JOIN "order_item_status" ois ON ois.id = oi."itemStatusId"
+              WHERE oi."itemStatusId" = $1
+              GROUP BY p.id, ois.id
+          ) AS sub
+        `,
+          [statusId]
+        );
+
+        return [data, count[0].total];
+      });
+
+      return response;
+    } catch (error: any) {
+      console.log('error', error);
+      throw new Error('error fetching data')
+    }
   }
 
   public changeManyStatus = async (request: UpdateManyStatusRequest) => {

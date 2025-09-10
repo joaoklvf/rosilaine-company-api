@@ -8,7 +8,7 @@ import { DescriptionFilter } from '../interfaces/filters/product-filter';
 
 @injectable()
 export class CustomerTagService implements ICustomerTagService {
-  private customerTagRepository: CustomerTagRepository;
+  private readonly customerTagRepository: CustomerTagRepository;
 
   constructor() {
     this.customerTagRepository = AppDataSource.getRepository(CustomerTagEntity);

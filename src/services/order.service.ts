@@ -88,21 +88,26 @@ export class OrderService implements IOrderService {
 
   public update = async (order: OrderRequest, id: string) => {
     try {
-      const updateOrder = await this.orderRepository
-        .createQueryBuilder()
-        .update(OrderEntity, {
-          customer: order.customer,
-          deliveryDate: order.deliveryDate,
-          endCustomer: order.endCustomer,
-          firstInstallmentDate: order.firstInstallmentDate,
-          isRounded: order.isRounded,
-          orderDate: order.orderDate,
-          status: order.status,
-          total: order.total
-        })
-        .where('id = :id', { id })
-        .returning(['updatedDate'])
-        .execute();
+      const updateOrder = await this.orderRepository.manager.transaction(async (em) => {
+        console.log('transaction')
+        if (!order.status.id)
+          order.status = await em.save(OrderStatusEntity, order.status);
+        console.log(order.status);
+        return em.createQueryBuilder()
+          .update(OrderEntity, {
+            customer: order.customer,
+            deliveryDate: order.deliveryDate,
+            endCustomer: order.endCustomer,
+            firstInstallmentDate: order.firstInstallmentDate,
+            isRounded: order.isRounded,
+            orderDate: order.orderDate,
+            status: order.status,
+            total: order.total
+          })
+          .where('id = :id', { id })
+          .returning(['updatedDate'])
+          .execute();
+      })
 
       return updateOrder.affected ?
         { ...order, updatedDate: updateOrder.raw[0].updatedDate } : null;

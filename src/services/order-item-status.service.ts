@@ -8,7 +8,7 @@ import { DescriptionFilter } from '../interfaces/filters/product-filter';
 
 @injectable()
 export class OrderItemStatusService implements IOrderItemStatusService {
-  private orderItemStatusRepository: OrderItemStatusRepository;
+  private readonly orderItemStatusRepository: OrderItemStatusRepository;
 
   constructor() {
     this.orderItemStatusRepository = AppDataSource.getRepository(OrderItemStatusEntity);

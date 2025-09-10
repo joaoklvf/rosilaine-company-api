@@ -7,7 +7,6 @@ import { DescriptionFilter } from '../interfaces/filters/product-filter';
 import { IProductCategoryService } from '../interfaces/product-category-service';
 import { IProductService } from '../interfaces/product-service';
 import { INJECTABLE_TYPES } from '../types/inversify-types';
-import { getBrCurrencyStr } from '../utils/text-format-util';
 
 @injectable()
 export class ProductService implements IProductService {
@@ -74,9 +73,12 @@ export class ProductService implements IProductService {
           params.slice(0, params.length - 2)
         );
 
-        const productsMapped = data.map((x: any) => ({
-          ...x,
-          category: { id: x.categoryId, description: x.categoryDescription },
+        const productsMapped = data.map(({productCode, id, description, productPrice, ...rest}: any) => ({
+          id,
+          description,
+          productPrice,
+          productCode,
+          category: { id: rest.categoryId, description: rest.categoryDescription },
         }));
 
         return [productsMapped, Number(count[0].count)];
