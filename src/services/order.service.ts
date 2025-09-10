@@ -89,10 +89,9 @@ export class OrderService implements IOrderService {
   public update = async (order: OrderRequest, id: string) => {
     try {
       const updateOrder = await this.orderRepository.manager.transaction(async (em) => {
-        console.log('transaction')
         if (!order.status.id)
           order.status = await em.save(OrderStatusEntity, order.status);
-        console.log(order.status);
+        
         return em.createQueryBuilder()
           .update(OrderEntity, {
             customer: order.customer,
