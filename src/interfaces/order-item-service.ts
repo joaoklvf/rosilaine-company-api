@@ -1,7 +1,7 @@
 import { DeleteResult, EntityManager, UpdateResult } from "typeorm";
 import { OrderItemEntity } from "../database/entities/order/order-item/order-item.entity";
 import { OrderEntity } from "../database/entities/order/order.entity";
-import { OrderItemByStatus, UpdateManyStatusRequest } from "./models/order-item-by-status";
+import { OrderItemByStatus, UpdateManyStatusRequest, UpdateStatusByProduct } from "./models/order-item-by-status";
 import { OrderInstallmentEntity } from "../database/entities/order/order-installment.entity";
 
 export interface GetByStatusRequestParams {
@@ -17,6 +17,7 @@ export interface IOrderItemService {
   deleteFromOrderId(orderId: number): Promise<void>;
   getByStatus: (params: GetByStatusRequestParams) => Promise<(number | OrderItemByStatus[] | undefined)[]>
   changeManyStatus: (request: UpdateManyStatusRequest) => Promise<UpdateResult>;
+  changeStatusByProduct: (request: UpdateStatusByProduct) => Promise<UpdateResult>;
   delete(id: string): Promise<DeleteResult | ItemResponse>;
   safeDelete(id: string): Promise<UpdateResult>;
   index(params?: any): Promise<[OrderItemEntity[], number]>;

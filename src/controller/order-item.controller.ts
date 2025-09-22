@@ -39,9 +39,13 @@ export const orderItemController = (orderItemService: IOrderItemService) => {
 
   router.put('/:id', async (c: Context) => {
     try {
-      if (c.req.path === '/many-status-change') {
+      if (c.req.path.includes('/many-status-change')) {
         const body = await c.req.json()
         return c.json(await orderItemService.changeManyStatus(body))
+      }
+      if (c.req.path.includes('/product-status-change')) {
+        const body = await c.req.json()
+        return c.json(await orderItemService.changeStatusByProduct(body))
       }
       const id = c.req.param('id')
       const body = await c.req.json()

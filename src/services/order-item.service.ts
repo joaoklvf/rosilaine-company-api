@@ -5,7 +5,7 @@ import { OrderItemStatusEntity } from '../database/entities/order/order-item/ord
 import { OrderItemEntity } from '../database/entities/order/order-item/order-item.entity';
 import { OrderEntity } from '../database/entities/order/order.entity';
 import { OrderItemRepository } from '../database/repository/order-item.repository';
-import { UpdateManyStatusRequest } from '../interfaces/models/order-item-by-status';
+import { UpdateManyStatusRequest, UpdateStatusByProduct } from '../interfaces/models/order-item-by-status';
 import { IOrderInstallmentService } from '../interfaces/order-installment-service';
 import { GetByStatusRequestParams, IOrderItemService } from '../interfaces/order-item-service';
 import { INJECTABLE_TYPES } from '../types/inversify-types';
@@ -215,6 +215,7 @@ export class OrderItemService implements IOrderItemService {
             SUM(oi."itemAmount") AS "amount", 
             p."id" AS "productId", 
             p."description" AS "productDescription", 
+            p."productCode" AS "productCode", 
             ois."id" as "statusId", 
             ois."description" as "statusDescription" 
           FROM "order_item" oi
@@ -264,6 +265,18 @@ export class OrderItemService implements IOrderItemService {
         }
       })
       .where('itemStatusId = :oldStatusId', { oldStatusId: request.oldStatusId })
+      .execute()
+  }
+
+  public changeStatusByProduct = async (request: UpdateStatusByProduct) => {
+    return await this.orderItemRepository.createQueryBuilder()
+      .update(OrderItemEntity)
+      .set({
+        itemStatus: {
+          id: request.newStatusId
+        }
+      })
+      .where('productId = :productId', { productId: request.productId })
       .execute()
   }
 }
