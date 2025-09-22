@@ -57,7 +57,8 @@ export class OrderService implements IOrderService {
         },
         status: {
           id: statusId
-        }
+        },
+        isDeleted: false
       },
       order: {
         createdDate: {
@@ -91,7 +92,7 @@ export class OrderService implements IOrderService {
       const updateOrder = await this.orderRepository.manager.transaction(async (em) => {
         if (!order.status.id)
           order.status = await em.save(OrderStatusEntity, order.status);
-        
+
         return em.createQueryBuilder()
           .update(OrderEntity, {
             customer: order.customer,
