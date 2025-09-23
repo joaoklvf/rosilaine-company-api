@@ -93,6 +93,9 @@ export class OrderService implements IOrderService {
         if (!order.status.id)
           order.status = await em.save(OrderStatusEntity, order.status);
 
+        if (order.endCustomer && !order.endCustomer.id)
+          order.endCustomer = await em.save(EndCustomerEntity, order.endCustomer);
+
         return em.createQueryBuilder()
           .update(OrderEntity, {
             customer: order.customer,
