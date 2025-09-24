@@ -73,8 +73,16 @@ export class OrderInstallmentService implements IOrderInstallmentService {
 
   public updateMany = async (installments: OrderInstallmentEntity[]) => {
     try {
-      return await this.orderInstallmentRepository.manager.transaction(async (transactionalEntityManager) => {
-        return await transactionalEntityManager.save(OrderInstallmentEntity, installments);
+      return await this.orderInstallmentRepository.manager.transaction(async (em) => {
+        const results = await Promise.all(installments.map(async (installment) => {
+          const { order, ...rest } = installment;
+          return await em.update(OrderInstallmentEntity, { id: installment.id }, { ...rest });
+        }));
+        
+        if(results.some(x=> !x.affected))
+          throw new Error("Alguma parcela não pode ser alterada");
+
+        return true;
       });
     }
     catch (error) {
