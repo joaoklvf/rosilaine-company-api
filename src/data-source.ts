@@ -17,7 +17,7 @@ dotenv.config()
 
 export const AppDataSource = new DataSource({
   type: 'postgres',
-  url: process.env.DATABASE_URL,
+  url: process.env.CUSTOM_DATABASE_URL,
   synchronize: true,
   entities: [
     CustomerEntity,
