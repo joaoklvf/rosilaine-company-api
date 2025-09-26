@@ -28,6 +28,7 @@ export class CustomerService implements ICustomerService {
             SELECT * 
             FROM "customer" 
             WHERE unaccent("name") ILike unaccent('%${name}%')
+            AND "isDeleted" != true
             LIMIT $1
             OFFSET $2;
         `, [take, skip]);
