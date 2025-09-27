@@ -17,15 +17,21 @@ export const orderItemController = (orderItemService: IOrderItemService) => {
 
   router.get('/:id', async (c: Context) => {
     try {
-      const id = c.req.param('id')
-      const query = c.req.query()
-      // Se query for string, pega get(id), senão getByStatus(query)
-      if (typeof query === 'string') {
-        const data = await orderItemService.get(id)
+      const param = c.req.param('id')
+      const query = c.req.query();
+
+      if (param === 'items-by-status') {
+        const data = await orderItemService.getByStatus(query as unknown as GetByStatusRequestParams)
         return c.json(data, 200)
       }
-      const data = await orderItemService.getByStatus(query as unknown as GetByStatusRequestParams)
-      return c.json(data, 200)
+
+      if (param === 'items-by-customer') {
+        const data = await orderItemService.getByStatusAndCustomer(query as unknown as GetByStatusRequestParams)
+        return c.json(data, 200)
+      }
+
+      const data = await orderItemService.get(param)
+      return c.json(data, 200);
     } catch (error) {
       return c.json({ msg: error }, 500)
     }

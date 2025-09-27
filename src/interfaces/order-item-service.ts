@@ -8,6 +8,7 @@ export interface GetByStatusRequestParams {
   statusId: string;
   take: number;
   offset: number;
+  customerId?: string;
 }
 
 type ItemResponse = { installments: OrderInstallmentEntity[]; total: number; orderItem?: OrderItemEntity; }
@@ -16,6 +17,7 @@ export interface IOrderItemService {
   createUpdateManyByOrder(order: OrderEntity, transactionalEntityManager: EntityManager): Promise<OrderItemEntity[]>;
   deleteFromOrderId(orderId: number): Promise<void>;
   getByStatus: (params: GetByStatusRequestParams) => Promise<(number | OrderItemByStatus[] | undefined)[]>
+  getByStatusAndCustomer: (params: GetByStatusRequestParams) => Promise<(number | OrderItemByStatus[] | undefined)[]>
   changeManyStatus: (request: UpdateManyStatusRequest) => Promise<UpdateResult>;
   changeStatusByProduct: (request: UpdateStatusByProduct) => Promise<UpdateResult>;
   delete(id: string): Promise<DeleteResult | ItemResponse>;

@@ -1,3 +1,5 @@
+import { CustomerEntity } from "../../database/entities/customer/customer.entity";
+
 export interface OrderItemByStatus {
   amount: number;
   statusDescription: string;
@@ -5,6 +7,8 @@ export interface OrderItemByStatus {
   productId: string;
   productDescription: string;
   productCode: string;
+  customerName?: string;
+  customerId?: string;
 }
 
 export interface UpdateManyStatusRequest {
@@ -14,5 +18,11 @@ export interface UpdateManyStatusRequest {
 
 export interface UpdateStatusByProduct {
   productId: string;
+  customerId?: string;
   newStatusId: string;
+}
+
+export interface OrderItemByCustomer {
+  customer: CustomerEntity;
+  items: OrderItemByStatus[]
 }

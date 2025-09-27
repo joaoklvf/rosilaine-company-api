@@ -5,10 +5,11 @@ import { OrderItemStatusEntity } from '../database/entities/order/order-item/ord
 import { OrderItemEntity } from '../database/entities/order/order-item/order-item.entity';
 import { OrderEntity } from '../database/entities/order/order.entity';
 import { OrderItemRepository } from '../database/repository/order-item.repository';
-import { UpdateManyStatusRequest, UpdateStatusByProduct } from '../interfaces/models/order-item-by-status';
+import { OrderItemByCustomer, OrderItemByStatus, UpdateManyStatusRequest, UpdateStatusByProduct } from '../interfaces/models/order-item-by-status';
 import { IOrderInstallmentService } from '../interfaces/order-installment-service';
 import { GetByStatusRequestParams, IOrderItemService } from '../interfaces/order-item-service';
 import { INJECTABLE_TYPES } from '../types/inversify-types';
+import { CustomerEntity } from '../database/entities/customer/customer.entity';
 
 @injectable()
 export class OrderItemService implements IOrderItemService {
@@ -195,13 +196,13 @@ export class OrderItemService implements IOrderItemService {
   }
 
   public get = async (id: string) => {
-    const category = await this.orderItemRepository.findOne({
+    const orderItem = await this.orderItemRepository.findOne({
       where: {
         id
       }
     });
 
-    return category;
+    return orderItem;
   }
 
   public getByStatus = async ({ statusId, take, offset }: GetByStatusRequestParams) => {
@@ -268,15 +269,107 @@ export class OrderItemService implements IOrderItemService {
       .execute()
   }
 
-  public changeStatusByProduct = async (request: UpdateStatusByProduct) => {
-    return await this.orderItemRepository.createQueryBuilder()
-      .update(OrderItemEntity)
-      .set({
-        itemStatus: {
-          id: request.newStatusId
+  public changeStatusByProduct = async ({ newStatusId, productId, customerId }: UpdateStatusByProduct) => {
+    return await this.orderItemRepository.manager.transaction(async (em) => {
+      if (customerId)
+        return em.query(`
+        UPDATE 
+          "order_item" oi
+        SET 
+          "itemStatusId" = $1
+        FROM 
+          "order" o
+        WHERE 
+          o."id" = oi."orderId"
+        AND
+          o."customerId" = $2
+        AND 
+          oi."productId" = $3  
+      `, [newStatusId, customerId, productId]);
+
+      return await em.createQueryBuilder()
+        .update(OrderItemEntity)
+        .set({
+          itemStatus: {
+            id: newStatusId
+          }
+        })
+        .where('productId = :productId', { productId })
+        .execute();
+    });
+  }
+
+  public getByStatusAndCustomer = async ({ statusId, offset, take, customerId }: GetByStatusRequestParams) => {
+    const skip = Number(take) * Number(offset);
+
+    try {
+      const dataQb = this.orderItemRepository
+        .createQueryBuilder('oi')
+        .select('c."name" as "customerName"')
+        .addSelect('c."id" as "customerId"')
+        .addSelect('SUM(oi."itemAmount") as "amount"')
+        .addSelect('p."id" as "productId"')
+        .addSelect('p."productCode"')
+        .addSelect('p.description as "productDescription"')
+        .addSelect('ois."id" as "statusId"')
+        .addSelect('ois."description" as "statusDescription"')
+        .innerJoin('oi.order', 'o')
+        .innerJoin('oi.product', 'p')
+        .innerJoin('oi.itemStatus', 'ois')
+        .innerJoin('o.customer', 'c')
+        .where('oi."itemStatusId" =:statusId', { statusId })
+        .groupBy('p.id')
+        .addGroupBy('c.id')
+        .addGroupBy('oi."itemAmount"')
+        .addGroupBy('ois.id')
+        .orderBy('c.id')
+        .limit(take)
+        .offset(skip)
+
+      if (customerId)
+        dataQb.andWhere('c."id" =:customerId', { customerId });
+
+      const data = await dataQb.execute();
+
+      const count = await this.orderItemRepository.manager.createQueryBuilder()
+        .select('COUNT(*) as total')
+        .from((qb) => {
+          qb
+            .select('c."id"')
+            .from(OrderItemEntity, 'oi')
+            .addSelect('p."id"')
+            .innerJoin('oi.order', 'o')
+            .innerJoin('oi.product', 'p')
+            .innerJoin('oi.itemStatus', 'ois')
+            .innerJoin('o.customer', 'c')
+            .where('oi."itemStatusId" =:statusId', { statusId })
+            .groupBy('p.id')
+            .addGroupBy('c.id')
+            .addGroupBy('oi."itemAmount"')
+            .addGroupBy('ois.id')
+
+          if (customerId)
+            qb.andWhere('c."id" =:customerId', { customerId });
+
+          return qb;
+        }, 'sub')
+        .execute();
+
+      let customArray: OrderItemByCustomer[] = [];
+      let currentId = '';
+      data.forEach((x: OrderItemByStatus) => {
+        if (!currentId || currentId !== x.customerId) {
+          currentId = x.customerId!;
+          customArray.push({ customer: { id: x.customerId, name: x.customerName! } as CustomerEntity, items: [] })
         }
-      })
-      .where('productId = :productId', { productId: request.productId })
-      .execute()
+        customArray[customArray.length - 1].items.push(x);
+      });
+
+      return [customArray, count[0].total];
+    }
+    catch (error) {
+      console.log('error', error)
+      throw new Error('error fetching data');
+    }
   }
 }
