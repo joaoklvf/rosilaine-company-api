@@ -1,17 +1,7 @@
 import { DeleteResult, EntityManager, UpdateResult } from "typeorm";
 import { OrderItemEntity } from "../database/entities/order/order-item/order-item.entity";
 import { OrderEntity } from "../database/entities/order/order.entity";
-import { OrderItemByStatus, UpdateManyStatusRequest, UpdateStatusByProduct } from "./models/order-item-by-status";
-import { OrderInstallmentEntity } from "../database/entities/order/order-installment.entity";
-
-export interface GetByStatusRequestParams {
-  statusId: string;
-  take: number;
-  offset: number;
-  customerId?: string;
-}
-
-type ItemResponse = { installments: OrderInstallmentEntity[]; total: number; orderItem?: OrderItemEntity; }
+import { GetByStatusRequestParams, ItemResponse, OrderItemByStatus, UpdateManyStatusRequest, UpdateStatusByProduct } from "./models/order-item-by-status";
 
 export interface IOrderItemService {
   createUpdateManyByOrder(order: OrderEntity, transactionalEntityManager: EntityManager): Promise<OrderItemEntity[]>;

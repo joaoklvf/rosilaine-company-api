@@ -1,6 +1,7 @@
 import { Hono, Context } from 'hono'
 import { OrderItemEntity } from '../database/entities/order/order-item/order-item.entity'
-import { GetByStatusRequestParams, IOrderItemService } from '../interfaces/order-item-service'
+import { IOrderItemService } from '../interfaces/order-item-service'
+import { GetByStatusRequestParams } from '../interfaces/models/order-item-by-status'
 
 export const orderItemController = (orderItemService: IOrderItemService) => {
   const router = new Hono()

@@ -5,9 +5,9 @@ import { OrderItemStatusEntity } from '../database/entities/order/order-item/ord
 import { OrderItemEntity } from '../database/entities/order/order-item/order-item.entity';
 import { OrderEntity } from '../database/entities/order/order.entity';
 import { OrderItemRepository } from '../database/repository/order-item.repository';
-import { OrderItemByCustomer, OrderItemByStatus, UpdateManyStatusRequest, UpdateStatusByProduct } from '../interfaces/models/order-item-by-status';
+import { GetByStatusRequestParams, OrderItemByCustomer, OrderItemByStatus, UpdateManyStatusRequest, UpdateStatusByProduct } from '../interfaces/models/order-item-by-status';
 import { IOrderInstallmentService } from '../interfaces/order-installment-service';
-import { GetByStatusRequestParams, IOrderItemService } from '../interfaces/order-item-service';
+import { IOrderItemService } from '../interfaces/order-item-service';
 import { INJECTABLE_TYPES } from '../types/inversify-types';
 import { CustomerEntity } from '../database/entities/customer/customer.entity';
 
@@ -205,47 +205,52 @@ export class OrderItemService implements IOrderItemService {
     return orderItem;
   }
 
-  public getByStatus = async ({ statusId, take, offset }: GetByStatusRequestParams) => {
+  public getByStatus = async ({ statusId, take, offset, productId }: GetByStatusRequestParams) => {
     try {
       const skip = Number(take) * Number(offset);
 
       const response = await this.orderItemRepository.manager.transaction(async (em) => {
-        const data = await em.query(
-          `
-          SELECT 
-            SUM(oi."itemAmount") AS "amount", 
-            p."id" AS "productId", 
-            p."description" AS "productDescription", 
-            p."productCode" AS "productCode", 
-            ois."id" as "statusId", 
-            ois."description" as "statusDescription" 
-          FROM "order_item" oi
-          JOIN "product" p ON p.id = oi."productId"
-          JOIN "order_item_status" ois ON ois.id = oi."itemStatusId"
-          WHERE oi."itemStatusId" = $1
-          GROUP BY p.id, ois.id
-          LIMIT $2
-          OFFSET $3;
-        `,
-          [statusId, take, skip]
-        );
+        const dataQb = this.orderItemRepository
+          .createQueryBuilder('oi')
+          .select('SUM(oi."itemAmount") as "amount"')
+          .addSelect('p."id" as "productId"')
+          .addSelect('p."productCode"')
+          .addSelect('p.description as "productDescription"')
+          .addSelect('ois."id" as "statusId"')
+          .addSelect('ois."description" as "statusDescription"')
+          .innerJoin('oi.product', 'p')
+          .innerJoin('oi.itemStatus', 'ois')
+          .where('oi."itemStatusId" =:statusId', { statusId })
+          .groupBy('p.id')
+          .addGroupBy('ois.id')
+          .limit(take)
+          .offset(skip)
 
-        const count = await em.query(
-          `
-          SELECT COUNT(*) AS total
-          FROM (
-              SELECT 
-                  p.id, 
-                  ois.id
-              FROM "order_item" oi
-              JOIN "product" p ON p.id = oi."productId"
-              JOIN "order_item_status" ois ON ois.id = oi."itemStatusId"
-              WHERE oi."itemStatusId" = $1
-              GROUP BY p.id, ois.id
-          ) AS sub
-        `,
-          [statusId]
-        );
+        if (productId)
+          dataQb.andWhere('p."id" =:productId', { productId });
+
+        const data = await dataQb.execute();
+
+        const count = await this.orderItemRepository.manager.createQueryBuilder()
+          .select('COUNT(*) as total')
+          .from((qb) => {
+            qb
+              .select('p."id"')
+              .from(OrderItemEntity, 'oi')
+              .addSelect('p."id"')
+              .innerJoin('oi.product', 'p')
+              .innerJoin('oi.itemStatus', 'ois')
+              .where('oi."itemStatusId" =:statusId', { statusId })
+              .groupBy('p.id')
+              .addGroupBy('ois.id')
+
+            if (productId)
+              qb.andWhere('p."id" =:productId', { productId });
+
+            return qb;
+          }, 'sub')
+          .execute();
+
 
         return [data, count[0].total];
       });
@@ -299,7 +304,7 @@ export class OrderItemService implements IOrderItemService {
     });
   }
 
-  public getByStatusAndCustomer = async ({ statusId, offset, take, customerId }: GetByStatusRequestParams) => {
+  public getByStatusAndCustomer = async ({ statusId, offset, take, customerId, productId }: GetByStatusRequestParams) => {
     const skip = Number(take) * Number(offset);
 
     try {
@@ -329,6 +334,9 @@ export class OrderItemService implements IOrderItemService {
       if (customerId)
         dataQb.andWhere('c."id" =:customerId', { customerId });
 
+      if (productId)
+        dataQb.andWhere('p."id" =:productId', { productId });
+
       const data = await dataQb.execute();
 
       const count = await this.orderItemRepository.manager.createQueryBuilder()
@@ -350,6 +358,9 @@ export class OrderItemService implements IOrderItemService {
 
           if (customerId)
             qb.andWhere('c."id" =:customerId', { customerId });
+
+          if (productId)
+            qb.andWhere('p."id" =:productId', { productId });
 
           return qb;
         }, 'sub')
