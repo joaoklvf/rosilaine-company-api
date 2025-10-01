@@ -43,7 +43,7 @@ export class OrderService implements IOrderService {
         },
         customer: {
           name: true,
-          nickname: true
+          customer_nick_name: true
         },
       },
       relations: {

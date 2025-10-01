@@ -310,7 +310,7 @@ export class OrderItemService implements IOrderItemService {
     try {
       const dataQb = this.orderItemRepository
         .createQueryBuilder('oi')
-        .select(`TRIM(CONCAT(c."name" , ' ', c.nickname)) as "customerName"`)
+        .select(`TRIM(CONCAT(c."name" , ' ', c.customer_nick_name)) as "customerName"`)
         .addSelect('c."id" as "customerId"')
         .addSelect('SUM(oi."itemAmount") as "amount"')
         .addSelect('p."id" as "productId"')
