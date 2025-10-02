@@ -60,11 +60,6 @@ export class OrderService implements IOrderService {
         },
         isDeleted: false
       },
-      order: {
-        deliveryDate: {
-          direction: 'DESC'
-        }
-      },
       take,
       skip
     });
