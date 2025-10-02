@@ -61,7 +61,7 @@ export class OrderService implements IOrderService {
         isDeleted: false
       },
       order: {
-        createdDate: {
+        deliveryDate: {
           direction: 'DESC'
         }
       },
