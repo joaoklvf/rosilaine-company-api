@@ -43,7 +43,7 @@ export class ProductService implements IProductService {
           whereClauses.push(`p."categoryId" = $${params.length}`);
         }
 
-        const whereSQL = whereClauses.length ? `WHERE ${whereClauses.join(" AND ")} AND "isDeleted" = false` : 'WHERE "isDeleted" = false';
+        const whereSQL = whereClauses.length ? `WHERE ${whereClauses.join(" AND ")} AND p."isDeleted" = false` : 'WHERE p."isDeleted" = false';
         params.push(take, skip);
 
         const data = await em.query(
