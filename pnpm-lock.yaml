@@ -37,7 +37,7 @@ importers:
         version: 0.2.2
       rosilaine-company:
         specifier: 'file:'
-        version: file:(reflect-metadata@0.2.2)(ts-node@10.9.2(@types/node@14.18.63)(typescript@4.9.5))
+        version: file:(ts-node@10.9.2(@types/node@14.18.63)(typescript@4.9.5))
       typeorm:
         specifier: ^0.3.26
         version: 0.3.26(pg@8.16.3)(reflect-metadata@0.2.2)(ts-node@10.9.2(@types/node@14.18.63)(typescript@4.9.5))
@@ -1261,7 +1261,7 @@ snapshots:
 
   require-directory@2.1.1: {}
 
-  rosilaine-company@file:(reflect-metadata@0.2.2)(ts-node@10.9.2(@types/node@14.18.63)(typescript@4.9.5)):
+  rosilaine-company@file:(ts-node@10.9.2(@types/node@14.18.63)(typescript@4.9.5)):
     dependencies:
       '@hono/node-server': 1.19.2(hono@4.9.7)
       '@types/cors': 2.8.19
@@ -1271,6 +1271,7 @@ snapshots:
       inversify: 7.10.0(reflect-metadata@0.2.2)
       nodemon: 3.1.10
       pg: 8.16.3
+      reflect-metadata: 0.2.2
       typeorm: 0.3.26(pg@8.16.3)(reflect-metadata@0.2.2)(ts-node@10.9.2(@types/node@14.18.63)(typescript@4.9.5))
     transitivePeerDependencies:
       - '@google-cloud/spanner'
@@ -1285,7 +1286,6 @@ snapshots:
       - pg-native
       - pg-query-stream
       - redis
-      - reflect-metadata
       - sql.js
       - sqlite3
       - supports-color

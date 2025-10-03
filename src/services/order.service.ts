@@ -35,6 +35,7 @@ export class OrderService implements IOrderService {
         id: true,
         orderDate: true,
         total: true,
+        createdDate: true,
         endCustomer: {
           name: true
         },
@@ -59,6 +60,9 @@ export class OrderService implements IOrderService {
           id: statusId
         },
         isDeleted: false
+      },
+      order: {
+        createdDate: 'ASC',
       },
       take,
       skip
