@@ -62,7 +62,7 @@ export class OrderService implements IOrderService {
         isDeleted: false
       },
       order: {
-        createdDate: 'ASC',
+        createdDate: 'DESC',
       },
       take,
       skip
